@@ -15,7 +15,7 @@ Most probably you will get all 0s if you time your C code, as our code is doing 
 Now write a C program where you will change the number of threads used by omp_set_num_threads(n) directive. This directive should appear before a #pragma omp parallel directive and then the parallel region will be executed by n threads, where n is an integer. There is usually a limit how many threads you can launch from a process in a linux system. I have tested up to 512 threads in my machine, but we will work with smaller number of threads.
 
 The way to parallelize a for loop is to use the #pragma omp for directive. So your program will look like:
-```
+```C
 int main() {
   .....
   omp_set_num_threads(n);
