@@ -12,5 +12,5 @@ main.o: main.c $(HEADERS)
 parser.o: parser.c $(HEADERS)
 	$(CC) $(WARNINGS) -c parser.c $(HEADERS)
 
-clean: 
-	rm -f *.o
+clean:
+	rm -f *.o *.out

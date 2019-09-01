@@ -9,7 +9,10 @@ int parse_cmd(int argc, char *argv[]) {
         if(argv[k][0] != '-') continue;
         for(int i = 0; i < NUM_OPERATIONS; i++) {
             if(strcmp(argv[k], arg_options[i]) == 0) {
-                if(i < 5) *config.operation = i;
+                if(i < 5) {
+                    config.operation = malloc(1 * sizeof(enum CMD_OPT));
+                    *config.operation = i;
+                }
                 else if(i == 5) { //logger specified
                     if(!set_logger(argv[++k])) {
                         perror(NULL);
@@ -72,12 +75,11 @@ bool config_is_setup(void) {
 int set_input_files(int index, char * argv[], int argc) {
     for(int i = 0; i < 2; i++) {
         index += i;
-        if(index >= argc || (argv[i][0] == '-' && i < 1)) {
-            fprintf(stderr, "Error: No input files specified.\n");
-            return 0;
-        }
-        else if(argv[i][0] == '-') break;
-        else if(i == 0) {
+        if(i == 0) {
+            if(index >= argc || argv[i][0] == '-') {
+                fprintf(stderr, "Error: No input files specified.\n");
+                return 0;
+            }
             config.in1 = fopen(argv[i], "r");
             if(config.in1 == NULL) {
                 perror(NULL);
@@ -85,11 +87,12 @@ int set_input_files(int index, char * argv[], int argc) {
             } continue;
         }
         else if(i == 1) {
+            if(index >= argc || argv[i][0] == '-') break;
             config.in2 = fopen(argv[i], "r");
             if(config.in2 == NULL) {
                 perror(NULL);
                 return 0;
-            } break;
+            }break;
         }
     }
     return 1;
