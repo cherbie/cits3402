@@ -11,12 +11,15 @@
 #define STUDENT_NUMBER "22245091"
 
 //STRUCTURES
-enum CMD_OPT {sc, tr, ad, ts, mm};
+enum CMD_OPT {sc, tr, ad, ts, mm}; //MATRIX OPERATIONS
 struct MOP_ARG {
     enum CMD_OPT *operation;
-    FILE *in1;
-    FILE *in2;
-    FILE *log;
+    FILE *in1_fd;
+    char *in1_filename;
+    FILE *in2_fd;
+    char *in2_filename;
+    FILE *log_fd;
+    char *log_filename;
 };
 
 //GLOBAL VARIABLES
@@ -26,13 +29,16 @@ struct tm *exec_time;
 time_t rawtime;
 char *op_str;
 
-//FUNCTION DECLARATIONS
+// -- FUNCTION DECLARATIONS --
 int main(int, char**);
+int parse_cmd(int, const char**);
+//int get_operation(char*);
+bool config_is_setup(void);
+int set_input_files(int, const char**, const int);
+int set_logger(const char*);
+
+// -- HELPER FUNCTIONS --
+void print_config(void);
 void initialise(void);
 char *op_to_string(void);
 void print_usage(void);
-int parse_cmd(int, char**);
-int get_operation(char*);
-bool config_is_setup(void);
-int set_input_files(int, char**, int);
-int set_logger(char*);

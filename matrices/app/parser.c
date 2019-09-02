@@ -4,7 +4,7 @@
  * Set the config / operation of execution.
  * return 1 to indicate success and 0 to indicate failure
  */
-int parse_cmd(int argc, char *argv[]) {
+int parse_cmd(const int argc, const char *argv[]) {
     for(int k = 1; k < argc; k++) {
         if(argv[k][0] != '-') continue;
         for(int i = 0; i < NUM_OPERATIONS; i++) {
@@ -21,21 +21,21 @@ int parse_cmd(int argc, char *argv[]) {
                 }
                 else {
                     if((k + 1) >= argc) {
-                        fprintf(stderr, "Error: No logger output file specified.\n");
+                        fprintf(stderr, "Error: No input files specified.\n");
                         return 0;
                     }
-                    if(!set_input_files(++k, argv, argc)) return 0;
+                    else if(!set_input_files(++k, argv, argc)) return 0;
                 }
             }
         }
     }
-    if(config.log == NULL) {
+    if(config.log_fd == NULL) {
         char *buffer = malloc(BUFFER_SIZE * sizeof(char));
         char *date = malloc(11 * sizeof(char));
         char *time = malloc(5 * sizeof(char));
         strncpy(buffer, STUDENT_NUMBER, strlen(STUDENT_NUMBER));
-        sprintf(date, "%i%i%i", exec_time->tm_mday, exec_time->tm_mon + 1, exec_time->tm_year + 1900);
-        sprintf(time, "%i%i", exec_time->tm_hour, exec_time->tm_min);
+        sprintf(date, "%02.0f%02.0f%i", (float) exec_time->tm_mday, (float) exec_time->tm_mon + 1.0, exec_time->tm_year + 1900);
+        sprintf(time, "%02.0f%02.0f", (float) exec_time->tm_hour, (float) exec_time->tm_min);
         sprintf(buffer, "%s_%s_%s_%s.out", STUDENT_NUMBER, date, time, op_to_string());
         char *filename = strdup(buffer);
         if(!set_logger(filename)) {
@@ -60,7 +60,7 @@ int parse_cmd(int argc, char *argv[]) {
  * Return 1 to indicate success and 0 to indicate failure
  */
 bool config_is_setup(void) {
-    if(config.operation == NULL || config.in1 == NULL || config.log == NULL) {
+    if(config.operation == NULL || config.in1_fd == NULL || config.log_fd == NULL) {
         fprintf(stderr, "Error: Not enough command line arguments specified.\n");
         return false;
     }
@@ -72,7 +72,7 @@ bool config_is_setup(void) {
  *
  * Return 1 to indicate success and 0 to indicate failure.
  */
-int set_input_files(int index, char * argv[], int argc) {
+int set_input_files(int index, const char * argv[], const int argc) {
     for(int i = 0; i < 2; i++) {
         index += i;
         if(i == 0) {
@@ -80,19 +80,27 @@ int set_input_files(int index, char * argv[], int argc) {
                 fprintf(stderr, "Error: No input files specified.\n");
                 return 0;
             }
-            config.in1 = fopen(argv[i], "r");
-            if(config.in1 == NULL) {
-                perror(NULL);
+            if((config.in1_fd = fopen(argv[index], "r")) == NULL) {
+                perror("location: /parser.c/set_input_files()\n");
                 return 0;
-            } continue;
+            }
+            if((config.in1_filename = strdup(argv[index])) == NULL) {
+                perror("location: /parser.c/set_input_files()\n");
+                return 0;
+            }
+            continue;
         }
         else if(i == 1) {
-            if(index >= argc || argv[i][0] == '-') break;
-            config.in2 = fopen(argv[i], "r");
-            if(config.in2 == NULL) {
-                perror(NULL);
+            if(index >= argc || argv[index][0] == '-') break;
+            if((config.in2_fd = fopen(argv[index], "r")) == NULL) {
+                perror("location: /parser.c/set_input_files()\n");
                 return 0;
-            }break;
+            }
+            if((config.in2_filename = strdup(argv[index])) == NULL) {
+                perror("location: /parser.c/set_input_files()\n");
+                return 0;
+            }
+            break;
         }
     }
     return 1;
@@ -101,8 +109,14 @@ int set_input_files(int index, char * argv[], int argc) {
 /**
  * Return 1 to indicate success and 0 to indicate failure.
  */
-int set_logger(char *filename) {
-    config.log = fopen(filename, "w+");
-    if(config.log == NULL) return 0;
+int set_logger(const char *filename) {
+    if((config.log_fd = fopen(filename, "w+")) == NULL) {
+        perror("location: /parser.c/set_logger()\n");
+        return 0;
+    }
+    if((config.log_filename = strdup(filename)) == NULL) {
+        perror("location: /parser.c/set_logger()\n");
+        return 0;
+    }
     return 1;
 }
