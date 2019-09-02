@@ -14,6 +14,13 @@ void initialise(void) {
     arg_options[4] = strdup("-mm");
     arg_options[5] = strdup("-l");
     arg_options[6] = strdup("-f");
+
+    //function pointers
+    op_func[0] = scalar_mp;
+    op_func[1] = trace;
+    op_func[2] = addition;
+    op_func[3] = transpose_matrix;
+    op_func[4] = matrix_mp;
 }
 
 char *op_to_string(void) {
@@ -34,4 +41,8 @@ void print_config() {
     printf(" ... Input 1 -> %s\n", config.in1_filename);
     printf(" ... Input 2 -> %s\n", config.in2_filename);
     printf(" ... Logger file -> %s\n", config.log_filename);
+}
+
+void print(char *str) {
+    printf("%s\n", str);
 }

@@ -60,8 +60,14 @@ int parse_cmd(const int argc, const char *argv[]) {
  * Return 1 to indicate success and 0 to indicate failure
  */
 bool config_is_setup(void) {
-    if(config.operation == NULL || config.in1_fd == NULL || config.log_fd == NULL) {
-        fprintf(stderr, "Error: Not enough command line arguments specified.\n");
+    if(config.operation == NULL) {
+        fprintf(stderr, "Error: Incorrect or no matrix operation option specified.\n");
+        return false;
+    }else if(config.in1_fd == NULL) {
+        fprintf(stderr, "Error: No input files specified.\n");
+        return false;
+    }else if(config.log_fd == NULL) {
+        fprintf(stderr, "Error: Unable to establish output logging file.\n");
         return false;
     }
     else return true;

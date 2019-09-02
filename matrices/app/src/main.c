@@ -11,6 +11,10 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
     print_config();
-    printf("... Program complete.\n");
+    if(!operation_main()) {
+        fprintf(stderr, "Unable to perform matrix operation.\n");
+        exit(EXIT_FAILURE);
+    }
+    printf(" ... Program complete.\n");
     exit(EXIT_SUCCESS);
 }

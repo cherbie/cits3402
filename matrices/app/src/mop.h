@@ -11,7 +11,7 @@
 #define STUDENT_NUMBER "22245091"
 
 //STRUCTURES
-enum CMD_OPT {sc, tr, ad, ts, mm}; //MATRIX OPERATIONS
+enum CMD_OPT {sc, tr, ad, ts, mm, f, l}; //MATRIX OPERATIONS
 struct MOP_ARG {
     enum CMD_OPT *operation;
     FILE *in1_fd;
@@ -28,6 +28,7 @@ struct MOP_ARG config;
 struct tm *exec_time;
 time_t rawtime;
 char *op_str;
+int (*op_func[NUM_OPERATIONS])(); //pointer to operation functions
 
 // -- FUNCTION DECLARATIONS --
 int main(int, char**);
@@ -42,3 +43,12 @@ void print_config(void);
 void initialise(void);
 char *op_to_string(void);
 void print_usage(void);
+void print(char *);
+
+// -- OPERATIONS --
+int operation_main(void);
+int scalar_mp(void);
+int trace(void);
+int addition(void);
+int transpose_matrix(void);
+int matrix_mp(void);
