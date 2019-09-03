@@ -9,10 +9,12 @@
 #define NUM_OPERATIONS 7
 #define BUFFER_SIZE 250
 #define STUDENT_NUMBER "22245091"
+//#define INPUT_NUM_LINES 3
 
 //STRUCTURES
 enum CMD_OPT {sc, tr, ad, ts, mm, f, l}; //MATRIX OPERATIONS
-struct MOP_ARG {
+enum MTX_TYPE {int, float};
+struct APP_ARG {
     enum CMD_OPT *operation;
     FILE *in1_fd;
     char *in1_filename;
@@ -22,10 +24,19 @@ struct MOP_ARG {
     char *log_filename;
 };
 
+struct COO {
+    enum MTX_TYPE *type;
+    void * mtx;
+    int row;
+    int col;
+    int size[2]; //COO.size[0] - number of elements in mtx. COO.size[1] - number of elements in each sub array.
+};
+
 //GLOBAL VARIABLES
 char *arg_options[NUM_OPERATIONS];
-struct MOP_ARG config;
+struct APP_ARG config;
 struct tm *exec_time;
+struct COO *coo_sparse_mtx; //structure containing coordinate format representation of matrix.
 time_t rawtime;
 char *op_str;
 int (*op_func[NUM_OPERATIONS])(); //pointer to operation functions
