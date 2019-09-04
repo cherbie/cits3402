@@ -25,18 +25,19 @@ struct APP_ARG {
     FILE *log_fd;
     char *log_filename;
 };
-struct COO {
+typedef struct {
     //enum MTX_TYPE *type;
+    char *type;
     void * mtx;
     int row;
     int col;
     int size[2]; //COO.size[0] - number of elements in mtx. COO.size[1] - number of elements in each sub array.
-};
+} COO;
 
 //GLOBAL VARIABLES
 struct APP_ARG config;
 struct tm *exec_time;
-struct COO *coo_sparse_mtx; //structure containing coordinate format representation of matrix.
+COO *coo_sparse_mtx; //structure containing coordinate format representation of matrix.
 time_t rawtime;
 char *op_str;
 char *arg_options[NUM_OPTIONS];
@@ -46,7 +47,7 @@ int (*op_func[NUM_OPERATIONS])(); //pointer to operation functions
 // -- FUNCTION DECLARATIONS --
 int main(int, char**);
 int parse_cmd(int, char**);
-//int get_operation(char*);
+int get_operation(char*);
 bool config_is_setup(void);
 int set_input_files(int, char*);
 int set_logger(char*, int);
