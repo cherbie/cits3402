@@ -5,7 +5,7 @@
  * Return 1 to indicate success and 0 to indicate failure.
  */
 int operation_main(void) {
-    if(!(*op_func[*config.operation])()) {
+    if(!(*op_func[config.operation])()) {
         fprintf(stderr, "Unable to perform matrix operation.\n");
         return 0;
     }

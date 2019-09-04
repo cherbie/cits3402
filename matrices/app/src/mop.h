@@ -5,17 +5,19 @@
 #include <errno.h>
 #include <time.h>
 #include <stdbool.h>
+#include <unistd.h>
+#include <getopt.h>
 
-#define NUM_OPERATIONS 7
+#define NUM_OPERATIONS 5
+#define NUM_OPTIONS 7
 #define BUFFER_SIZE 250
 #define STUDENT_NUMBER "22245091"
+
 //#define INPUT_NUM_LINES 3
 
-//STRUCTURES
-enum CMD_OPT {sc, tr, ad, ts, mm, f, l}; //MATRIX OPERATIONS
-enum MTX_TYPE {int, float};
+// -- STRUCTURES --
 struct APP_ARG {
-    enum CMD_OPT *operation;
+    int  operation;
     FILE *in1_fd;
     char *in1_filename;
     FILE *in2_fd;
@@ -23,9 +25,8 @@ struct APP_ARG {
     FILE *log_fd;
     char *log_filename;
 };
-
 struct COO {
-    enum MTX_TYPE *type;
+    //enum MTX_TYPE *type;
     void * mtx;
     int row;
     int col;
@@ -33,7 +34,7 @@ struct COO {
 };
 
 //GLOBAL VARIABLES
-char *arg_options[NUM_OPERATIONS];
+char *arg_options[NUM_OPTIONS];
 struct APP_ARG config;
 struct tm *exec_time;
 struct COO *coo_sparse_mtx; //structure containing coordinate format representation of matrix.
@@ -41,13 +42,14 @@ time_t rawtime;
 char *op_str;
 int (*op_func[NUM_OPERATIONS])(); //pointer to operation functions
 
+
 // -- FUNCTION DECLARATIONS --
 int main(int, char**);
-int parse_cmd(int, const char**);
+int parse_cmd(int, char**);
 //int get_operation(char*);
 bool config_is_setup(void);
-int set_input_files(int, const char**, const int);
-int set_logger(const char*);
+int set_input_files(int, char*);
+int set_logger(char*);
 
 // -- HELPER FUNCTIONS --
 void print_config(void);

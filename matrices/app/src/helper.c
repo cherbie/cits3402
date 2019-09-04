@@ -15,6 +15,8 @@ void initialise(void) {
     arg_options[5] = strdup("-l");
     arg_options[6] = strdup("-f");
 
+    config.operation = -1;
+
     //function pointers
     op_func[0] = scalar_mp;
     op_func[1] = trace;
@@ -24,7 +26,7 @@ void initialise(void) {
 }
 
 char *op_to_string(void) {
-    switch(*config.operation) {
+    switch(config.operation) {
         case 0: op_str = strdup("sc"); break;
         case 1: op_str = strdup("tr"); break;
         case 2: op_str = strdup("ad"); break;
