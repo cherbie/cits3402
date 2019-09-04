@@ -2,12 +2,12 @@
 
 int main(int argc, char *argv[]) {
     initialise();
-    if (argc == 1) {
+    if(argc == 1) {
         print_usage();
         exit(EXIT_FAILURE);
     }
     if(!parse_cmd(argc, argv)) {
-        fprintf(stderr, "Error parsing command line arguments\n");
+        fprintf(stderr, "Error parsing command line arguments.\n");
         exit(EXIT_FAILURE);
     }
     print_config();

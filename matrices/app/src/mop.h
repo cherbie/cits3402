@@ -34,12 +34,12 @@ struct COO {
 };
 
 //GLOBAL VARIABLES
-char *arg_options[NUM_OPTIONS];
 struct APP_ARG config;
 struct tm *exec_time;
 struct COO *coo_sparse_mtx; //structure containing coordinate format representation of matrix.
 time_t rawtime;
 char *op_str;
+char *arg_options[NUM_OPTIONS];
 int (*op_func[NUM_OPERATIONS])(); //pointer to operation functions
 
 
@@ -49,7 +49,7 @@ int parse_cmd(int, char**);
 //int get_operation(char*);
 bool config_is_setup(void);
 int set_input_files(int, char*);
-int set_logger(char*);
+int set_logger(char*, int);
 
 // -- HELPER FUNCTIONS --
 void print_config(void);
