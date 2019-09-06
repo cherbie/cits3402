@@ -1,7 +1,10 @@
 #include "mop.h"
 
 int main(int argc, char *argv[]) {
-    initialise();
+    if(!initialise()) {
+        fprintf(stderr, "Error initialising global variables\n");
+        exit(EXIT_FAILURE);
+    }
     if(argc == 1) {
         print_usage();
         exit(EXIT_FAILURE);
@@ -11,7 +14,6 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
     print_config();
-    exit(0);
     if(!operation_main()) {
         fprintf(stderr, "Unable to perform matrix operation.\n");
         exit(EXIT_FAILURE);

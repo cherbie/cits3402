@@ -4,7 +4,7 @@ void print_usage(void) {
     printf("Usage: mop [-sc|-tr|-ad|-ts|-mm] [-l filename] -f %s [%s]\n", "%s", "%s");
 }
 
-void initialise(void) {
+int initialise(void) {
     time(&rawtime);
     exec_time = localtime(&rawtime);
     arg_options[0] = strdup("-sc");
@@ -16,6 +16,15 @@ void initialise(void) {
     arg_options[6] = strdup("-f");
 
     config.operation = -1;
+    config.num_threads = -1;
+    config.fd = malloc(NUMBER_OF_INPUT_FILES * sizeof(int *));
+    config.filename = malloc(NUMBER_OF_INPUT_FILES * sizeof(char *));
+    if(config.fd == NULL || config.filename == NULL) {
+        perror(NULL);
+        return 0;
+    }
+    config.log_fd = NULL;
+    config.log_filename = NULL;
 
     //function pointers
     op_func[0] = scalar_mp;
@@ -23,6 +32,13 @@ void initialise(void) {
     op_func[2] = addition;
     op_func[3] = transpose_matrix;
     op_func[4] = matrix_mp;
+
+    //SPARSE MATRIX REP.
+    if((coo_sparse_mtx = malloc(NUMBER_OF_INPUT_FILES * sizeof(COO))) == NULL) {
+        perror(NULL);
+        return 0;
+    }
+    return 1;
 }
 
 char *op_to_string(void) {
@@ -38,11 +54,13 @@ char *op_to_string(void) {
 }
 
 void print_config() {
-    printf("Configuration ::\n");
+    printf(" -- Configuration --\n");
     printf(" ... Matrix operation -> %s\n", op_to_string());
-    printf(" ... Input 1 -> %s\n", config.in1_filename);
-    printf(" ... Input 2 -> %s\n", config.in2_filename);
+    printf(" ... Input 1 -> %s\n", config.filename[0]);
+    printf(" ... Input 2 -> %s\n", config.filename[1]);
     printf(" ... Logger file -> %s\n", config.log_filename);
+    if(config.num_threads > 0) printf(" ... Number of threads -> %i\n", config.num_threads);
+    printf("\n");
 }
 
 void print(char *str) {

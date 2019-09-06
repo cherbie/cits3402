@@ -12,14 +12,20 @@
 #define NUM_OPTIONS 7
 #define BUFFER_SIZE 250
 #define STUDENT_NUMBER "22245091"
+#define NUMBER_OF_INPUT_FILES 2
 
 //#define INPUT_NUM_LINES 3
-
+typedef struct {
+    int i;
+    float f;
+} MTX_TYPE;
 // -- STRUCTURES --
 struct APP_ARG {
     int  operation;
-    FILE *in1_fd;
-    char *in1_filename;
+    MTX_TYPE sm; //scalar number
+    int  num_threads;
+    FILE **fd;
+    char **filename;
     FILE *in2_fd;
     char *in2_filename;
     FILE *log_fd;
@@ -28,7 +34,7 @@ struct APP_ARG {
 typedef struct {
     //enum MTX_TYPE *type;
     char *type;
-    void * mtx;
+    void *mtx;
     int row;
     int col;
     int size[2]; //COO.size[0] - number of elements in mtx. COO.size[1] - number of elements in each sub array.
@@ -50,11 +56,13 @@ int parse_cmd(int, char**);
 int get_operation(char*);
 bool config_is_setup(void);
 int set_input_files(int, char*);
-int set_logger(char*, int);
+int set_logger(void);
+int set_config_threads(char*);
+int set_config_sm(char*);
 
 // -- HELPER FUNCTIONS --
 void print_config(void);
-void initialise(void);
+int initialise(void);
 char *op_to_string(void);
 void print_usage(void);
 void print(char *);
@@ -66,3 +74,4 @@ int trace(void);
 int addition(void);
 int transpose_matrix(void);
 int matrix_mp(void);
+int read_in_mtx(char**, int, int, int, const int*);
