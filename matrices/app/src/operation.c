@@ -17,6 +17,7 @@ int operation_main(void) {
  * Return 1 to indicate success and 0 to indicate failure.
  */
 int scalar_mp(void) {
+    read_file_main(0);
     print(" ... performing scalar multiplication.");
     return 1;
 }

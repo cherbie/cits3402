@@ -66,3 +66,27 @@ void print_config() {
 void print(char *str) {
     printf("%s\n", str);
 }
+
+char *str_clean(char *str) {
+    int i,j = 0;
+    for(i = 0; str[i] != '\0'; i++) {
+        while(!((str[i] >= 'a' && str[i]<='z') || (str[i]>='A' && str[i]<='Z') || (str[i]>='0' && str[i]<='9') || str[i]=='\0')){
+            for(j = i; str[j] != '\0'; ++j) {
+                str[j] = str[j+1];
+            }
+            str[j] = '\0';
+        }
+    }
+    return str;
+}
+
+void print_coo(int k) {
+    print(" --- ");
+    for(int i = 0; i < coo_sparse_mtx[k].size; i++) {
+        printf(" %i ", coo_sparse_mtx[k].mtx[i][0]);
+        printf(" %i ", coo_sparse_mtx[k].mtx[i][1]);
+        printf(" %i ", coo_sparse_mtx[k].mtx[i][2]);
+        print("");
+    }
+    print(" ---- ");
+}

@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <getopt.h>
+#include <ctype.h>
 
 #define NUM_OPERATIONS 5
 #define NUM_OPTIONS 7
@@ -16,9 +17,10 @@
 
 //#define INPUT_NUM_LINES 3
 typedef struct {
-    int i;
+    int   i;
     float f;
 } MTX_TYPE;
+
 // -- STRUCTURES --
 struct APP_ARG {
     int  operation;
@@ -34,25 +36,25 @@ struct APP_ARG {
 typedef struct {
     //enum MTX_TYPE *type;
     char *type;
-    void *mtx;
+    int **mtx; //
     int row;
     int col;
-    int size[2]; //COO.size[0] - number of elements in mtx. COO.size[1] - number of elements in each sub array.
+    int size; //COO.size[0] - number of elements in mtx. COO.size[1] - number of elements in each sub array.
 } COO;
 
 //GLOBAL VARIABLES
-struct APP_ARG config;
-struct tm *exec_time;
-COO *coo_sparse_mtx; //structure containing coordinate format representation of matrix.
-time_t rawtime;
-char *op_str;
-char *arg_options[NUM_OPTIONS];
-int (*op_func[NUM_OPERATIONS])(); //pointer to operation functions
+struct APP_ARG  config;
+struct tm       *exec_time;
+COO             *coo_sparse_mtx; //structure containing coordinate format representation of matrix.
+time_t          rawtime;
+char            *op_str;
+char            *arg_options[NUM_OPTIONS];
+int             (*op_func[NUM_OPERATIONS])(); //pointer to operation functions
 
 
 // -- FUNCTION DECLARATIONS --
-int main(int, char**);
-int parse_cmd(int, char**);
+extern int main(int, char**);
+extern int parse_cmd(int, char**);
 int get_operation(char*);
 bool config_is_setup(void);
 int set_input_files(int, char*);
@@ -66,6 +68,8 @@ int initialise(void);
 char *op_to_string(void);
 void print_usage(void);
 void print(char *);
+char *str_clean(char*);
+void print_coo(int);
 
 // -- OPERATIONS --
 int operation_main(void);
@@ -74,4 +78,9 @@ int trace(void);
 int addition(void);
 int transpose_matrix(void);
 int matrix_mp(void);
-int read_in_mtx(char**, int, int, int, const int*);
+
+// -- FILE READING --
+int read_file_main(int);
+int read_int_file(int);
+int read_float_file(char**, int);
+int add_int_coo(int,int,int,int,int);
