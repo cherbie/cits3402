@@ -18,6 +18,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Unable to perform matrix operation.\n");
         exit(EXIT_FAILURE);
     }
+    dealloc_config();
     printf(" ... Program complete.\n");
     exit(EXIT_SUCCESS);
 }

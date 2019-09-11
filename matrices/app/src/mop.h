@@ -29,8 +29,8 @@ typedef struct {
     int  num_threads;
     FILE **fd;
     char **filename;
-    FILE *in2_fd;
-    char *in2_filename;
+    //FILE *in2_fd;
+    //char *in2_filename;
     FILE *log_fd;
     char *log_filename;
 } CONFIG;
@@ -49,7 +49,6 @@ typedef struct {
 CONFIG          config;
 struct tm       *exec_time;
 time_t          rawtime;
-
 char            *arg_options[NUM_OPTIONS];
 int             (*op_func[NUM_OPERATIONS])(); //pointer to operation functions
 
@@ -93,4 +92,8 @@ extern int add_float_coo(COO*,float,int,int,int);
 extern int process_scalar_mp(COO*, float);
 
 // -- LOGGER --
-int log_coo_result(COO*);
+extern int log_coo_result(COO*);
+
+// -- DEALLOC --
+extern void dealloc_coo(COO**,int);
+extern void dealloc_config(void);

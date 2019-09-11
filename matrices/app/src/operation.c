@@ -32,7 +32,7 @@ int scalar_mp(void) {
         fprintf(stderr, "Error performing scalar multiplication.\n");
         return 0;
     }
-    
+
     print_coo(&coo_sparse_mtx[file_id]);
 
     if(!log_coo_result(&(coo_sparse_mtx[file_id]))) {
@@ -40,7 +40,8 @@ int scalar_mp(void) {
         return 0;
     }
 
-    print(" ... completed scalar multiplication.");
+    dealloc_coo(&coo_sparse_mtx, 1);
+    print(" ... completed scalar multiplication & deallocated memory");
     return 1;
 }
 
