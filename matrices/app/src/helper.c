@@ -33,24 +33,19 @@ int initialise(void) {
     op_func[3] = transpose_matrix;
     op_func[4] = matrix_mp;
 
-    //SPARSE MATRIX REP.
-    if((coo_sparse_mtx = malloc(NUMBER_OF_INPUT_FILES * sizeof(COO))) == NULL) {
-        perror(NULL);
-        return 0;
-    }
     return 1;
 }
 
 char *op_to_string(void) {
     switch(config.operation) {
-        case 0: op_str = strdup("sc"); break;
-        case 1: op_str = strdup("tr"); break;
-        case 2: op_str = strdup("ad"); break;
-        case 3: op_str = strdup("ts"); break;
-        case 4: op_str = strdup("mm"); break;
+        case 0: config.op_str = strdup("sc"); break;
+        case 1: config.op_str = strdup("tr"); break;
+        case 2: config.op_str = strdup("ad"); break;
+        case 3: config.op_str = strdup("ts"); break;
+        case 4: config.op_str = strdup("mm"); break;
         default: return NULL;
     }
-    return op_str;
+    return config.op_str;
 }
 
 void print_config() {
@@ -80,12 +75,12 @@ char *str_clean(char *str) {
     return str;
 }
 
-void print_coo(int k) {
+void print_coo(COO *coo_mtx) {
     print(" --- ");
-    for(int i = 0; i < coo_sparse_mtx[k].size; i++) {
-        printf(" %i ", coo_sparse_mtx[k].mtx[i][0]);
-        printf(" %i ", coo_sparse_mtx[k].mtx[i][1]);
-        printf(" %i ", coo_sparse_mtx[k].mtx[i][2]);
+    for(int i = 0; i < (*coo_mtx).size; i++) {
+        printf(" %i ", (*coo_mtx).mtx[i][0]);
+        printf(" %i ", (*coo_mtx).mtx[i][1]);
+        printf(" %i ", (*coo_mtx).mtx[i][2]);
         print("");
     }
     print(" ---- ");

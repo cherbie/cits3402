@@ -22,9 +22,10 @@ typedef struct {
 } MTX_TYPE;
 
 // -- STRUCTURES --
-struct APP_ARG {
+typedef struct {
     int  operation;
-    MTX_TYPE sm; //scalar number
+    char *op_str;
+    float sm; //scalar number
     int  num_threads;
     FILE **fd;
     char **filename;
@@ -32,22 +33,22 @@ struct APP_ARG {
     char *in2_filename;
     FILE *log_fd;
     char *log_filename;
-};
+} CONFIG;
+
 typedef struct {
     //enum MTX_TYPE *type;
     char *type;
-    int **mtx; //
+    int **mtx;
     int row;
     int col;
     int size; //COO.size[0] - number of elements in mtx. COO.size[1] - number of elements in each sub array.
 } COO;
 
 //GLOBAL VARIABLES
-struct APP_ARG  config;
+CONFIG          config;
 struct tm       *exec_time;
-COO             *coo_sparse_mtx; //structure containing coordinate format representation of matrix.
 time_t          rawtime;
-char            *op_str;
+
 char            *arg_options[NUM_OPTIONS];
 int             (*op_func[NUM_OPERATIONS])(); //pointer to operation functions
 
@@ -55,32 +56,35 @@ int             (*op_func[NUM_OPERATIONS])(); //pointer to operation functions
 // -- FUNCTION DECLARATIONS --
 extern int main(int, char**);
 extern int parse_cmd(int, char**);
-int get_operation(char*);
-bool config_is_setup(void);
-int set_input_files(int, char*);
-int set_logger(void);
-int set_config_threads(char*);
-int set_config_sm(char*);
+extern int get_operation(char*);
+extern bool config_is_setup(void);
+extern int set_input_files(int, char*);
+extern int set_logger(void);
+extern int set_config_threads(char*);
+extern int set_config_sm(char*);
 
 // -- HELPER FUNCTIONS --
-void print_config(void);
-int initialise(void);
-char *op_to_string(void);
-void print_usage(void);
-void print(char *);
-char *str_clean(char*);
-void print_coo(int);
+extern void print_config(void);
+extern int initialise(void);
+extern char *op_to_string(void);
+extern void print_usage(void);
+extern void print(char *);
+extern char *str_clean(char*);
+extern void print_coo(COO*);
 
 // -- OPERATIONS --
-int operation_main(void);
-int scalar_mp(void);
-int trace(void);
-int addition(void);
-int transpose_matrix(void);
-int matrix_mp(void);
+extern int operation_main(void);
+extern int scalar_mp(void);
+extern int trace(void);
+extern int addition(void);
+extern int transpose_matrix(void);
+extern int matrix_mp(void);
 
 // -- FILE READING --
-int read_file_main(int);
-int read_int_file(int);
-int read_float_file(char**, int);
-int add_int_coo(int,int,int,int,int);
+extern int read_file_main(COO **, int);
+extern int read_coo_file(COO**, int);
+extern int read_float_file(char**, int);
+extern int add_int_coo(COO**,int,int,int,int,int);
+
+// -- SYNCHRONOUS --
+extern int process_scalar_mp(COO*, float);

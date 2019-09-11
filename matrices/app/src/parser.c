@@ -141,15 +141,12 @@ int set_config_threads(char * arg) {
 
 int set_config_sm(char *arg) {
     //atof;
-    int n = atoi(arg);
-    float f = atoi(arg);
-    if(n == 0) {
+    float f = atof(arg);
+    if(f == 0) {
         fprintf(stderr, "Either an error or scalar of zero was supplied.\n");
         return 0;
     }
-    if(f == 0) fprintf(stderr, "error with f\n");
-    config.sm.i = n;
-    config.sm.f = f;
+    config.sm = f;
     return 1;
 }
 /**

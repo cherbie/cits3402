@@ -1,6 +1,6 @@
 CC=gcc-9 -std=c99 -fopenmp
 WARNINGS=-Wall -Werror -pedantic
-OFILES=main.o parser.o helper.o operation.o file-reading.o
+OFILES=main.o parser.o helper.o scalar.o operation.o file-reading.o
 HEADERS=./src/mop.h
 
 project: $(OFILES)
@@ -21,5 +21,8 @@ helper.o: ./src/helper.c $(HEADERS)
 operation.o: ./src/operation.c $(HEADERS)
 	$(CC) $(WARNINGS) -c ./src/operation.c $(HEADERS)
 
+scalar.o: ./src/scalar.c $(HEADERS)
+	$(CC) $(WARNINGS) -c ./src/scalar.c $(HEADERS)
+
 clean:
-	rm -f *.o *.out
+	rm -f *.o *.out ./src/*.h.gch

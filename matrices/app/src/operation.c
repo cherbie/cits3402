@@ -17,7 +17,21 @@ int operation_main(void) {
  * Return 1 to indicate success and 0 to indicate failure.
  */
 int scalar_mp(void) {
-    read_file_main(0);
+    //SPARSE MATRIX REP.
+    COO *coo_sparse_mtx; //structure containing coordinate format representation of matrix.
+    if((coo_sparse_mtx = malloc(NUMBER_OF_INPUT_FILES * sizeof(COO))) == NULL) {
+        perror(NULL);
+        return 0;
+    }
+    int file_id = 0;
+    read_file_main(&coo_sparse_mtx, file_id);
+    if(!process_scalar_mp(&coo_sparse_mtx[file_id], config.sm)) {
+        fprintf(stderr, "Error performing scalar multiplication.\n");
+        return 0;
+    }
+
+    print_coo(&coo_sparse_mtx[file_id]);
+
     print(" ... performing scalar multiplication.");
     return 1;
 }
