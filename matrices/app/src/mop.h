@@ -84,7 +84,10 @@ extern int matrix_mp(void);
 extern int read_file_main(COO **, int);
 extern int read_coo_file(COO**, int);
 extern int read_float_file(char**, int);
-extern int add_int_coo(COO**,int,int,int,int,int);
+extern int add_int_coo(COO*,int,int,int,int);
 
 // -- SYNCHRONOUS --
 extern int process_scalar_mp(COO*, float);
+
+// -- LOGGER --
+int log_coo_result(COO*);

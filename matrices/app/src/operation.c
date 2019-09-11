@@ -32,7 +32,12 @@ int scalar_mp(void) {
 
     print_coo(&coo_sparse_mtx[file_id]);
 
-    print(" ... performing scalar multiplication.");
+    if(!log_coo_result(&(coo_sparse_mtx[file_id]))) {
+        fprintf(stderr, "Error logging result to file.\n");
+        return 0;
+    }
+
+    print(" ... completed scalar multiplication.");
     return 1;
 }
 

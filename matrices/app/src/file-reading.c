@@ -99,7 +99,7 @@ int read_coo_file(COO **coo_mtx, int k) {
                 return 0;
             }
             val = atoi(buf);
-            if(!add_int_coo(coo_mtx, k, val, rows, cols, (*coo_mtx)[k].size - 1)) {
+            if(!add_int_coo(&(*coo_mtx)[k], val, rows, cols, (*coo_mtx)[k].size - 1)) {
                 perror(NULL);
                 return 0;
             }
@@ -121,7 +121,7 @@ int read_coo_file(COO **coo_mtx, int k) {
             content = true;
             continue;
         }
-        else if(isspace(c)) {
+        else if(isspace(c) && content) {
             (*coo_mtx)[k].size += 1;
             (*coo_mtx)[k].mtx = realloc((*coo_mtx)[k].mtx, (*coo_mtx)[k].size * sizeof(int *));
             if((*coo_mtx)[k].mtx == NULL) {
@@ -129,7 +129,7 @@ int read_coo_file(COO **coo_mtx, int k) {
                 return 0;
             }
             val = atoi(buf);
-            if(!add_int_coo(coo_mtx, k, val, rows, cols, (*coo_mtx)[k].size - 1)) {
+            if(!add_int_coo(&(*coo_mtx)[k], val, rows, cols, (*coo_mtx)[k].size - 1)) {
                 perror(NULL);
                 return 0;
             }
@@ -140,6 +140,13 @@ int read_coo_file(COO **coo_mtx, int k) {
             }
             dsize = 0;
             content = false;
+        }
+        else if(!isspace(c)){
+            cols++;
+            if(cols >= (*coo_mtx)[k].col) { //next row
+                rows++;
+                cols = 0;
+            }
         }
         buf = calloc(len, sizeof(char));
     }
@@ -152,14 +159,14 @@ int read_coo_file(COO **coo_mtx, int k) {
  * @param k is the application file identifier.
  * @count is the array index of the coordinates.
  */
-int add_int_coo(COO **coo_mtx, int k, int val, int row, int col, int index) {
-    (*coo_mtx)[k].mtx[index] = malloc(3  * sizeof(int));
-    if((*coo_mtx)[k].mtx == NULL) {
+int add_int_coo(COO *coo_mtx, int val, int row, int col, int index) {
+    (*coo_mtx).mtx[index] = malloc(3  * sizeof(int));
+    if((*coo_mtx).mtx == NULL) {
         perror("function: add_int_coo()");
         return 0;
     }
-    (*coo_mtx)[k].mtx[index][0] = row;
-    (*coo_mtx)[k].mtx[index][1] = col;
-    (*coo_mtx)[k].mtx[index][2] = val;
+    (*coo_mtx).mtx[index][0] = row;
+    (*coo_mtx).mtx[index][1] = col;
+    (*coo_mtx).mtx[index][2] = val;
     return 1;
 }
