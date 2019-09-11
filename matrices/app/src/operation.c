@@ -24,12 +24,15 @@ int scalar_mp(void) {
         return 0;
     }
     int file_id = 0;
-    read_file_main(&coo_sparse_mtx, file_id);
+    if(!read_to_coo(&coo_sparse_mtx, file_id)) {
+        fprintf(stderr, "Error converting file to sparse matrix form.\n");
+        return 0;
+    }
     if(!process_scalar_mp(&coo_sparse_mtx[file_id], config.sm)) {
         fprintf(stderr, "Error performing scalar multiplication.\n");
         return 0;
     }
-
+    
     print_coo(&coo_sparse_mtx[file_id]);
 
     if(!log_coo_result(&(coo_sparse_mtx[file_id]))) {

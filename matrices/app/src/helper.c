@@ -77,11 +77,21 @@ char *str_clean(char *str) {
 
 void print_coo(COO *coo_mtx) {
     print(" --- ");
-    for(int i = 0; i < (*coo_mtx).size; i++) {
-        printf(" %i ", (*coo_mtx).mtx[i][0]);
-        printf(" %i ", (*coo_mtx).mtx[i][1]);
-        printf(" %i ", (*coo_mtx).mtx[i][2]);
-        print("");
+    if((*coo_mtx).is_int) {
+        for(int i = 0; i < (*coo_mtx).size; i++) {
+            printf(" %i ", (*coo_mtx).mtxi[i][0]);
+            printf(" %i ", (*coo_mtx).mtxi[i][1]);
+            printf(" %i ", (*coo_mtx).mtxi[i][2]);
+            print("\n");
+        }
+    }
+    else {
+        for(int i = 0; i < (*coo_mtx).size; i++) {
+            printf(" %1.0f ", (*coo_mtx).mtxf[i][0]);
+            printf(" %1.0f ", (*coo_mtx).mtxf[i][1]);
+            printf(" %3.2f ", (*coo_mtx).mtxf[i][2]);
+            print("\n");
+        }
     }
     print(" ---- ");
 }

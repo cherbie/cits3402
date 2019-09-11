@@ -7,12 +7,24 @@
 int log_coo_result(COO *coo_mtx) {
     print(" --- ");
     int count = 0;
-    for(int i = 0; i < (*coo_mtx).row; i++) {
-        for(int j = 0; j < (*coo_mtx).col; j++) {
-            if((count < (*coo_mtx).size) && (*coo_mtx).mtx[count][0] == i && (*coo_mtx).mtx[count][1] == j) {
-                printf("%i ", (*coo_mtx).mtx[count++][2]);
+    if((*coo_mtx).is_int) {
+        for(int i = 0; i < (*coo_mtx).row; i++) {
+            for(int j = 0; j < (*coo_mtx).col; j++) {
+                if((count < (*coo_mtx).size) && (*coo_mtx).mtxi[count][0] == i && (*coo_mtx).mtxi[count][1] == j) {
+                    printf("%i ", (*coo_mtx).mtxi[count++][2]);
+                }
+                else printf("%i ", 0);
             }
-            else printf("%i ", 0);
+        }
+    }
+    else {
+        for(int i = 0; i < (*coo_mtx).row; i++) {
+            for(int j = 0; j < (*coo_mtx).col; j++) {
+                if((count < (*coo_mtx).size) && (*coo_mtx).mtxf[count][0] == i && (*coo_mtx).mtxf[count][1] == j) {
+                    printf("%3.2f ", (*coo_mtx).mtxf[count++][2]);
+                }
+                else printf("%3.2f ", (float) 0.0);
+            }
         }
     }
     print("\n");

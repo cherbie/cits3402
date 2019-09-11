@@ -37,8 +37,9 @@ typedef struct {
 
 typedef struct {
     //enum MTX_TYPE *type;
-    char *type;
-    int **mtx;
+    bool is_int;
+    int **mtxi;
+    float **mtxf;
     int row;
     int col;
     int size; //COO.size[0] - number of elements in mtx. COO.size[1] - number of elements in each sub array.
@@ -81,10 +82,12 @@ extern int transpose_matrix(void);
 extern int matrix_mp(void);
 
 // -- FILE READING --
-extern int read_file_main(COO **, int);
-extern int read_coo_file(COO**, int);
-extern int read_float_file(char**, int);
+extern int read_to_coo(COO **, int);
+extern int read_coo_filei(COO**,int);
+extern int read_coo_filef(COO**, int);
 extern int add_int_coo(COO*,int,int,int,int);
+extern int add_float_coo(COO*,float,int,int,int);
+
 
 // -- SYNCHRONOUS --
 extern int process_scalar_mp(COO*, float);
