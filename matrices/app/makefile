@@ -1,6 +1,6 @@
 CC=gcc-9 -std=c99 -fopenmp
 WARNINGS=-Wall -Werror -pedantic
-OFILES=main.o parser.o helper.o scalar.o operation.o file-reading.o logger.o dealloc.o
+OFILES=main.o parser.o helper.o sync-coo.o operation.o file-reading.o logger.o dealloc.o
 HEADERS=./src/mop.h
 
 project: $(OFILES)
@@ -21,8 +21,8 @@ helper.o: ./src/helper.c $(HEADERS)
 operation.o: ./src/operation.c $(HEADERS)
 	$(CC) $(WARNINGS) -c ./src/operation.c $(HEADERS)
 
-scalar.o: ./src/scalar.c $(HEADERS)
-	$(CC) $(WARNINGS) -c ./src/scalar.c $(HEADERS)
+sync-coo.o: ./src/sync-coo.c $(HEADERS)
+	$(CC) $(WARNINGS) -c ./src/sync-coo.c $(HEADERS)
 
 logger.o: ./src/logger.c $(HEADERS)
 	$(CC) $(WARNINGS) -c ./src/logger.c $(HEADERS)

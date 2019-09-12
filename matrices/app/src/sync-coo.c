@@ -37,3 +37,11 @@ int process_trace(COO *coo_mtx, int *i, float *f) {
     }
     return 1;
 }
+
+/**
+ * Performs matrix multiplication on the sparse matrices provided.
+ * @return 1 to indicate success and 0 to indicate failure.
+ */
+int process_addition(COO **coo_mtx) {
+    return 1;
+}

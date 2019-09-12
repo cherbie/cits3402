@@ -82,6 +82,26 @@ int trace(void) {
  * Return 1 to indicate success and 0 to indicate failure.
  */
 int addition(void) {
+    const int num_struct = 3;
+    //SPARSE MATRIX REP.
+    COO *coo_sparse_mtx; //structure containing coordinate format representation of matrix.
+    if((coo_sparse_mtx = malloc(num_struct * sizeof(COO))) == NULL) {
+        perror(NULL);
+        return 0;
+    }
+    for(int k = 0; k < NUMBER_OF_INPUT_FILES; k++) {
+        if(!read_to_coo(&coo_sparse_mtx, k)) {
+            fprintf(stderr, "Error converting file to sparse matrix form.\n");
+            return 0;
+        }
+    }
+    if(!process_addition(&coo_sparse_mtx)) {
+        fprintf(stderr, "Error performing matrix addition.\n");
+        return 0;
+    }
+
+    free(coo_sparse_mtx);
+
     print(" ... performing matrix addition.");
     return 1;
 }

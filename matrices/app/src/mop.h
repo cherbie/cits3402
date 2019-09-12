@@ -103,6 +103,7 @@ extern int add_float_coo(COO*,float,int,int,int);
 // -- SYNCHRONOUS --
 extern int process_scalar(COO*, float);
 extern int process_trace(COO*,int*,float*);
+extern int process_addition(COO**);
 
 // -- LOGGER --
 extern int log_coo_result(COO*);
