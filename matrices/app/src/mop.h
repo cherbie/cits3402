@@ -45,6 +45,17 @@ typedef struct {
     int size; //COO.size[0] - number of elements in mtx. COO.size[1] - number of elements in each sub array.
 } COO;
 
+typedef struct {
+    bool is_int;
+    int *mtxi;
+    float *mtxf;
+    int *ia; //stores number of non-zero elements in each row.
+    int *ja; //stores the column index of each non-zero element
+    int size; //number of non-zero input elements
+    int row; //number of rows specified by the input file
+    int col; //number of columns specified by the input file
+} CSR;
+
 //GLOBAL VARIABLES
 CONFIG          config;
 struct tm       *exec_time;
@@ -82,6 +93,7 @@ extern int matrix_mp(void);
 
 // -- FILE READING --
 extern int read_to_coo(COO **, int);
+extern int read_to_csr(CSR **, int);
 extern int read_coo_filei(COO**,int);
 extern int read_coo_filef(COO**, int);
 extern int add_int_coo(COO*,int,int,int,int);

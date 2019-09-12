@@ -90,6 +90,21 @@ int addition(void) {
  * Return 1 to indicate success and 0 to indicate failure.
  */
 int transpose_matrix(void) {
+    const int num_files = 1;
+    int file_id = 0;
+    //SPARSE MATRIX REP CSR.
+    CSR *csr_sparse_mtx; //structure containing coordinate format representation of matrix.
+    if((csr_sparse_mtx = malloc(num_files * sizeof(CSR))) == NULL) {
+        perror(NULL);
+        return 0;
+    }
+    if(!read_to_csr(&csr_sparse_mtx, file_id)) {
+        fprintf(stderr, "Error converting file to sparse matrix form.\n");
+        return 0;
+    }
+
+    free(csr_sparse_mtx);
+
     print(" ... transposing matrix.");
     return 1;
 }

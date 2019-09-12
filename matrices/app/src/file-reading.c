@@ -181,3 +181,9 @@ int add_float_coo(COO *coo_mtx, float val, int row, int col, int index) {
     (*coo_mtx).mtxf[index][2] = val;
     return 1;
 }
+
+// -- Coordinate Sparse Row Matrix Representation --
+
+int read_to_csr(CSR **sparse_mtx, int k) {
+    return 1;
+}
