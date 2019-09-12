@@ -82,6 +82,7 @@ extern void print_usage(void);
 extern void print(char *);
 extern char *str_clean(char*);
 extern void print_coo(COO*);
+extern bool is_defined(COO*, int, int, int);
 
 // -- OPERATIONS --
 extern int operation_main(void);

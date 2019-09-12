@@ -43,5 +43,62 @@ int process_trace(COO *coo_mtx, int *i, float *f) {
  * @return 1 to indicate success and 0 to indicate failure.
  */
 int process_addition(COO **coo_mtx) {
+    const int file1 = 0;
+    const int file2 = 1;
+    const int res = 2;
+    int block1, block2, blockr;
+    int val = 0;
+
+    if(((*coo_mtx)[file1].row != (*coo_mtx)[file2].row) || ((*coo_mtx)[file1].col != (*coo_mtx)[file2].col)) {
+        fprintf(stderr, "Error dimensions of the input matrices are not equivalent.\n");
+        return 0;
+    }
+    else {
+        (*coo_mtx)[res].row = (*coo_mtx)[file1].row;
+        (*coo_mtx)[res].col =  (*coo_mtx)[file1].col;
+    }
+    block1 = 0; block2 = 0; blockr = 0;
+    if(!(*coo_mtx)[file1].is_int || !(*coo_mtx)[file2].is_int) { //float
+        (*coo_mtx)[res].is_int = false;
+    }
+    else { //int
+        (*coo_mtx)[res].is_int = true;
+        (*coo_mtx)[res].mtxi = malloc(((*coo_mtx)[file1].size + (*coo_mtx)[file2].size) * sizeof(int *)); //initial maximum allocation
+        if((*coo_mtx)[res].mtxi == NULL) {
+            perror("Error allocating memory for resultant sparse matrix.");
+            return 0;
+        }
+        print("stage1");
+        for(int i = 0; i < (*coo_mtx)[file1].row; i++) {
+            if((*coo_mtx)[file1].mtxi[block1][0] != i && (*coo_mtx)[file2].mtxi[block2][0] != i) continue;
+            print("stage2");
+            for(int j = 0; j < (*coo_mtx)[file1].col; j++) {
+                print("stage3");
+                if(is_defined(&(*coo_mtx)[file1], i, j, block1) && is_defined(&(*coo_mtx)[file2], i, j, block2)) {
+                    print("stage4");
+                    val = (*coo_mtx)[file1].mtxi[block1][2] + (*coo_mtx)[file2].mtxi[block2][2];
+                    (*coo_mtx)[res].size += 1;
+                    add_int_coo(&(*coo_mtx)[res], val, i, j, blockr);
+                    blockr++; block1++; block2++;
+                    print("stage5");
+                }
+                else if(is_defined(&(*coo_mtx)[file1], i, j, block1)) {
+                    val = (*coo_mtx)[file1].mtxi[block1][2];
+                    (*coo_mtx)[res].size += 1;
+                    add_int_coo(&(*coo_mtx)[res], val, i, j, blockr);
+                    blockr++; block1++;
+                }
+                else if(is_defined(&(*coo_mtx)[file2], i, j, block2)) {
+                    val = (*coo_mtx)[file2].mtxi[block2][2];
+                    (*coo_mtx)[res].size += 1;
+                    add_int_coo(&(*coo_mtx)[res], val, i, j, blockr);
+                    blockr++; block2++;
+                }
+                continue;
+            }
+        }
+    }
+    print("addition complete\n");
+
     return 1;
 }

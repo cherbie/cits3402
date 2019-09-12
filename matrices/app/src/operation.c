@@ -100,7 +100,14 @@ int addition(void) {
         return 0;
     }
 
-    free(coo_sparse_mtx);
+    print_coo(&(coo_sparse_mtx[num_struct - 1]));
+
+    if(!log_coo_result(&(coo_sparse_mtx[num_struct - 1]))) {
+        fprintf(stderr, "Error logging result to file.\n");
+        return 0;
+    }
+
+    dealloc_coo(&coo_sparse_mtx, num_struct);
 
     print(" ... performing matrix addition.");
     return 1;
