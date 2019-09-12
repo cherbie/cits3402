@@ -58,8 +58,42 @@ int process_addition(COO **coo_mtx) {
         (*coo_mtx)[res].col =  (*coo_mtx)[file1].col;
     }
     block1 = 0; block2 = 0; blockr = 0;
-    if(!(*coo_mtx)[file1].is_int || !(*coo_mtx)[file2].is_int) { //float
+    if(!(*coo_mtx)[file1].is_int && !(*coo_mtx)[file2].is_int) { //float
         (*coo_mtx)[res].is_int = false;
+        (*coo_mtx)[res].mtxf = malloc(((*coo_mtx)[file1].size + (*coo_mtx)[file2].size) * sizeof(int *)); //initial maximum allocation
+        if((*coo_mtx)[res].mtxf == NULL) {
+            perror("Error allocating memory for resultant sparse matrix.");
+            return 0;
+        }
+        print("stage1");
+        for(int i = 0; i < (*coo_mtx)[file1].row; i++) {
+            if((*coo_mtx)[file1].mtxf[block1][0] != i && (*coo_mtx)[file2].mtxf[block2][0] != i) continue;
+            print("stage2");
+            for(int j = 0; j < (*coo_mtx)[file1].col; j++) {
+                print("stage3");
+                if(is_defined(&(*coo_mtx)[file1], i, j, block1) && is_defined(&(*coo_mtx)[file2], i, j, block2)) {
+                    print("stage4");
+                    val = (*coo_mtx)[file1].mtxf[block1][2] + (*coo_mtx)[file2].mtxf[block2][2];
+                    (*coo_mtx)[res].size += 1;
+                    add_int_coo(&(*coo_mtx)[res], val, i, j, blockr);
+                    blockr++; block1++; block2++;
+                    print("stage5");
+                }
+                else if(is_defined(&(*coo_mtx)[file1], i, j, block1)) {
+                    val = (*coo_mtx)[file1].mtxf[block1][2];
+                    (*coo_mtx)[res].size += 1;
+                    add_int_coo(&(*coo_mtx)[res], val, i, j, blockr);
+                    blockr++; block1++;
+                }
+                else if(is_defined(&(*coo_mtx)[file2], i, j, block2)) {
+                    val = (*coo_mtx)[file2].mtxf[block2][2];
+                    (*coo_mtx)[res].size += 1;
+                    add_int_coo(&(*coo_mtx)[res], val, i, j, blockr);
+                    blockr++; block2++;
+                }
+                continue;
+            }
+        }
     }
     else { //int
         (*coo_mtx)[res].is_int = true;
