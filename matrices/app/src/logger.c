@@ -31,3 +31,12 @@ int log_coo_result(COO *coo_mtx) {
     print(" ---- ");
     return 1;
 }
+
+int log_trace_result(COO *coo_mtx, int *tracei, float *tracef) {
+    print(" --- ");
+    if((*coo_mtx).is_int) printf("%i", *tracei);
+    else printf("%3.2f", *tracef);
+    printf("\n");
+    print(" --- ");
+    return 1;
+}

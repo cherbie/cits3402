@@ -1,5 +1,9 @@
 #include "mop.h"
 
+/**
+ * Deallocate dynamic memory within COO sparse matrix rep. data structure.
+ * @param size is the number of input files with meta data dynamically allocated.
+ */
 void dealloc_coo(COO **coo_mtx, int size) {
     for(int k = 0; k < size; k++) {
         if((*coo_mtx)[k].is_int) {

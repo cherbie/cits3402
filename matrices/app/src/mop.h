@@ -74,7 +74,7 @@ extern void print_coo(COO*);
 
 // -- OPERATIONS --
 extern int operation_main(void);
-extern int scalar_mp(void);
+extern int scalar(void);
 extern int trace(void);
 extern int addition(void);
 extern int transpose_matrix(void);
@@ -89,10 +89,12 @@ extern int add_float_coo(COO*,float,int,int,int);
 
 
 // -- SYNCHRONOUS --
-extern int process_scalar_mp(COO*, float);
+extern int process_scalar(COO*, float);
+extern int process_trace(COO*,int*,float*);
 
 // -- LOGGER --
 extern int log_coo_result(COO*);
+extern int log_trace_result(COO*, int*, float*);
 
 // -- DEALLOC --
 extern void dealloc_coo(COO**,int);

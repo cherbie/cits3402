@@ -42,7 +42,7 @@ int parse_cmd(int argc, char *argv[]) {
                 break;
             }
             case '1': case '2': case '3': case '4': {
-                if(!operation_seen) {
+                if(operation_seen) {
                     fprintf(stderr, "More than one matrix operation specified.\n");
                     return 0;
                 }

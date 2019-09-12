@@ -16,19 +16,20 @@ int operation_main(void) {
 /**
  * Return 1 to indicate success and 0 to indicate failure.
  */
-int scalar_mp(void) {
+int scalar(void) {
     //SPARSE MATRIX REP.
+    const int num_files = 1;
+    int file_id = 0;
     COO *coo_sparse_mtx; //structure containing coordinate format representation of matrix.
-    if((coo_sparse_mtx = malloc(NUMBER_OF_INPUT_FILES * sizeof(COO))) == NULL) {
+    if((coo_sparse_mtx = malloc(num_files * sizeof(COO))) == NULL) {
         perror(NULL);
         return 0;
     }
-    int file_id = 0;
     if(!read_to_coo(&coo_sparse_mtx, file_id)) {
         fprintf(stderr, "Error converting file to sparse matrix form.\n");
         return 0;
     }
-    if(!process_scalar_mp(&coo_sparse_mtx[file_id], config.sm)) {
+    if(!process_scalar(&coo_sparse_mtx[file_id], config.sm)) {
         fprintf(stderr, "Error performing scalar multiplication.\n");
         return 0;
     }
@@ -40,7 +41,7 @@ int scalar_mp(void) {
         return 0;
     }
 
-    dealloc_coo(&coo_sparse_mtx, 1);
+    dealloc_coo(&coo_sparse_mtx, num_files);
     print(" ... completed scalar multiplication & deallocated memory");
     return 1;
 }
@@ -49,6 +50,30 @@ int scalar_mp(void) {
  * Return 1 to indicate success and 0 to indicate failure.
  */
 int trace(void) {
+    const int num_files = 1;
+    int file_id = 0;
+    //SPARSE MATRIX REP.
+    COO *coo_sparse_mtx; //structure containing coordinate format representation of matrix.
+    if((coo_sparse_mtx = malloc(num_files * sizeof(COO))) == NULL) {
+        perror(NULL);
+        return 0;
+    }
+    if(!read_to_coo(&coo_sparse_mtx, file_id)) {
+        fprintf(stderr, "Error converting file to sparse matrix form.\n");
+        return 0;
+    }
+    int i;
+    float f;
+
+    if(!process_trace(&coo_sparse_mtx[file_id], &i, &f)) {
+        fprintf(stderr, "Error calulating the trace of the matrix provided.\n");
+        return 0;
+    }
+    if(!log_trace_result(&coo_sparse_mtx[file_id], &i, &f)) {
+        fprintf(stderr, "Error logging the result of the trace.\n");
+        return 0;
+    }
+    dealloc_coo(&coo_sparse_mtx, num_files);
     print(" ... finding trace of matrix.");
     return 1;
 }

@@ -27,7 +27,7 @@ int initialise(void) {
     config.log_filename = NULL;
 
     //function pointers
-    op_func[0] = scalar_mp;
+    op_func[0] = scalar;
     op_func[1] = trace;
     op_func[2] = addition;
     op_func[3] = transpose_matrix;
@@ -93,5 +93,5 @@ void print_coo(COO *coo_mtx) {
             print("\n");
         }
     }
-    print(" ---- ");
+    print(" --- ");
 }
