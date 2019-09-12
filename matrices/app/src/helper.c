@@ -101,6 +101,12 @@ void print_coo(COO *coo_mtx) {
  * @returns true if a non-zero value is defined, false otherwise.
  */
 bool is_defined(COO *coo_mtx, int row, int col, int block) {
-    if((*coo_mtx).mtxi[block][0] == row && (*coo_mtx).mtxi[block][1] == col) return true;
-    else return false;
+    if((*coo_mtx).is_int) {
+        if((*coo_mtx).mtxi[block][0] == row && (*coo_mtx).mtxi[block][1] == col) return true;
+        else return false;
+    }
+    else {
+        if((*coo_mtx).mtxf[block][0] == row && (*coo_mtx).mtxf[block][1] == col) return true;
+        else return false;
+    }
 }

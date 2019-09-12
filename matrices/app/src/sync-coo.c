@@ -47,7 +47,6 @@ int process_addition(COO **coo_mtx) {
     const int file2 = 1;
     const int res = 2;
     int block1, block2, blockr;
-    int val = 0;
 
     if(((*coo_mtx)[file1].row != (*coo_mtx)[file2].row) || ((*coo_mtx)[file1].col != (*coo_mtx)[file2].col)) {
         fprintf(stderr, "Error dimensions of the input matrices are not equivalent.\n");
@@ -59,15 +58,16 @@ int process_addition(COO **coo_mtx) {
     }
     block1 = 0; block2 = 0; blockr = 0;
     if(!(*coo_mtx)[file1].is_int && !(*coo_mtx)[file2].is_int) { //float
+        float val = 0.0;
         (*coo_mtx)[res].is_int = false;
-        (*coo_mtx)[res].mtxf = malloc(((*coo_mtx)[file1].size + (*coo_mtx)[file2].size) * sizeof(int *)); //initial maximum allocation
+        (*coo_mtx)[res].mtxf = malloc(((*coo_mtx)[file1].size + (*coo_mtx)[file2].size) * sizeof(float *)); //initial maximum allocation
         if((*coo_mtx)[res].mtxf == NULL) {
             perror("Error allocating memory for resultant sparse matrix.");
             return 0;
         }
         print("stage1");
         for(int i = 0; i < (*coo_mtx)[file1].row; i++) {
-            if((*coo_mtx)[file1].mtxf[block1][0] != i && (*coo_mtx)[file2].mtxf[block2][0] != i) continue;
+            if((*coo_mtx)[file1].mtxf[block1][0] != (float) i && (*coo_mtx)[file2].mtxf[block2][0] != (float) i) continue;
             print("stage2");
             for(int j = 0; j < (*coo_mtx)[file1].col; j++) {
                 print("stage3");
@@ -75,27 +75,42 @@ int process_addition(COO **coo_mtx) {
                     print("stage4");
                     val = (*coo_mtx)[file1].mtxf[block1][2] + (*coo_mtx)[file2].mtxf[block2][2];
                     (*coo_mtx)[res].size += 1;
-                    add_int_coo(&(*coo_mtx)[res], val, i, j, blockr);
+                    if(!add_float_coo(&(*coo_mtx)[res], val, i, j, blockr)) {
+                        fprintf(stderr, "Error allocating matrix addition to memory space.\n");
+                        return 0;
+                    }
                     blockr++; block1++; block2++;
                     print("stage5");
                 }
                 else if(is_defined(&(*coo_mtx)[file1], i, j, block1)) {
+                    print("stage6");
                     val = (*coo_mtx)[file1].mtxf[block1][2];
                     (*coo_mtx)[res].size += 1;
-                    add_int_coo(&(*coo_mtx)[res], val, i, j, blockr);
+                    if(!add_float_coo(&(*coo_mtx)[res], val, i, j, blockr)){
+                        fprintf(stderr, "Error allocating matrix addition to memory space.\n");
+                        return 0;
+                    }
                     blockr++; block1++;
+                    print("stage7");
                 }
                 else if(is_defined(&(*coo_mtx)[file2], i, j, block2)) {
+                    print("stage8");
                     val = (*coo_mtx)[file2].mtxf[block2][2];
                     (*coo_mtx)[res].size += 1;
-                    add_int_coo(&(*coo_mtx)[res], val, i, j, blockr);
+                    if(!add_float_coo(&(*coo_mtx)[res], val, i, j, blockr)) {
+                        fprintf(stderr, "Error allocating matrix addition to memory space.\n");
+                        return 0;
+                    }
                     blockr++; block2++;
+                    print("stage9");
                 }
+                print("stage10");
                 continue;
             }
         }
     }
     else { //int
+        int val = 0;
         (*coo_mtx)[res].is_int = true;
         (*coo_mtx)[res].mtxi = malloc(((*coo_mtx)[file1].size + (*coo_mtx)[file2].size) * sizeof(int *)); //initial maximum allocation
         if((*coo_mtx)[res].mtxi == NULL) {
@@ -112,22 +127,36 @@ int process_addition(COO **coo_mtx) {
                     print("stage4");
                     val = (*coo_mtx)[file1].mtxi[block1][2] + (*coo_mtx)[file2].mtxi[block2][2];
                     (*coo_mtx)[res].size += 1;
-                    add_int_coo(&(*coo_mtx)[res], val, i, j, blockr);
+                    if(!add_int_coo(&(*coo_mtx)[res], val, i, j, blockr)) {
+                        fprintf(stderr, "Error allocating matrix addition to memory space.\n");
+                        return 0;
+                    }
                     blockr++; block1++; block2++;
                     print("stage5");
                 }
                 else if(is_defined(&(*coo_mtx)[file1], i, j, block1)) {
+                    print("stage6");
                     val = (*coo_mtx)[file1].mtxi[block1][2];
                     (*coo_mtx)[res].size += 1;
-                    add_int_coo(&(*coo_mtx)[res], val, i, j, blockr);
+                    if(!add_int_coo(&(*coo_mtx)[res], val, i, j, blockr)) {
+                        fprintf(stderr, "Error allocating matrix addition to memory space.\n");
+                        return 0;
+                    }
                     blockr++; block1++;
+                    print("stage7");
                 }
                 else if(is_defined(&(*coo_mtx)[file2], i, j, block2)) {
+                    print("stage8");
                     val = (*coo_mtx)[file2].mtxi[block2][2];
                     (*coo_mtx)[res].size += 1;
-                    add_int_coo(&(*coo_mtx)[res], val, i, j, blockr);
+                    if(!add_int_coo(&(*coo_mtx)[res], val, i, j, blockr)) {
+                        fprintf(stderr, "Error allocating matrix addition to memory space.\n");
+                        return 0;
+                    }
                     blockr++; block2++;
+                    print("stage9");
                 }
+                print("stage11");
                 continue;
             }
         }
