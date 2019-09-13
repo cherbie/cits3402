@@ -11,6 +11,7 @@
 
 #define NUM_OPERATIONS 5
 #define NUM_OPTIONS 7
+#define MAX_MTX_DIMENSIONS 10 
 #define BUFFER_SIZE 250
 #define STUDENT_NUMBER "22245091"
 #define NUMBER_OF_INPUT_FILES 2
@@ -47,10 +48,10 @@ typedef struct {
 
 typedef struct {
     bool is_int;
-    int *mtxi;
+    int *mtxi; //non-zero values
     float *mtxf;
-    int *ia; //stores number of non-zero elements in each row.
-    int *ja; //stores the column index of each non-zero element
+    int *mtx_offset; //stores number of non-zero elements in each row.
+    int *mtx_col; //stores the column index of each non-zero element
     int size; //number of non-zero input elements
     int row; //number of rows specified by the input file
     int col; //number of columns specified by the input file

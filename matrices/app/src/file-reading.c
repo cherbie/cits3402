@@ -5,8 +5,9 @@
  * @param k is the matrix index of the respective file
  */
 int read_to_coo(COO **sparse_mtx, int k) {
-    int buffer_len = 10;
-    char *buffer = calloc(buffer_len, sizeof(char));
+    int buffer_len = MAX_MTX_DIMENSIONS; //max number of digits
+    int res = 0;
+    char *buffer = calloc(5, sizeof(char)); //int or float
     if(buffer == NULL) {
         perror(NULL);
         return 0;
@@ -23,8 +24,8 @@ int read_to_coo(COO **sparse_mtx, int k) {
     }
     if(fgets(buffer, buffer_len - 1, config.fd[k]) != NULL) {
         buffer = str_clean(buffer);
-        (*sparse_mtx)[k].row = atoi(buffer);
-        if((*sparse_mtx)[k].row == 0) {
+        res = sscanf(buffer, "%i", &(*sparse_mtx)[k].row);
+        if(res == 0 || res == EOF) {
             perror(NULL);
             return 0;
         }
@@ -36,17 +37,14 @@ int read_to_coo(COO **sparse_mtx, int k) {
     }
     if(fgets(buffer, buffer_len - 1, config.fd[k]) != NULL) {
         buffer = str_clean(buffer);
-        (*sparse_mtx)[k].col = atoi(buffer);
-        if((*sparse_mtx)[k].col == 0) {
+        res = sscanf(buffer, "%i", &(*sparse_mtx)[k].col);
+        if(res == 0 || res == EOF) {
             perror(NULL);
             return 0;
         }
     }
-    buffer = calloc(buffer_len, sizeof(char)); //store column values for each row entry
-    if(buffer == NULL) {
-        perror(NULL);
-        return 0;
-    }
+    free(buffer);
+    // -- READ MATRIX VALUES --
     if((*sparse_mtx)[k].is_int) {
         if(!read_coo_filei(sparse_mtx, k)) return 0;
     }
@@ -55,7 +53,6 @@ int read_to_coo(COO **sparse_mtx, int k) {
     }
 
     fclose(config.fd[k]);
-    free(buffer);
 
     print_coo(&(*sparse_mtx)[k]);
     return 1;
@@ -185,5 +182,6 @@ int add_float_coo(COO *coo_mtx, float val, int row, int col, int index) {
 // -- Coordinate Sparse Row Matrix Representation --
 
 int read_to_csr(CSR **sparse_mtx, int k) {
+
     return 1;
 }
