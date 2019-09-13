@@ -264,7 +264,6 @@ int read_csr_filei(CSR **csr_mtx, int k) {
             return 0;
         }
     }
-
     return 1;
 }
 
@@ -273,6 +272,35 @@ int read_csr_filei(CSR **csr_mtx, int k) {
  * @param csr_mtx CSR struct
  */
 int read_csr_filef(CSR **csr_mtx, int k) {
+    float val = 0;
+    int x,y;
+    x = 0; y = 0; //immediate row and column respectively
+    (*csr_mtx)[k].size = 0; //no elements
+    (*csr_mtx)[k].mtxf = malloc(1 * sizeof(float));
+    (*csr_mtx)[k].mtx_col = malloc(1 * sizeof(int));
+    (*csr_mtx)[k].mtx_offset = calloc(((*csr_mtx)[k].row + 1), sizeof(int)); //offset size defined
+    int num = (*csr_mtx)[k].row * (*csr_mtx)[k].col; //number of matrix elements
+    for(int i = 0; i < num; i++) {
+        fscanf(config.fd[k], "%f", &val);
+        fprintf(stdout, "\nFLOAT: %f\n", val);
+        if(val == 0.0) { //value should not be recorded in sparse matrix
+            continue;
+        }
+        x = i / (*csr_mtx)[k].row; //calculate row
+        y = i % (*csr_mtx)[k].col; //calculate column
+        (*csr_mtx)[k].size += 1; //increment number of non-zero values
+        (*csr_mtx)[k].mtxf = realloc((*csr_mtx)[k].mtxf, (*csr_mtx)[k].size * sizeof(float));
+        (*csr_mtx)[k].mtx_col = realloc((*csr_mtx)[k].mtx_col, (*csr_mtx)[k].size * sizeof(int));
+        if((*csr_mtx)[k].mtxf == NULL || (*csr_mtx)[k].mtx_col == NULL) {
+            perror("function: read_int_file()");
+            return 0;
+        }
+        fprintf(stdout, "\n float: %f\n", val);
+        if(!add_float_csr(&(*csr_mtx)[k], val, x, y, (*csr_mtx)[k].size - 1)) {
+            perror(NULL);
+            return 0;
+        }
+    }
     return 1;
 }
 
@@ -282,6 +310,13 @@ int read_csr_filef(CSR **csr_mtx, int k) {
  */
 int add_int_csr(CSR *csr_mtx, int val, int row, int col, int count) {
     (*csr_mtx).mtxi[count] = val;
+    (*csr_mtx).mtx_offset[row + 1] += 1;
+    (*csr_mtx).mtx_col[count] = col;
+    return 1;
+}
+
+int add_float_csr(CSR *csr_mtx, float val, int row, int col, int count) {
+    (*csr_mtx).mtxf[count] = val;
     (*csr_mtx).mtx_offset[row + 1] += 1;
     (*csr_mtx).mtx_col[count] = col;
     return 1;

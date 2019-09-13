@@ -103,6 +103,7 @@ extern int add_float_coo(COO*,float,int,int,int);
 extern int read_csr_filei(CSR **, int);
 extern int read_csr_filef(CSR**, int);
 extern int add_int_csr(CSR*, int, int, int, int);
+extern int add_float_csr(CSR*, float, int, int, int);
 
 
 // -- SYNCHRONOUS --

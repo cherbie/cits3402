@@ -42,6 +42,7 @@ int scalar(void) {
     }
 
     dealloc_coo(&coo_sparse_mtx, num_files);
+    free(coo_sparse_mtx);
     print(" ... completed scalar multiplication & deallocated memory");
     return 1;
 }
@@ -109,7 +110,7 @@ int addition(void) {
     }
 
     dealloc_coo(&coo_sparse_mtx, num_struct);
-
+    free(coo_sparse_mtx);
     print(" ... performing matrix addition.");
     return 1;
 }
@@ -132,7 +133,7 @@ int transpose_matrix(void) {
     }
 
     print("FINISHED READING CSR FILE\n");
-    
+
     dealloc_csr(&csr_sparse_mtx, num_files);
     free(csr_sparse_mtx);
 
