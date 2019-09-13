@@ -33,3 +33,12 @@ void dealloc_config(void) {
     free(config.fd); //array of file descriptors
     free(config.filename); //array of filenames
 }
+
+void dealloc_csr(CSR **csr_mtx, int size) {
+    for(int k = 0; k < size; k++) {
+        if((*csr_mtx)[k].is_int) free((*csr_mtx)[k].mtxi);
+        else free((*csr_mtx)[k].mtxf);
+        free((*csr_mtx)[k].mtx_offset);
+        free((*csr_mtx)[k].mtx_col);
+    }
+}

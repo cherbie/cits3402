@@ -11,7 +11,7 @@
 
 #define NUM_OPERATIONS 5
 #define NUM_OPTIONS 7
-#define MAX_MTX_DIMENSIONS 10 
+#define MAX_MTX_DIMENSIONS 10
 #define BUFFER_SIZE 250
 #define STUDENT_NUMBER "22245091"
 #define NUMBER_OF_INPUT_FILES 2
@@ -49,7 +49,7 @@ typedef struct {
 typedef struct {
     bool is_int;
     int *mtxi; //non-zero values
-    float *mtxf;
+    float *mtxf; //non-zero values
     int *mtx_offset; //stores number of non-zero elements in each row.
     int *mtx_col; //stores the column index of each non-zero element
     int size; //number of non-zero input elements
@@ -100,6 +100,9 @@ extern int read_coo_filei(COO**,int);
 extern int read_coo_filef(COO**, int);
 extern int add_int_coo(COO*,int,int,int,int);
 extern int add_float_coo(COO*,float,int,int,int);
+extern int read_csr_filei(CSR **, int);
+extern int read_csr_filef(CSR**, int);
+extern int add_int_csr(CSR*, int, int, int, int);
 
 
 // -- SYNCHRONOUS --
@@ -114,3 +117,4 @@ extern int log_trace_result(COO*, int*, float*);
 // -- DEALLOC --
 extern void dealloc_coo(COO**,int);
 extern void dealloc_config(void);
+extern void dealloc_csr(CSR**, int);

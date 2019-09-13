@@ -74,6 +74,7 @@ int trace(void) {
         return 0;
     }
     dealloc_coo(&coo_sparse_mtx, num_files);
+    free(coo_sparse_mtx);
     print(" ... finding trace of matrix.");
     return 1;
 }
@@ -130,6 +131,9 @@ int transpose_matrix(void) {
         return 0;
     }
 
+    print("FINISHED READING CSR FILE\n");
+    
+    dealloc_csr(&csr_sparse_mtx, num_files);
     free(csr_sparse_mtx);
 
     print(" ... transposing matrix.");
