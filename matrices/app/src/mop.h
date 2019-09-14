@@ -30,8 +30,6 @@ typedef struct {
     int  num_threads;
     FILE **fd;
     char **filename;
-    //FILE *in2_fd;
-    //char *in2_filename;
     FILE *log_fd;
     char *log_filename;
 } CONFIG;
@@ -56,6 +54,17 @@ typedef struct {
     int row; //number of rows specified by the input file
     int col; //number of columns specified by the input file
 } CSR;
+
+typedef struct {
+    bool is_int;
+    int *mtxi; //non-zero values
+    float * mtxf; //non-zero values
+    int *mtx_offset; //number of non-zero values in each row
+    int *mtx_col; //stores the column index of each non-zero element
+    int size; //number of non-zero input elements
+    int row; //number of rows specified by the input file
+    int col; //nuumber of columns specified by the input file
+} CSS;
 
 //GLOBAL VARIABLES
 CONFIG          config;
@@ -110,6 +119,7 @@ extern int add_float_csr(CSR*, float, int, int, int);
 extern int process_scalar(COO*, float);
 extern int process_trace(COO*,int*,float*);
 extern int process_addition(COO**);
+extern int process_transpose(CSR*, CSS*);
 
 // -- LOGGER --
 extern int log_coo_result(COO*);
@@ -119,3 +129,4 @@ extern int log_trace_result(COO*, int*, float*);
 extern void dealloc_coo(COO**,int);
 extern void dealloc_config(void);
 extern void dealloc_csr(CSR**, int);
+extern void dealloc_css(CSS**, int);

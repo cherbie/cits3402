@@ -131,11 +131,23 @@ int transpose_matrix(void) {
         fprintf(stderr, "Error converting file to sparse matrix form.\n");
         return 0;
     }
+    CSS *css_sparse_mtx;
+    if((css_sparse_mtx = malloc(num_files * sizeof(CSR))) == NULL) {
+        perror(NULL);
+        return 0;
+    }
 
     print("FINISHED READING CSR FILE\n");
 
+    if(!process_transpose(&csr_sparse_mtx[file_id], &css_sparse_mtx[file_id])) {
+        fprintf(stderr, "Error transposing given matrix.\n");
+        return 0;
+    }
+
     dealloc_csr(&csr_sparse_mtx, num_files);
+    dealloc_css(&css_sparse_mtx, num_files);
     free(csr_sparse_mtx);
+    free(css_sparse_mtx);
 
     print(" ... transposing matrix.");
     return 1;

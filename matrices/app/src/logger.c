@@ -40,3 +40,11 @@ int log_trace_result(COO *coo_mtx, int *tracei, float *tracef) {
     print(" --- ");
     return 1;
 }
+
+/**
+ * Log the resulting matrix to stdout or file if specified.
+ * @param css_mtx type CSS
+ */
+int log_transpose_result(CSS * css_mtx) {
+    return 1;
+}
