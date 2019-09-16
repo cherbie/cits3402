@@ -43,20 +43,20 @@ int log_trace_result(COO *coo_mtx, int *tracei, float *tracef) {
 
 /**
  * Log the resulting matrix to stdout or file if specified.
- * @param css_mtx type CSS
+ * @param csr_mtx type CSR
  */
-int log_transpose_result(CSS *css_mtx) {
+int log_csr_result(CSR *csr_mtx) {
     int nz, row_el;
     print(" --- ");
     nz = 0; // index of current nnz element
-    if((*css_mtx).is_int) {
-    	for(int i = 0; i < (*css_mtx).row; i++) { //rows
-            row_el = (*css_mtx).mtx_offset[i];
-            for(int j = 0; j < (*css_mtx).col; j++) {
-                if((*css_mtx).mtx_offset[i] == 0) printf("%i ", 0);
+    if((*csr_mtx).is_int) {
+    	for(int i = 0; i < (*csr_mtx).row; i++) { //rows
+            row_el = (*csr_mtx).mtx_offset[i];
+            for(int j = 0; j < (*csr_mtx).col; j++) {
+                if((*csr_mtx).mtx_offset[i] == 0) printf("%i ", 0);
                 else if(row_el > 0) { // nnz elements left to be 'consumed'
-                    if((*css_mtx).mtx_col[nz] == j) { //the column of the nz element
-                        printf("%i ", (*css_mtx).mtxi[nz++]);
+                    if((*csr_mtx).mtx_col[nz] == j) { //the column of the nz element
+                        printf("%i ", (*csr_mtx).mtxi[nz++]);
                         row_el--;
                     }
                     else { //No non-zero element for this column
@@ -70,13 +70,13 @@ int log_transpose_result(CSS *css_mtx) {
         }
     }
     else {
-    	for(int i = 0; i < (*css_mtx).row; i++) { //rows
-            row_el = (*css_mtx).mtx_offset[i];
-            for(int j = 0; j < (*css_mtx).col; j++) {
-                if((*css_mtx).mtx_offset[i] == 0) printf("%3.2f ", 0.0);
+    	for(int i = 0; i < (*csr_mtx).row; i++) { //rows
+            row_el = (*csr_mtx).mtx_offset[i];
+            for(int j = 0; j < (*csr_mtx).col; j++) {
+                if((*csr_mtx).mtx_offset[i] == 0) printf("%3.2f ", 0.0);
                 else if(row_el > 0) { // nnz elements left to be 'consumed'
-                    if((*css_mtx).mtx_col[nz] == j) { //the column of the nz element
-                        printf("%3.2f ", (*css_mtx).mtxf[nz++]);
+                    if((*csr_mtx).mtx_col[nz] == j) { //the column of the nz element
+                        printf("%3.2f ", (*csr_mtx).mtxf[nz++]);
                         row_el--;
                     }
                     else { //No non-zero element for this column
@@ -92,5 +92,36 @@ int log_transpose_result(CSS *css_mtx) {
     }
     print("\n");
     print(" --- ");
+    return 1;
+}
+
+/**
+ * Log the resulting matrix to stdout or file if specified.
+ * @param csc_mtx type CSC*
+ */
+int log_csc_result(CSC * csc_mtx) {
+    int nz, row_el;
+    print(" --- ");
+    nz = 0; // index of current nnz element
+    if((*csc_mtx).is_int) {
+    	for(int i = 0; i < (*csc_mtx).row; i++) { //rows
+            row_el = (*csc_mtx).mtx_offset[i];
+            for(int j = 0; j < (*csc_mtx).col; j++) {
+                if((*csc_mtx).mtx_offset[i] == 0) printf("%i ", 0);
+                else if(row_el > 0) { // nnz elements left to be 'consumed'
+                    if((*csc_mtx).mtx_col[nz] == j) { //the column of the nz element
+                        printf("%i ", (*csc_mtx).mtxi[nz++]);
+                        row_el--;
+                    }
+                    else { //No non-zero element for this column
+                        printf("%i ", 0);
+                    }
+              	}
+                else {
+                    printf("%i ", 0);
+                }
+           }
+        }
+    }
     return 1;
 }

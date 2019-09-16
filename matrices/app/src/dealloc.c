@@ -43,11 +43,11 @@ void dealloc_csr(CSR **csr_mtx, int size) {
     }
 }
 
-void dealloc_css(CSS **css_mtx, int size) {
+void dealloc_csc(CSC **csc_mtx, int size) {
     for(int k = 0; k < size; k++) {
-        if((*css_mtx)[k].is_int) free((*css_mtx)[k].mtxi);
-        else free((*css_mtx)[k].mtxf);
-        free((*css_mtx)[k].mtx_offset);
-        free((*css_mtx)[k].mtx_col);
+        if((*csc_mtx)[k].is_int) free((*csc_mtx)[k].mtxi);
+        else free((*csc_mtx)[k].mtxf);
+        free((*csc_mtx)[k].mtx_offset);
+        free((*csc_mtx)[k].mtx_col);
     }
 }

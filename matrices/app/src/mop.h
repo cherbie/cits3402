@@ -64,7 +64,7 @@ typedef struct {
     int size; //number of non-zero input elements
     int row; //number of rows specified by the input file
     int col; //nuumber of columns specified by the input file
-} CSS;
+} CSC;
 
 //GLOBAL VARIABLES
 CONFIG          config;
@@ -94,7 +94,7 @@ extern char *str_clean(char*);
 extern void print_coo(COO*);
 extern bool is_defined(COO*, int, int, int);
 extern void print_csr(CSR*);
-extern void print_css(CSS*);
+extern void print_csc(CSC*);
 
 // -- OPERATIONS --
 extern int operation_main(void);
@@ -121,15 +121,16 @@ extern int add_float_csr(CSR*, float, int, int, int);
 extern int process_scalar(COO*, float);
 extern int process_trace(COO*,int*,float*);
 extern int process_addition(COO**);
-extern int process_transpose(CSR*, CSS*);
+extern int process_transpose(CSR*, CSC*);
 
 // -- LOGGER --
 extern int log_coo_result(COO*);
 extern int log_trace_result(COO*, int*, float*);
-extern int log_transpose_result(CSS *);
+extern int log_csr_result(CSR *);
+extern int log_csc_result(CSC *);
 
 // -- DEALLOC --
 extern void dealloc_coo(COO**,int);
 extern void dealloc_config(void);
 extern void dealloc_csr(CSR**, int);
-extern void dealloc_css(CSS**, int);
+extern void dealloc_csc(CSC**, int);
