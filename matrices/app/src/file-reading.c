@@ -241,7 +241,7 @@ int read_csr_filei(CSR **csr_mtx, int k) {
     (*csr_mtx)[k].size = 0; //no elements
     (*csr_mtx)[k].mtxi = malloc(1 * sizeof(int));
     (*csr_mtx)[k].mtx_col = malloc(1 * sizeof(int));
-    (*csr_mtx)[k].mtx_offset = calloc(((*csr_mtx)[k].row + 1), sizeof(int)); //offset size defined
+    (*csr_mtx)[k].mtx_offset = calloc((*csr_mtx)[k].row, sizeof(int)); //offset size defined
     int num = (*csr_mtx)[k].row * (*csr_mtx)[k].col; //number of matrix elements
     for(int i = 0; i < num; i++) {
         fscanf(config.fd[k], "%i", &val);
@@ -278,7 +278,7 @@ int read_csr_filef(CSR **csr_mtx, int k) {
     (*csr_mtx)[k].size = 0; //no elements
     (*csr_mtx)[k].mtxf = malloc(1 * sizeof(float));
     (*csr_mtx)[k].mtx_col = malloc(1 * sizeof(int));
-    (*csr_mtx)[k].mtx_offset = calloc(((*csr_mtx)[k].row + 1), sizeof(int)); //offset size defined
+    (*csr_mtx)[k].mtx_offset = calloc((*csr_mtx)[k].row, sizeof(int)); //offset size defined
     int num = (*csr_mtx)[k].row * (*csr_mtx)[k].col; //number of matrix elements
     for(int i = 0; i < num; i++) {
         fscanf(config.fd[k], "%f", &val);
@@ -310,14 +310,14 @@ int read_csr_filef(CSR **csr_mtx, int k) {
  */
 int add_int_csr(CSR *csr_mtx, int val, int row, int col, int count) {
     (*csr_mtx).mtxi[count] = val;
-    (*csr_mtx).mtx_offset[row + 1] += 1;
+    (*csr_mtx).mtx_offset[row] += 1;
     (*csr_mtx).mtx_col[count] = col;
     return 1;
 }
 
 int add_float_csr(CSR *csr_mtx, float val, int row, int col, int count) {
     (*csr_mtx).mtxf[count] = val;
-    (*csr_mtx).mtx_offset[row + 1] += 1;
+    (*csr_mtx).mtx_offset[row] += 1;
     (*csr_mtx).mtx_col[count] = col;
     return 1;
 }

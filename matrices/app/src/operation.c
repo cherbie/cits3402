@@ -136,11 +136,20 @@ int transpose_matrix(void) {
         perror(NULL);
         return 0;
     }
-
+    print_csr(&csr_sparse_mtx[file_id]); //debugging
     print("FINISHED READING CSR FILE\n");
 
     if(!process_transpose(&csr_sparse_mtx[file_id], &css_sparse_mtx[file_id])) {
         fprintf(stderr, "Error transposing given matrix.\n");
+        return 0;
+    }
+
+    print_css(&css_sparse_mtx[file_id]);
+
+    printf("memcompare = %i\n", memcmp(&csr_sparse_mtx[file_id], &css_sparse_mtx[file_id], csr_sparse_mtx[file_id].size));
+
+    if(!log_transpose_result(&(css_sparse_mtx)[file_id])) {
+        fprintf(stderr, "Error logging transposed matrix to file.\n");
         return 0;
     }
 

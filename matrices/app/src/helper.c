@@ -96,6 +96,30 @@ void print_coo(COO *coo_mtx) {
     print(" --- ");
 }
 
+void print_csr(CSR *csr_mtx) {
+    print(" --- ");
+    printf("rows = %i\n", (*csr_mtx).row);
+    printf("cols = %i\n", (*csr_mtx).col);
+    printf("size = %i\n", (*csr_mtx).size);
+    for(int i = 0; i < (*csr_mtx).size; i++) {
+        printf("%i", (int)(*csr_mtx).mtxi[i]);
+        print("\n");
+    }
+    print(" --- ");
+}
+
+void print_css(CSS *css_mtx) {
+    print(" --- ");
+    printf("rows = %i\n", (*css_mtx).row);
+    printf("cols = %i\n", (*css_mtx).col);
+    printf("size = %i\n", (*css_mtx).size);
+    for(int i = 0; i < (*css_mtx).size; i++) {
+        printf("%i", (int)(*css_mtx).mtxi[i]);
+        print("\n");
+    }
+    print(" --- ");
+}
+
 /**
  * Calculates whether the COO struct has a non-zero value defined for a particular row & column in a block
  * @returns true if a non-zero value is defined, false otherwise.

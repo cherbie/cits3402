@@ -93,6 +93,8 @@ extern void print(char *);
 extern char *str_clean(char*);
 extern void print_coo(COO*);
 extern bool is_defined(COO*, int, int, int);
+extern void print_csr(CSR*);
+extern void print_css(CSS*);
 
 // -- OPERATIONS --
 extern int operation_main(void);
@@ -124,6 +126,7 @@ extern int process_transpose(CSR*, CSS*);
 // -- LOGGER --
 extern int log_coo_result(COO*);
 extern int log_trace_result(COO*, int*, float*);
+extern int log_transpose_result(CSS *);
 
 // -- DEALLOC --
 extern void dealloc_coo(COO**,int);
