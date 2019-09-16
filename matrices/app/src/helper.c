@@ -101,9 +101,17 @@ void print_csr(CSR *csr_mtx) {
     printf("rows = %i\n", (*csr_mtx).row);
     printf("cols = %i\n", (*csr_mtx).col);
     printf("size = %i\n", (*csr_mtx).size);
-    for(int i = 0; i < (*csr_mtx).size; i++) {
-        printf("%i", (int)(*csr_mtx).mtxi[i]);
-        print("\n");
+    if((*csr_mtx).is_int) {
+        for(int i = 0; i < (*csr_mtx).size; i++) {
+            printf("%i", (int)(*csr_mtx).mtxi[i]);
+            print("\n");
+        }
+    }
+    else {
+        for(int i = 0; i < (*csr_mtx).size; i++) {
+            printf("%3.2f", (*csr_mtx).mtxf[i]);
+            print("\n");
+        }
     }
     print(" --- ");
 }
@@ -113,9 +121,17 @@ void print_css(CSS *css_mtx) {
     printf("rows = %i\n", (*css_mtx).row);
     printf("cols = %i\n", (*css_mtx).col);
     printf("size = %i\n", (*css_mtx).size);
-    for(int i = 0; i < (*css_mtx).size; i++) {
-        printf("%i", (int)(*css_mtx).mtxi[i]);
-        print("\n");
+    if((*css_mtx).is_int) {
+        for(int i = 0; i < (*css_mtx).size; i++) {
+            printf("%i", (int)(*css_mtx).mtxi[i]);
+            print("\n");
+        }
+    }
+    else {
+        for(int i = 0; i < (*css_mtx).size; i++) {
+            printf("%3.2f", (*css_mtx).mtxf[i]);
+            print("\n");
+        }
     }
     print(" --- ");
 }

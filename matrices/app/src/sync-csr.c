@@ -25,7 +25,7 @@ int process_transpose(CSR *csr_mtx, CSS *css_mtx) {
              return 0;
          }
          memcpy((*css_mtx).mtxi, (*csr_mtx).mtxi, (*css_mtx).size * sizeof(int));
-         memcpy((*css_mtx).mtx_offset, (*csr_mtx).mtx_offset, (*css_mtx).size * sizeof(int));
+         memcpy((*css_mtx).mtx_offset, (*csr_mtx).mtx_offset, (*css_mtx).row * sizeof(int));
          memcpy((*css_mtx).mtx_col, (*csr_mtx).mtx_col, (*css_mtx).size * sizeof(int));
          return 1;
      }
@@ -37,9 +37,9 @@ int process_transpose(CSR *csr_mtx, CSS *css_mtx) {
              perror("function: process_transpose()");
              return 0;
          }
-         memcpy((*css_mtx).mtxf, (*csr_mtx).mtxf, (*css_mtx).size);
-         memcpy((*css_mtx).mtx_offset, (*csr_mtx).mtx_offset, (*css_mtx).row);
-         memcpy((*css_mtx).mtx_col, (*csr_mtx).mtx_col, (*css_mtx).size);
+         memcpy((*css_mtx).mtxf, (*csr_mtx).mtxf, (*css_mtx).size * sizeof(float));
+         memcpy((*css_mtx).mtx_offset, (*csr_mtx).mtx_offset, (*css_mtx).row * sizeof(int));
+         memcpy((*css_mtx).mtx_col, (*csr_mtx).mtx_col, (*css_mtx).size * sizeof(int));
          return 1;
      }
 }

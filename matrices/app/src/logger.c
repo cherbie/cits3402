@@ -49,23 +49,46 @@ int log_transpose_result(CSS *css_mtx) {
     int nz, row_el;
     print(" --- ");
     nz = 0; // index of current nnz element
-    for(int i = 0; i < (*css_mtx).row; i++) { //rows
-        row_el = (*css_mtx).mtx_offset[i];
-        for(int j = 0; j < (*css_mtx).col; j++) {
-            if((*css_mtx).mtx_offset[i] == 0) printf("%i ", 0);
-            else if(row_el > 0) { // nnz elements left to be 'consumed'
-                if((*css_mtx).mtx_col[nz] == j) { //the column of the nz element
-                    printf("%i ", (*css_mtx).mtxi[nz++]);
-                    row_el--;
-                }
-                else { //No non-zero element for this column
+    if((*css_mtx).is_int) {
+    	for(int i = 0; i < (*css_mtx).row; i++) { //rows
+            row_el = (*css_mtx).mtx_offset[i];
+            for(int j = 0; j < (*css_mtx).col; j++) {
+                if((*css_mtx).mtx_offset[i] == 0) printf("%i ", 0);
+                else if(row_el > 0) { // nnz elements left to be 'consumed'
+                    if((*css_mtx).mtx_col[nz] == j) { //the column of the nz element
+                        printf("%i ", (*css_mtx).mtxi[nz++]);
+                        row_el--;
+                    }
+                    else { //No non-zero element for this column
+                        printf("%i ", 0);
+                    }
+              	}
+                else {
                     printf("%i ", 0);
                 }
-            }
-            else {
-                printf("%i ", 0);
-            }
+           }
         }
+    }
+    else {
+    	for(int i = 0; i < (*css_mtx).row; i++) { //rows
+            row_el = (*css_mtx).mtx_offset[i];
+            for(int j = 0; j < (*css_mtx).col; j++) {
+                if((*css_mtx).mtx_offset[i] == 0) printf("%3.2f ", 0.0);
+                else if(row_el > 0) { // nnz elements left to be 'consumed'
+                    if((*css_mtx).mtx_col[nz] == j) { //the column of the nz element
+                        printf("%3.2f ", (*css_mtx).mtxf[nz++]);
+                        row_el--;
+                    }
+                    else { //No non-zero element for this column
+                        printf("%3.2f ", 0.0);
+                    }
+              	}
+                else {
+                    printf("%3.2f ", 0.0);
+                }
+           }
+        }
+
     }
     print("\n");
     print(" --- ");

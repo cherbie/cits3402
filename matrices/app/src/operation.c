@@ -138,7 +138,6 @@ int transpose_matrix(void) {
     }
     print_csr(&csr_sparse_mtx[file_id]); //debugging
     print("FINISHED READING CSR FILE\n");
-
     if(!process_transpose(&csr_sparse_mtx[file_id], &css_sparse_mtx[file_id])) {
         fprintf(stderr, "Error transposing given matrix.\n");
         return 0;
