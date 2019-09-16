@@ -48,6 +48,6 @@ void dealloc_csc(CSC **csc_mtx, int size) {
         if((*csc_mtx)[k].is_int) free((*csc_mtx)[k].mtxi);
         else free((*csc_mtx)[k].mtxf);
         free((*csc_mtx)[k].mtx_offset);
-        free((*csc_mtx)[k].mtx_col);
+        free((*csc_mtx)[k].mtx_row);
     }
 }

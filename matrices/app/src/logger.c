@@ -99,29 +99,50 @@ int log_csr_result(CSR *csr_mtx) {
  * Log the resulting matrix to stdout or file if specified.
  * @param csc_mtx type CSC*
  */
-int log_csc_result(CSC * csc_mtx) {
-    int nz, row_el;
+int log_csc_result(CSC *csc_mtx) {
+    int n, col, index, row;
+    n = (*csc_mtx).row * (*csc_mtx).col;
     print(" --- ");
-    nz = 0; // index of current nnz element
+    int num_nz = (*csc_mtx).size;
+    bool *seen = calloc(num_nz, sizeof(bool)); //non-zero elements seen (true); not-seen (false)
+    if(!seen[1]) printf("%s\n", "FALSE");
+    index = 0;
     if((*csc_mtx).is_int) {
-    	for(int i = 0; i < (*csc_mtx).row; i++) { //rows
-            row_el = (*csc_mtx).mtx_offset[i];
-            for(int j = 0; j < (*csc_mtx).col; j++) {
-                if((*csc_mtx).mtx_offset[i] == 0) printf("%i ", 0);
-                else if(row_el > 0) { // nnz elements left to be 'consumed'
-                    if((*csc_mtx).mtx_col[nz] == j) { //the column of the nz element
-                        printf("%i ", (*csc_mtx).mtxi[nz++]);
-                        row_el--;
-                    }
-                    else { //No non-zero element for this column
-                        printf("%i ", 0);
-                    }
-              	}
-                else {
+    	for(int i = 0; i < n; i++) {
+            col = i / (*csc_mtx).col; //the elements column index
+            row = i % (*csc_mtx).row; //the elements row index
+            if((*csc_mtx).mtx_offset[col] == 0) {
+                printf("%i ", 0);
+                continue;
+            }
+            else { //offset has value
+                index = get_non_zero_csc(&(*csc_mtx), &seen, col, row); // O(N)
+                if(index < 0) {
                     printf("%i ", 0);
+                    continue;
                 }
+                printf("%i ", (*csc_mtx).mtxi[index]);
            }
         }
     }
+    else {
+        for(int i = 0; i < n; i++) {
+            col = i / (*csc_mtx).col; //the elements column index
+            row = i % (*csc_mtx).row; //the elements row index
+            if((*csc_mtx).mtx_offset[col] == 0.0) {
+                printf("%3.2f ", 0.0);
+                continue;
+            }
+            else { //offset has value
+                index = get_non_zero_csc(&(*csc_mtx), &seen, col, row); // O(N)
+                if(index < 0) {
+                    printf("%3.2f ", 0.0);
+                    continue;
+                }
+                printf("%3.2f ", (*csc_mtx).mtxf[index]);
+           }
+        }
+    }
+    printf("\n");
     return 1;
 }

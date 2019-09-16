@@ -58,9 +58,9 @@ typedef struct {
 typedef struct {
     bool is_int;
     int *mtxi; //non-zero values
-    float * mtxf; //non-zero values
+    float *mtxf; //non-zero values
     int *mtx_offset; //number of non-zero values in each row
-    int *mtx_col; //stores the column index of each non-zero element
+    int *mtx_row; //stores the column index of each non-zero element
     int size; //number of non-zero input elements
     int row; //number of rows specified by the input file
     int col; //nuumber of columns specified by the input file
@@ -95,6 +95,7 @@ extern void print_coo(COO*);
 extern bool is_defined(COO*, int, int, int);
 extern void print_csr(CSR*);
 extern void print_csc(CSC*);
+extern int get_non_zero_csc(CSC*, bool**, int, int);
 
 // -- OPERATIONS --
 extern int operation_main(void);

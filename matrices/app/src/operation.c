@@ -145,7 +145,7 @@ int transpose_matrix(void) {
 
     print_csc(&csc_sparse_mtx[file_id]);
 
-    printf("memcompare = %i\n", memcmp(&csr_sparse_mtx[file_id], &csc_sparse_mtx[file_id], csr_sparse_mtx[file_id].size));
+    printf("memcompare = %i\n", memcmp(&csr_sparse_mtx[file_id].mtxi, &csc_sparse_mtx[file_id].mtxi, csc_sparse_mtx[file_id].size * sizeof(int)));
 
     if(!log_csc_result(&(csc_sparse_mtx)[file_id])) {
         fprintf(stderr, "Error logging transposed matrix to file.\n");

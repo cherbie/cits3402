@@ -116,6 +116,9 @@ void print_csr(CSR *csr_mtx) {
     print(" --- ");
 }
 
+/**
+ * Debugging function.
+ */
 void print_csc(CSC *csc_mtx) {
     print(" --- ");
     printf("rows = %i\n", (*csc_mtx).row);
@@ -123,7 +126,7 @@ void print_csc(CSC *csc_mtx) {
     printf("size = %i\n", (*csc_mtx).size);
     if((*csc_mtx).is_int) {
         for(int i = 0; i < (*csc_mtx).size; i++) {
-            printf("%i", (int)(*csc_mtx).mtxi[i]);
+            printf("%i", (*csc_mtx).mtxi[i]);
             print("\n");
         }
     }
@@ -149,4 +152,26 @@ bool is_defined(COO *coo_mtx, int row, int col, int block) {
         if((*coo_mtx).mtxf[block][0] == row && (*coo_mtx).mtxf[block][1] == col) return true;
         else return false;
     }
+}
+
+/**
+ * O(n) lookup.
+ * @param *csc_mtx CSC struct *
+ * @param *seen boolean is nz seen.
+ * @param col int for the column underquestion.
+ * @returns the index of the non-zero element or -1 if non-exists.
+ */
+int get_non_zero_csc(CSC *csc_mtx, bool **seen, int col, int row) {
+    int start_index = 0;
+    int index = 0;
+    for(int i = 0; i < col; i++) start_index += (*csc_mtx).mtx_offset[i];
+    for(int i = 0; i < (*csc_mtx).mtx_offset[col]; i++) {
+        index = start_index + i;
+        if((*csc_mtx).mtx_row[index] != row) continue; //row index of nz value does not equal row under question
+        if(!(*seen)[index]) {
+            (*seen)[index] = true;
+            return index;
+        }
+    }
+    return -1;
 }
