@@ -43,3 +43,15 @@ int process_transpose(CSR *csr_mtx, CSC *csc_mtx) {
          return 1;
      }
 }
+
+/**
+ * Performs matrix multiplcation on given arguments 1 & 2.
+ * Stores the resulting matrix in argument 0.
+ * @param res_mtx CSC* resulting matrix stored in CSC struct.
+ * @param csr_mtx CSR* the first matrix given.
+ * @param csc_mtx CSC* the second matrix given.
+ * @return 1 to indicate success and zero to indicate failure.
+ */
+int process_multiplication(CSC *res_mtx, CSR *csr_mtx, CSC *csc_mtx) {
+    return 1;
+}

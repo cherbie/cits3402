@@ -171,8 +171,8 @@ int transpose_matrix(void) {
  * Return 1 to indicate success and 0 to indicate failure.
  */
 int matrix_mp(void) {
-    const int num_csr = 2;
-    const int num_csc = 1;
+    const int num_csr = 1;
+    const int num_csc = 2;
     int csr_id = 0;
     int csc_id = 0;
     int file_id = 0;
@@ -199,6 +199,13 @@ int matrix_mp(void) {
     }
     print_csc(&csc_sparse_mtx[csc_id]);
     print(" ... Completed reading matrix into sparse matrix representations.");
+
+    if(!process_multiplication(&csc_sparse_mtx[1], &csr_sparse_mtx[0], &csc_sparse_mtx[0])) {
+        fprintf(stderr, "Error performing matrix multiplication on given matrix.\n");
+        return 0;
+    }
+
+    print(" ... Completed matrix multiplication calculation.");
 
     dealloc_csr(&csr_sparse_mtx, num_csr);
     dealloc_csc(&csc_sparse_mtx, num_csc);
