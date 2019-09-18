@@ -104,8 +104,16 @@ void print_csr(CSR *csr_mtx) {
     if((*csr_mtx).is_int) {
         for(int i = 0; i < (*csr_mtx).size; i++) {
             printf("%i", (int)(*csr_mtx).mtxi[i]);
-            print("\n");
         }
+        printf("\n");
+        for(int i = 0; i <= (*csr_mtx).row; i++) {
+            printf("%i", (int)(*csr_mtx).mtx_offset[i]);
+        }
+        printf("\n");
+        for(int i = 0; i < (*csr_mtx).size; i++) {
+            printf("%i", (int)(*csr_mtx).mtx_col[i]);
+        }
+        printf("\n");
     }
     else {
         for(int i = 0; i < (*csr_mtx).size; i++) {
@@ -127,8 +135,16 @@ void print_csc(CSC *csc_mtx) {
     if((*csc_mtx).is_int) {
         for(int i = 0; i < (*csc_mtx).size; i++) {
             printf("%i", (*csc_mtx).mtxi[i]);
-            print("\n");
         }
+        printf("\n");
+        for(int i = 0; i <= (*csc_mtx).col; i++) {
+            printf("%i", (*csc_mtx).mtx_offset[i]);
+        }
+        printf("\n");
+        for(int i = 0; i < (*csc_mtx).size; i++) {
+            printf("%i", (*csc_mtx).mtx_row[i]);
+        }
+        printf("\n");
     }
     else {
         for(int i = 0; i < (*csc_mtx).size; i++) {

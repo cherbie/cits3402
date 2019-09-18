@@ -61,7 +61,7 @@ int process_multiplication(CSC *res_mtx, CSR *csr_mtx, CSC *csc_mtx) {
     (*res_mtx).col = (*csc_mtx).col;
     if(!(*csr_mtx).is_int || !(*csc_mtx).is_int) (*res_mtx).is_int = false;
     else (*res_mtx).is_int = true;
-    int num_csr_nz, num_csc_nz, sum_csr_nz, sum_csc_nz, index_csr, index_csc, csc, sum;
+    int num_csr_nz, num_csc_nz, sum_csr_nz, sum_csc_nz, index_csr, index_csc, csr, csc, sum;
     num_csr_nz = 0; num_csc_nz = 0; sum_csr_nz = 0; sum_csc_nz = 0;
     if((*res_mtx).is_int) {
         (*res_mtx).mtxi = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int)); //maximum size
@@ -83,19 +83,20 @@ int process_multiplication(CSC *res_mtx, CSR *csr_mtx, CSC *csc_mtx) {
                 num_csc_nz = (*csc_mtx).mtx_offset[j-1];
                 sum_csc_nz += num_csc_nz;
                 num_csc_nz = (*csc_mtx).mtx_offset[j];
-                csc = 0; sum = 0; //row and column under inspection respectively
+                csr = 0; csc = 0; sum = 0; //row and column under inspection respectively
                 if(num_csr_nz == 0 || num_csc_nz == 0) continue; // resultant offset = 0;
                 for(int k = 0; k < (*csc_mtx).row; k++) {
-                    index_csr = (sum_csr_nz) + k;
-                    index_csc = sum_csc_nz + k;
+                    index_csr = (sum_csr_nz) + csr;
+                    index_csc = sum_csc_nz + csc;
                     printf(" ---> %i & %i\n",index_csr, index_csc);
                     printf(" ---> %i & %i\n", (*csr_mtx).mtx_col[index_csr], (*csc_mtx).mtx_row[index_csc]);
                     if((*csr_mtx).mtx_col[index_csr] == (*csc_mtx).mtx_row[index_csc]) { //nz element column matches row
                         sum += (*csr_mtx).mtxi[index_csr] * (*csc_mtx).mtxi[index_csc];
-                        printf("Multiplication ==> %i x %i = #NUM\n", (*csr_mtx).mtxi[index_csr], (*csc_mtx).mtxi[index_csc]);
-                        csc++;
+                        printf("Multiplication ==> %i x %i = %i\n", (*csr_mtx).mtxi[index_csr], (*csc_mtx).mtxi[index_csc], sum);
                     }
-                    if(csc >= num_csc_nz) break;
+                    if((*csr_mtx).mtx_col[index_csr] == k) csr++;
+                    if((*csc_mtx).mtx_row[index_csc] == k) csc++;
+                    if(csc >= num_csc_nz || csr >= num_csr_nz) break;
                 }
                 //store sum;
                 if(sum != 0) {
