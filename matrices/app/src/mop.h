@@ -48,7 +48,7 @@ typedef struct {
     bool is_int;
     int *mtxi; //non-zero values
     float *mtxf; //non-zero values
-    int *mtx_offset; //stores number of non-zero elements in each row.
+    int *mtx_offset; //stores number of non-zero elements in each row. (convention index[0] = 0)
     int *mtx_col; //stores the column index of each non-zero element
     int size; //number of non-zero input elements
     int row; //number of rows specified by the input file
@@ -59,7 +59,7 @@ typedef struct {
     bool is_int;
     int *mtxi; //non-zero values
     float *mtxf; //non-zero values
-    int *mtx_offset; //number of non-zero values in each row
+    int *mtx_offset; //number of non-zero values in each row (convention index[0] = 0)
     int *mtx_row; //stores the column index of each non-zero element
     int size; //number of non-zero input elements
     int row; //number of rows specified by the input file

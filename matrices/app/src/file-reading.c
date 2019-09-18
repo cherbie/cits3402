@@ -220,6 +220,7 @@ int read_to_csr(CSR **sparse_mtx, int k, int fid) {
             return 0;
         }
     }
+    free(buffer);
     // -- READ MATRIX VALUES --
     if((*sparse_mtx)[k].is_int) {
         if(!read_csr_filei(sparse_mtx, k, fid)) return 0;
@@ -241,7 +242,11 @@ int read_csr_filei(CSR **csr_mtx, int k, int fid) {
     (*csr_mtx)[k].size = 0; //no elements
     (*csr_mtx)[k].mtxi = malloc(1 * sizeof(int));
     (*csr_mtx)[k].mtx_col = malloc(1 * sizeof(int));
-    (*csr_mtx)[k].mtx_offset = calloc((*csr_mtx)[k].row, sizeof(int)); //offset size defined
+    (*csr_mtx)[k].mtx_offset = calloc((*csr_mtx)[k].row+1, sizeof(int)); //offset size defined
+    if((*csr_mtx)[k].mtxi == NULL || (*csr_mtx)[k].mtx_col == NULL || (*csr_mtx)[k].mtx_offset == NULL) {
+        perror("function: read_csr_filei()");
+        return 0;
+    }
     int num = (*csr_mtx)[k].row * (*csr_mtx)[k].col; //number of matrix elements
     for(int i = 0; i < num; i++) {
         fscanf(config.fd[fid], "%i", &val);
@@ -278,7 +283,11 @@ int read_csr_filef(CSR **csr_mtx, int k, int fid) {
     (*csr_mtx)[k].size = 0; //no elements
     (*csr_mtx)[k].mtxf = malloc(1 * sizeof(float));
     (*csr_mtx)[k].mtx_col = malloc(1 * sizeof(int));
-    (*csr_mtx)[k].mtx_offset = calloc((*csr_mtx)[k].row, sizeof(int)); //offset size defined
+    (*csr_mtx)[k].mtx_offset = calloc((*csr_mtx)[k].row+1, sizeof(int)); //offset size defined
+    if((*csr_mtx)[k].mtxf == NULL || (*csr_mtx)[k].mtx_col == NULL || (*csr_mtx)[k].mtx_offset == NULL) {
+        perror("function: read_csr_filef()");
+        return 0;
+    }
     int num = (*csr_mtx)[k].row * (*csr_mtx)[k].col; //number of matrix elements
     for(int i = 0; i < num; i++) {
         fscanf(config.fd[fid], "%f", &val);
@@ -310,14 +319,14 @@ int read_csr_filef(CSR **csr_mtx, int k, int fid) {
  */
 int add_int_csr(CSR *csr_mtx, int val, int row, int col, int count) {
     (*csr_mtx).mtxi[count] = val;
-    (*csr_mtx).mtx_offset[row] += 1;
+    (*csr_mtx).mtx_offset[row + 1] += 1;
     (*csr_mtx).mtx_col[count] = col;
     return 1;
 }
 
 int add_float_csr(CSR *csr_mtx, float val, int row, int col, int count) {
     (*csr_mtx).mtxf[count] = val;
-    (*csr_mtx).mtx_offset[row] += 1;
+    (*csr_mtx).mtx_offset[row + 1] += 1;
     (*csr_mtx).mtx_col[count] = col;
     return 1;
 }
@@ -364,6 +373,7 @@ int read_to_csc(CSC **sparse_mtx, int k, int fid) {
             return 0;
         }
     }
+    free(buffer);
     // -- READ MATRIX VALUES --
     if((*sparse_mtx)[k].is_int) {
         if(!read_csc_filei(sparse_mtx, k, fid)) return 0;
@@ -385,7 +395,11 @@ int read_csc_filei(CSC **csc_mtx, int k, int fid) {
     (*csc_mtx)[k].size = 0; //no elements
     (*csc_mtx)[k].mtxi = malloc(1 * sizeof(int));
     (*csc_mtx)[k].mtx_row = malloc(1 * sizeof(int));
-    (*csc_mtx)[k].mtx_offset = calloc((*csc_mtx)[k].row, sizeof(int)); //offset size defined
+    (*csc_mtx)[k].mtx_offset = calloc((*csc_mtx)[k].col + 1, sizeof(int)); //offset size defined
+    if((*csc_mtx)[k].mtxi == NULL || (*csc_mtx)[k].mtx_row == NULL || (*csc_mtx)[k].mtx_offset == NULL) {
+        perror("function: read_csc_filei()");
+        return 0;
+    }
     int num = (*csc_mtx)[k].row * (*csc_mtx)[k].col; //number of matrix elements
     for(int i = 0; i < num; i++) {
         fscanf(config.fd[fid], "%i", &val);
@@ -420,7 +434,11 @@ int read_csc_filef(CSC **csc_mtx, int k, int fid) {
     (*csc_mtx)[k].size = 0; //no elements
     (*csc_mtx)[k].mtxf = malloc(1 * sizeof(float));
     (*csc_mtx)[k].mtx_row = malloc(1 * sizeof(int));
-    (*csc_mtx)[k].mtx_offset = calloc((*csc_mtx)[k].row, sizeof(int)); //offset size defined
+    (*csc_mtx)[k].mtx_offset = calloc((*csc_mtx)[k].col + 1, sizeof(int)); //offset size defined
+    if((*csc_mtx)[k].mtxf == NULL || (*csc_mtx)[k].mtx_row == NULL || (*csc_mtx)[k].mtx_offset == NULL) {
+        perror("function: read_csc_filef()");
+        return 0;
+    }
     int num = (*csc_mtx)[k].row * (*csc_mtx)[k].col; //number of matrix elements
     for(int i = 0; i < num; i++) {
         fscanf(config.fd[fid], "%f", &val);
@@ -450,7 +468,7 @@ int read_csc_filef(CSC **csc_mtx, int k, int fid) {
  */
 int add_int_csc(CSC *csc_mtx, int val, int row, int col, int count) {
     (*csc_mtx).mtxi[count] = val;
-    (*csc_mtx).mtx_offset[col] += 1;
+    (*csc_mtx).mtx_offset[col + 1] += 1;
     (*csc_mtx).mtx_row[count] = col;
     return 1;
 }
@@ -461,7 +479,7 @@ int add_int_csc(CSC *csc_mtx, int val, int row, int col, int count) {
  */
 int add_float_csc(CSC *csc_mtx, float val, int row, int col, int count) {
     (*csc_mtx).mtxf[count] = val;
-    (*csc_mtx).mtx_offset[col] += 1;
+    (*csc_mtx).mtx_offset[col + 1] += 1;
     (*csc_mtx).mtx_row[count] = col;
     return 1;
 }

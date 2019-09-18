@@ -51,9 +51,9 @@ int log_csr_result(CSR *csr_mtx) {
     nz = 0; // index of current nnz element
     if((*csr_mtx).is_int) {
     	for(int i = 0; i < (*csr_mtx).row; i++) { //rows
-            row_el = (*csr_mtx).mtx_offset[i];
+            row_el = (*csr_mtx).mtx_offset[i+1]; //convention offset;
             for(int j = 0; j < (*csr_mtx).col; j++) {
-                if((*csr_mtx).mtx_offset[i] == 0) printf("%i ", 0);
+                if((*csr_mtx).mtx_offset[i+1] == 0) printf("%i ", 0);
                 else if(row_el > 0) { // nnz elements left to be 'consumed'
                     if((*csr_mtx).mtx_col[nz] == j) { //the column of the nz element
                         printf("%i ", (*csr_mtx).mtxi[nz++]);
@@ -71,9 +71,9 @@ int log_csr_result(CSR *csr_mtx) {
     }
     else {
     	for(int i = 0; i < (*csr_mtx).row; i++) { //rows
-            row_el = (*csr_mtx).mtx_offset[i];
+            row_el = (*csr_mtx).mtx_offset[i+1]; //convention offset
             for(int j = 0; j < (*csr_mtx).col; j++) {
-                if((*csr_mtx).mtx_offset[i] == 0) printf("%3.2f ", 0.0);
+                if((*csr_mtx).mtx_offset[i+1] == 0) printf("%3.2f ", 0.0);
                 else if(row_el > 0) { // nnz elements left to be 'consumed'
                     if((*csr_mtx).mtx_col[nz] == j) { //the column of the nz element
                         printf("%3.2f ", (*csr_mtx).mtxf[nz++]);
@@ -112,7 +112,7 @@ int log_csc_ts_result(CSC *csc_mtx) {
     	for(int i = 0; i < n; i++) {
             col = i % (*csc_mtx).col; //the elements column index
             row = i / (*csc_mtx).row; //the elements row index
-            if((*csc_mtx).mtx_offset[col] == 0) {
+            if((*csc_mtx).mtx_offset[col + 1] == 0) {
                 printf("%i ", 0);
                 continue;
             }
@@ -130,7 +130,7 @@ int log_csc_ts_result(CSC *csc_mtx) {
         for(int i = 0; i < n; i++) {
             col = i % (*csc_mtx).col; //the elements column index
             row = i / (*csc_mtx).row; //the elements row index
-            if((*csc_mtx).mtx_offset[col] == 0.0) {
+            if((*csc_mtx).mtx_offset[col + 1] == 0.0) {
                 printf("%3.2f ", 0.0);
                 continue;
             }
