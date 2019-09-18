@@ -207,6 +207,8 @@ int matrix_mp(void) {
 
     print(" ... Completed matrix multiplication calculation.");
 
+    print_csc(&csc_sparse_mtx[1]); //print resultant info
+
     dealloc_csr(&csr_sparse_mtx, num_csr);
     dealloc_csc(&csc_sparse_mtx, num_csc);
     free(csr_sparse_mtx);
