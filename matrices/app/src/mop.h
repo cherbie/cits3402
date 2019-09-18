@@ -133,7 +133,7 @@ extern int process_transpose(CSR*, CSC*);
 extern int log_coo_result(COO*);
 extern int log_trace_result(COO*, int*, float*);
 extern int log_csr_result(CSR *);
-extern int log_csc_result(CSC *);
+extern int log_csc_ts_result(CSC *);
 
 // -- DEALLOC --
 extern void dealloc_coo(COO**,int);

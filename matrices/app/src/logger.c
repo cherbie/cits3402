@@ -97,9 +97,10 @@ int log_csr_result(CSR *csr_mtx) {
 
 /**
  * Log the resulting matrix to stdout or file if specified.
+ * Reads a CSC struct values as a CSR struct.
  * @param csc_mtx type CSC*
  */
-int log_csc_result(CSC *csc_mtx) {
+int log_csc_ts_result(CSC *csc_mtx) {
     int n, col, index, row;
     n = (*csc_mtx).row * (*csc_mtx).col;
     print(" --- ");
@@ -109,8 +110,8 @@ int log_csc_result(CSC *csc_mtx) {
     index = 0;
     if((*csc_mtx).is_int) {
     	for(int i = 0; i < n; i++) {
-            col = i / (*csc_mtx).col; //the elements column index
-            row = i % (*csc_mtx).row; //the elements row index
+            col = i % (*csc_mtx).col; //the elements column index
+            row = i / (*csc_mtx).row; //the elements row index
             if((*csc_mtx).mtx_offset[col] == 0) {
                 printf("%i ", 0);
                 continue;
@@ -127,8 +128,8 @@ int log_csc_result(CSC *csc_mtx) {
     }
     else {
         for(int i = 0; i < n; i++) {
-            col = i / (*csc_mtx).col; //the elements column index
-            row = i % (*csc_mtx).row; //the elements row index
+            col = i % (*csc_mtx).col; //the elements column index
+            row = i / (*csc_mtx).row; //the elements row index
             if((*csc_mtx).mtx_offset[col] == 0.0) {
                 printf("%3.2f ", 0.0);
                 continue;

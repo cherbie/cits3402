@@ -153,7 +153,7 @@ int transpose_matrix(void) {
 
     printf("memcompare = %i\n", memcmp(&csr_sparse_mtx[csr_id].mtxi, &csc_sparse_mtx[csc_id].mtxi, csc_sparse_mtx[csc_id].size * sizeof(int)));
 
-    if(!log_csc_result(&(csc_sparse_mtx)[csc_id])) {
+    if(!log_csc_ts_result(&(csc_sparse_mtx)[csc_id])) {
         fprintf(stderr, "Error logging transposed matrix to file.\n");
         return 0;
     }
