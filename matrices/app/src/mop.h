@@ -106,16 +106,21 @@ extern int transpose_matrix(void);
 extern int matrix_mp(void);
 
 // -- FILE READING --
-extern int read_to_coo(COO **, int);
-extern int read_to_csr(CSR **, int);
-extern int read_coo_filei(COO**,int);
-extern int read_coo_filef(COO**, int);
+extern int read_to_coo(COO **, int, int);
+extern int read_to_csr(CSR **, int, int);
+extern int read_to_csc(CSC **, int, int);
+extern int read_coo_filei(COO**,int, int);
+extern int read_coo_filef(COO**, int, int);
 extern int add_int_coo(COO*,int,int,int,int);
 extern int add_float_coo(COO*,float,int,int,int);
-extern int read_csr_filei(CSR **, int);
-extern int read_csr_filef(CSR**, int);
+extern int read_csr_filei(CSR**, int, int);
+extern int read_csr_filef(CSR**, int, int);
+extern int read_csc_filei(CSC**, int, int);
+extern int read_csc_filef(CSC**, int, int);
 extern int add_int_csr(CSR*, int, int, int, int);
 extern int add_float_csr(CSR*, float, int, int, int);
+extern int add_int_csc(CSC*, int, int, int, int);
+extern int add_float_csc(CSC*, float, int, int, int);
 
 
 // -- SYNCHRONOUS --

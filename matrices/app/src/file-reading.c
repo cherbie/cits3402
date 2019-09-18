@@ -4,7 +4,7 @@
  * Return 1 to indicate success and 0 to indicate failure.
  * @param k is the matrix index of the respective file
  */
-int read_to_coo(COO **sparse_mtx, int k) {
+int read_to_coo(COO **sparse_mtx, int k, int fid) {
     int buffer_len = MAX_MTX_DIMENSIONS; //max number of digits
     int res = 0;
     char *buffer = calloc(5, sizeof(char)); //int or float
@@ -12,7 +12,7 @@ int read_to_coo(COO **sparse_mtx, int k) {
         perror(NULL);
         return 0;
     }
-    if(fgets(buffer, buffer_len - 1, config.fd[k]) != NULL) {
+    if(fgets(buffer, buffer_len - 1, config.fd[fid]) != NULL) {
         buffer = str_clean(buffer);
         if(strcmp(buffer, "int") == 0) (*sparse_mtx)[k].is_int = true;
         else (*sparse_mtx)[k].is_int = false;
@@ -22,7 +22,7 @@ int read_to_coo(COO **sparse_mtx, int k) {
         perror(NULL);
         return 0;
     }
-    if(fgets(buffer, buffer_len - 1, config.fd[k]) != NULL) {
+    if(fgets(buffer, buffer_len - 1, config.fd[fid]) != NULL) {
         buffer = str_clean(buffer);
         res = sscanf(buffer, "%i", &(*sparse_mtx)[k].row);
         if(res == 0 || res == EOF) {
@@ -35,7 +35,7 @@ int read_to_coo(COO **sparse_mtx, int k) {
         perror(NULL);
         return 0;
     }
-    if(fgets(buffer, buffer_len - 1, config.fd[k]) != NULL) {
+    if(fgets(buffer, buffer_len - 1, config.fd[fid]) != NULL) {
         buffer = str_clean(buffer);
         res = sscanf(buffer, "%i", &(*sparse_mtx)[k].col);
         if(res == 0 || res == EOF) {
@@ -46,13 +46,13 @@ int read_to_coo(COO **sparse_mtx, int k) {
     free(buffer);
     // -- READ MATRIX VALUES --
     if((*sparse_mtx)[k].is_int) {
-        if(!read_coo_filei(sparse_mtx, k)) return 0;
+        if(!read_coo_filei(sparse_mtx, k, fid)) return 0;
     }
     else {
-        if(!read_coo_filef(sparse_mtx, k)) return 0;
+        if(!read_coo_filef(sparse_mtx, k, fid)) return 0;
     }
 
-    fclose(config.fd[k]);
+    fclose(config.fd[fid]);
 
     print_coo(&(*sparse_mtx)[k]);
     return 1;
@@ -62,7 +62,7 @@ int read_to_coo(COO **sparse_mtx, int k) {
  * Read in files of type float into the COO sparse matrix structure.
  * @return 1 to indicate success and 0 to indicate failure.
  */
-int read_coo_filef(COO **coo_mtx, int k) {
+int read_coo_filef(COO **coo_mtx, int k, int fid) {
     int rows, cols;
     float val = 0.0;
     rows = 0, cols = 0;
@@ -71,7 +71,7 @@ int read_coo_filef(COO **coo_mtx, int k) {
 
     int num = (*coo_mtx)[k].row * (*coo_mtx)[k].col;
     for(int i = 0; i < num; i++) {
-        fscanf(config.fd[k], "%f", &val);
+        fscanf(config.fd[fid], "%f", &val);
         fprintf(stdout, "\nFloat: %f\n", val);
         if(val == 0.0) { //value should not be recorded in sparse matrix
             cols++;
@@ -106,7 +106,7 @@ int read_coo_filef(COO **coo_mtx, int k) {
  * @param k is the matrix index of the file underquestion.
  * @return 1 to indicate success and 0 to indicate failure.
  */
-int read_coo_filei(COO **coo_mtx, int k) {
+int read_coo_filei(COO **coo_mtx, int k, int fid) {
     int rows, cols, val;
     rows = 0, cols = 0; val = 0;
     (*coo_mtx)[k].size = 0; //no elements
@@ -115,7 +115,7 @@ int read_coo_filei(COO **coo_mtx, int k) {
     int num = (*coo_mtx)[k].row * (*coo_mtx)[k].col;
 
     for(int i = 0; i < num; i++) {
-        fscanf(config.fd[k], "%i", &val);
+        fscanf(config.fd[fid], "%i", &val);
         fprintf(stdout, "\ninteger: %i\n", val);
         if(val == 0) { //value should not be recorded in sparse matrix
             cols++;
@@ -181,7 +181,7 @@ int add_float_coo(COO *coo_mtx, float val, int row, int col, int index) {
 
 // -- Coordinate Sparse Row Matrix Representation --
 
-int read_to_csr(CSR **sparse_mtx, int k) {
+int read_to_csr(CSR **sparse_mtx, int k, int fid) {
     int buffer_len = MAX_MTX_DIMENSIONS; //max number of digits
     int res = 0;
     char *buffer = calloc(5, sizeof(char)); //int or float
@@ -189,7 +189,7 @@ int read_to_csr(CSR **sparse_mtx, int k) {
         perror(NULL);
         return 0;
     }
-    if(fgets(buffer, buffer_len - 1, config.fd[k]) != NULL) {
+    if(fgets(buffer, buffer_len - 1, config.fd[fid]) != NULL) {
         buffer = str_clean(buffer);
         if(strcmp(buffer, "int") == 0) (*sparse_mtx)[k].is_int = true;
         else (*sparse_mtx)[k].is_int = false;
@@ -199,7 +199,7 @@ int read_to_csr(CSR **sparse_mtx, int k) {
         perror(NULL);
         return 0;
     }
-    if(fgets(buffer, buffer_len - 1, config.fd[k]) != NULL) {
+    if(fgets(buffer, buffer_len - 1, config.fd[fid]) != NULL) {
         buffer = str_clean(buffer);
         res = sscanf(buffer, "%i", &(*sparse_mtx)[k].row);
         if(res == 0 || res == EOF) {
@@ -212,7 +212,7 @@ int read_to_csr(CSR **sparse_mtx, int k) {
         perror(NULL);
         return 0;
     }
-    if(fgets(buffer, buffer_len - 1, config.fd[k]) != NULL) {
+    if(fgets(buffer, buffer_len - 1, config.fd[fid]) != NULL) {
         buffer = str_clean(buffer);
         res = sscanf(buffer, "%i", &(*sparse_mtx)[k].col);
         if(res == 0 || res == EOF) {
@@ -222,10 +222,10 @@ int read_to_csr(CSR **sparse_mtx, int k) {
     }
     // -- READ MATRIX VALUES --
     if((*sparse_mtx)[k].is_int) {
-        if(!read_csr_filei(sparse_mtx, k)) return 0;
+        if(!read_csr_filei(sparse_mtx, k, fid)) return 0;
     }
     else {
-        if(!read_csr_filef(sparse_mtx, k)) return 0;
+        if(!read_csr_filef(sparse_mtx, k, fid)) return 0;
     }
     return 1;
 }
@@ -234,7 +234,7 @@ int read_to_csr(CSR **sparse_mtx, int k) {
  * Read matrix values given in a file.
  * @param csr_mtx CSR struct
  */
-int read_csr_filei(CSR **csr_mtx, int k) {
+int read_csr_filei(CSR **csr_mtx, int k, int fid) {
     int val = 0;
     int x,y;
     x = 0; y = 0; //immediate row and column respectively
@@ -244,7 +244,7 @@ int read_csr_filei(CSR **csr_mtx, int k) {
     (*csr_mtx)[k].mtx_offset = calloc((*csr_mtx)[k].row, sizeof(int)); //offset size defined
     int num = (*csr_mtx)[k].row * (*csr_mtx)[k].col; //number of matrix elements
     for(int i = 0; i < num; i++) {
-        fscanf(config.fd[k], "%i", &val);
+        fscanf(config.fd[fid], "%i", &val);
         fprintf(stdout, "\ninteger: %i\n", val);
         if(val == 0) { //value should not be recorded in sparse matrix
             continue;
@@ -271,7 +271,7 @@ int read_csr_filei(CSR **csr_mtx, int k) {
  * Read matrix values given in a file.
  * @param csr_mtx CSR struct
  */
-int read_csr_filef(CSR **csr_mtx, int k) {
+int read_csr_filef(CSR **csr_mtx, int k, int fid) {
     float val = 0;
     int x,y;
     x = 0; y = 0; //immediate row and column respectively
@@ -281,7 +281,7 @@ int read_csr_filef(CSR **csr_mtx, int k) {
     (*csr_mtx)[k].mtx_offset = calloc((*csr_mtx)[k].row, sizeof(int)); //offset size defined
     int num = (*csr_mtx)[k].row * (*csr_mtx)[k].col; //number of matrix elements
     for(int i = 0; i < num; i++) {
-        fscanf(config.fd[k], "%f", &val);
+        fscanf(config.fd[fid], "%f", &val);
         fprintf(stdout, "\nFLOAT: %f\n", val);
         if(val == 0.0) { //value should not be recorded in sparse matrix
             continue;
@@ -319,5 +319,149 @@ int add_float_csr(CSR *csr_mtx, float val, int row, int col, int count) {
     (*csr_mtx).mtxf[count] = val;
     (*csr_mtx).mtx_offset[row] += 1;
     (*csr_mtx).mtx_col[count] = col;
+    return 1;
+}
+
+
+// -- READ INTO CSC STRUCT --
+
+int read_to_csc(CSC **sparse_mtx, int k, int fid) {
+    int buffer_len = MAX_MTX_DIMENSIONS; //max number of digits
+    int res = 0; //return value
+    char *buffer = calloc(5, sizeof(char)); //int or float
+    if(buffer == NULL) {
+        perror(NULL);
+        return 0;
+    }
+    if(fgets(buffer, buffer_len - 1, config.fd[fid]) != NULL) {
+        buffer = str_clean(buffer);
+        if(strcmp(buffer, "int") == 0) (*sparse_mtx)[k].is_int = true;
+        else (*sparse_mtx)[k].is_int = false;
+    }
+    buffer = calloc(buffer_len, sizeof(char));
+    if(buffer == NULL) {
+        perror(NULL);
+        return 0;
+    }
+    if(fgets(buffer, buffer_len - 1, config.fd[fid]) != NULL) {
+        buffer = str_clean(buffer);
+        res = sscanf(buffer, "%i", &(*sparse_mtx)[k].row);
+        if(res == 0 || res == EOF) {
+            perror(NULL);
+            return 0;
+        }
+    }
+    buffer = calloc(buffer_len, sizeof(char));
+    if(buffer == NULL) {
+        perror(NULL);
+        return 0;
+    }
+    if(fgets(buffer, buffer_len - 1, config.fd[fid]) != NULL) {
+        buffer = str_clean(buffer);
+        res = sscanf(buffer, "%i", &(*sparse_mtx)[k].col);
+        if(res == 0 || res == EOF) {
+            perror(NULL);
+            return 0;
+        }
+    }
+    // -- READ MATRIX VALUES --
+    if((*sparse_mtx)[k].is_int) {
+        if(!read_csc_filei(sparse_mtx, k, fid)) return 0;
+    }
+    else {
+        if(!read_csc_filef(sparse_mtx, k, fid)) return 0;
+    }
+    return 1;
+}
+
+/**
+ * Read matrix values given in a file.
+ * @param csc_mtx CSC struct
+ */
+int read_csc_filei(CSC **csc_mtx, int k, int fid) {
+    int val = 0;
+    int x,y;
+    x = 0; y = 0; //immediate row and column respectively
+    (*csc_mtx)[k].size = 0; //no elements
+    (*csc_mtx)[k].mtxi = malloc(1 * sizeof(int));
+    (*csc_mtx)[k].mtx_row = malloc(1 * sizeof(int));
+    (*csc_mtx)[k].mtx_offset = calloc((*csc_mtx)[k].row, sizeof(int)); //offset size defined
+    int num = (*csc_mtx)[k].row * (*csc_mtx)[k].col; //number of matrix elements
+    for(int i = 0; i < num; i++) {
+        fscanf(config.fd[fid], "%i", &val);
+        fprintf(stdout, "\ninteger: %i\n", val);
+        if(val == 0) continue; //value should not be recorded in the sparse matrix
+        x = i % (*csc_mtx)[k].row; //calculate row
+        y = i / (*csc_mtx)[k].col; //calculate column
+        (*csc_mtx)[k].size += 1; //increment number of non-zero values
+        (*csc_mtx)[k].mtxi = realloc((*csc_mtx)[k].mtxi, (*csc_mtx)[k].size * sizeof(int));
+        (*csc_mtx)[k].mtx_row = realloc((*csc_mtx)[k].mtx_row, (*csc_mtx)[k].size * sizeof(int));
+        if((*csc_mtx)[k].mtxi == NULL || (*csc_mtx)[k].mtx_row == NULL) {
+            perror("function: read_int_file()");
+            return 0;
+        }
+        fprintf(stdout, "\n int: %i\n", val);
+        if(!add_int_csc(&(*csc_mtx)[k], val, x, y, (*csc_mtx)[k].size - 1)) {
+            perror(NULL);
+            return 0;
+        }
+    }
+    return 1;
+}
+
+/**
+ * Read matrix values given in a file.
+ * @param csc_mtx CSC struct
+ */
+int read_csc_filef(CSC **csc_mtx, int k, int fid) {
+    float val = 0;
+    int x,y;
+    x = 0; y = 0; //immediate row and column respectively
+    (*csc_mtx)[k].size = 0; //no elements
+    (*csc_mtx)[k].mtxf = malloc(1 * sizeof(float));
+    (*csc_mtx)[k].mtx_row = malloc(1 * sizeof(int));
+    (*csc_mtx)[k].mtx_offset = calloc((*csc_mtx)[k].row, sizeof(int)); //offset size defined
+    int num = (*csc_mtx)[k].row * (*csc_mtx)[k].col; //number of matrix elements
+    for(int i = 0; i < num; i++) {
+        fscanf(config.fd[fid], "%f", &val);
+        fprintf(stdout, "\nfloat: %f\n", val);
+        if(val == 0.0) continue; //value should not be recorded in the sparse matrix
+        x = i % (*csc_mtx)[k].row; //calculate row
+        y = i / (*csc_mtx)[k].col; //calculate column
+        (*csc_mtx)[k].size += 1; //increment number of non-zero values
+        (*csc_mtx)[k].mtxf = realloc((*csc_mtx)[k].mtxf, (*csc_mtx)[k].size * sizeof(float));
+        (*csc_mtx)[k].mtx_row = realloc((*csc_mtx)[k].mtx_row, (*csc_mtx)[k].size * sizeof(int));
+        if((*csc_mtx)[k].mtxf == NULL || (*csc_mtx)[k].mtx_row == NULL) {
+            perror("function: read_int_file()");
+            return 0;
+        }
+        fprintf(stdout, "\n f --> %f\n", val);
+        if(!add_float_csc(&(*csc_mtx)[k], val, x, y, (*csc_mtx)[k].size - 1)) {
+            perror(NULL);
+            return 0;
+        }
+    }
+    return 1;
+}
+
+/**
+ * Update structure values
+ * @param count is the index of the non-zero value.
+ */
+int add_int_csc(CSC *csc_mtx, int val, int row, int col, int count) {
+    (*csc_mtx).mtxi[count] = val;
+    (*csc_mtx).mtx_offset[col] += 1;
+    (*csc_mtx).mtx_row[count] = col;
+    return 1;
+}
+
+/**
+ * Update structure values
+ * @param count is the index of the non-zero value.
+ */
+int add_float_csc(CSC *csc_mtx, float val, int row, int col, int count) {
+    (*csc_mtx).mtxf[count] = val;
+    (*csc_mtx).mtx_offset[col] += 1;
+    (*csc_mtx).mtx_row[count] = col;
     return 1;
 }
