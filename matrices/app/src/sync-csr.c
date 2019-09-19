@@ -61,9 +61,10 @@ int process_multiplication(CSC *res_mtx, CSR *csr_mtx, CSC *csc_mtx) {
     (*res_mtx).col = (*csc_mtx).col;
     if(!(*csr_mtx).is_int || !(*csc_mtx).is_int) (*res_mtx).is_int = false;
     else (*res_mtx).is_int = true;
-    int num_csr_nz, num_csc_nz, sum_csr_nz, sum_csc_nz, index_csr, index_csc, csr, csc, sum;
+    int num_csr_nz, num_csc_nz, sum_csr_nz, sum_csc_nz, index_csr, index_csc, csr, csc;
     num_csr_nz = 0; num_csc_nz = 0; sum_csr_nz = 0; sum_csc_nz = 0;
     if((*res_mtx).is_int) {
+        int sum;
         (*res_mtx).mtxi = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int)); //maximum size
         (*res_mtx).mtx_offset = calloc((*res_mtx).col, sizeof(int));
         (*res_mtx).mtx_row = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int));
@@ -102,7 +103,53 @@ int process_multiplication(CSC *res_mtx, CSR *csr_mtx, CSC *csc_mtx) {
                 if(sum != 0) {
                     (*res_mtx).mtxi[(*res_mtx).size] = sum;
                     (*res_mtx).mtx_offset[j] += 1;
-                    (*res_mtx).mtx_row[(*res_mtx).size] = csc; //column under inspection
+                    (*res_mtx).mtx_row[(*res_mtx).size] = j-1; //column under inspection
+                    (*res_mtx).size++;
+                }
+            }
+        }
+    }
+    else {
+        float sum;
+        (*res_mtx).mtxf = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(float)); //maximum size
+        (*res_mtx).mtx_offset = calloc((*res_mtx).col, sizeof(int));
+        (*res_mtx).mtx_row = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int));
+        if((*res_mtx).mtxf == NULL || (*res_mtx).mtx_offset == NULL || (*res_mtx).mtx_row == NULL) {
+            perror("function: process_multiplication().");
+            return 0;
+        }
+        (*res_mtx).size = 0;
+        for(int i = 1; i <= (*csr_mtx).row; i++) {
+            printf("row seen --- \n");
+            num_csr_nz = (*csr_mtx).mtx_offset[i-1]; //need the convention at the start of the matrix
+            sum_csr_nz += num_csr_nz;
+            num_csr_nz = (*csr_mtx).mtx_offset[i];
+            sum_csc_nz = 0; //zer non-zero lookup index
+            for(int j = 1; j <= (*csc_mtx).col; j++) {
+                printf("col seen ---- \n");
+                num_csc_nz = (*csc_mtx).mtx_offset[j-1];
+                sum_csc_nz += num_csc_nz;
+                num_csc_nz = (*csc_mtx).mtx_offset[j];
+                csr = 0; csc = 0; sum = 0.0; //row and column under inspection respectively
+                if(num_csr_nz == 0 || num_csc_nz == 0) continue; // resultant offset = 0;
+                for(int k = 0; k < (*csc_mtx).row; k++) {
+                    index_csr = (sum_csr_nz) + csr;
+                    index_csc = sum_csc_nz + csc;
+                    printf(" ---> %i & %i\n",index_csr, index_csc);
+                    printf(" ---> %i & %i\n", (*csr_mtx).mtx_col[index_csr], (*csc_mtx).mtx_row[index_csc]);
+                    if((*csr_mtx).mtx_col[index_csr] == (*csc_mtx).mtx_row[index_csc]) { //nz element column matches row
+                        sum += (*csr_mtx).mtxf[index_csr] * (*csc_mtx).mtxf[index_csc];
+                        printf("Multiplication ==> %f x %f = %f\n", (*csr_mtx).mtxf[index_csr], (*csc_mtx).mtxf[index_csc], sum);
+                    }
+                    if((*csr_mtx).mtx_col[index_csr] == k) csr++;
+                    if((*csc_mtx).mtx_row[index_csc] == k) csc++;
+                    if(csc >= num_csc_nz || csr >= num_csr_nz) break;
+                }
+                //store sum;
+                if(sum != 0) {
+                    (*res_mtx).mtxf[(*res_mtx).size] = sum;
+                    (*res_mtx).mtx_offset[j] += 1;
+                    (*res_mtx).mtx_row[(*res_mtx).size] = j-1; //column under inspection
                     (*res_mtx).size++;
                 }
             }

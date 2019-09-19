@@ -207,7 +207,13 @@ int matrix_mp(void) {
 
     print(" ... Completed matrix multiplication calculation.");
 
+
     print_csc(&csc_sparse_mtx[1]); //print resultant info
+
+    if(!log_csc_result(&csc_sparse_mtx[1])) {
+        fprintf(stderr, "Unable to log matrix result value.\n");
+        return 0;
+    }
 
     dealloc_csr(&csr_sparse_mtx, num_csr);
     dealloc_csc(&csc_sparse_mtx, num_csc);
