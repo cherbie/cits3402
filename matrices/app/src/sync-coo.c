@@ -20,8 +20,13 @@ int process_scalar(COO *coo_mtx, float sc) {
 
 /**
  * Calculates the trace of the matrix
+ * @return 1 to indicate success and 0 to indicate failure.
  */
 int process_trace(COO *coo_mtx, int *i, float *f) {
+    if((*coo_mtx).row != (*coo_mtx).col) {
+        fprintf(stderr, "Error: the trace of a matrix is only well defined for square matrices.\n");
+        return 0;
+    }
     *i = 0; *f = 0.0;
     if((*coo_mtx).is_int) {
         for(int j = 0; j < (*coo_mtx).size; j++){

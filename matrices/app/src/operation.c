@@ -65,9 +65,7 @@ int trace(void) {
         fprintf(stderr, "Error converting file to sparse matrix form.\n");
         return 0;
     }
-    int i;
-    float f;
-
+    int i; float f;
     if(!process_trace(&coo_sparse_mtx[coo_id], &i, &f)) {
         fprintf(stderr, "Error calulating the trace of the matrix provided.\n");
         return 0;
