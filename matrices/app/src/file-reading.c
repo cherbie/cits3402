@@ -254,7 +254,7 @@ int read_csr_filei(CSR **csr_mtx, int k, int fid) {
         if(val == 0) { //value should not be recorded in sparse matrix
             continue;
         }
-        x = i / (*csr_mtx)[k].row; //calculate row
+        x = i / (*csr_mtx)[k].col; //calculate row
         y = i % (*csr_mtx)[k].col; //calculate column
         (*csr_mtx)[k].size += 1; //increment number of non-zero values
         (*csr_mtx)[k].mtxi = realloc((*csr_mtx)[k].mtxi, (*csr_mtx)[k].size * sizeof(int));
@@ -295,7 +295,7 @@ int read_csr_filef(CSR **csr_mtx, int k, int fid) {
         if(val == 0.0) { //value should not be recorded in sparse matrix
             continue;
         }
-        x = i / (*csr_mtx)[k].row; //calculate row
+        x = i / (*csr_mtx)[k].col; //calculate row
         y = i % (*csr_mtx)[k].col; //calculate column
         (*csr_mtx)[k].size += 1; //increment number of non-zero values
         (*csr_mtx)[k].mtxf = realloc((*csr_mtx)[k].mtxf, (*csr_mtx)[k].size * sizeof(float));
