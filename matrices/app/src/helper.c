@@ -188,9 +188,9 @@ bool is_defined(COO *coo_mtx, int row, int col, int block) {
 int get_non_zero_csc(CSC *csc_mtx, bool **seen, int col, int row) {
     int start_index = 0;
     int index = 0;
-    for(int i = 0; i <= col; i++) start_index += (*csc_mtx).mtx_offset[i];
-    for(int i = 0; i < (*csc_mtx).mtx_offset[col+1]; i++) {
-        index = start_index + i;
+    for(int i = 1; i <= col; i++) start_index += (*csc_mtx).mtx_offset[i-1];
+    for(int i = 1; i <= (*csc_mtx).mtx_offset[col]; i++) {
+        index = start_index + (i-1);
         if((*csc_mtx).mtx_row[index] != row) continue; //row index of nz value does not equal row under question
         if(!(*seen)[index]) {
             (*seen)[index] = true;

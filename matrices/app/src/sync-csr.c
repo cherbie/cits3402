@@ -13,12 +13,12 @@ int process_transpose(CSR *csr_mtx, CSC *csc_mtx) {
      *  - csc_mtx.mtx_col
      */
      (*csc_mtx).is_int = (*csr_mtx).is_int;
-     (*csc_mtx).col = (*csr_mtx).col;
-     (*csc_mtx).row = (*csr_mtx).row;
+     (*csc_mtx).col = (*csr_mtx).row;
+     (*csc_mtx).row = (*csr_mtx).col;
      (*csc_mtx).size = (*csr_mtx).size;
      if((*csc_mtx).is_int) {
          (*csc_mtx).mtxi = malloc((*csr_mtx).size * sizeof(int));
-         (*csc_mtx).mtx_offset = malloc(((*csr_mtx).col + 1) * sizeof(int));
+         (*csc_mtx).mtx_offset = malloc(((*csc_mtx).col + 1) * sizeof(int));
          (*csc_mtx).mtx_row = malloc((*csr_mtx).size * sizeof(int));
          if((*csc_mtx).mtxi == NULL || (*csc_mtx).mtx_offset == NULL || (*csc_mtx).mtx_row == NULL) {
              perror("function: process_transpose()");
@@ -31,7 +31,7 @@ int process_transpose(CSR *csr_mtx, CSC *csc_mtx) {
      }
      else {
          (*csc_mtx).mtxf = malloc((*csr_mtx).size * sizeof(float));
-         (*csc_mtx).mtx_offset = malloc(((*csr_mtx).row + 1) * sizeof(int));
+         (*csc_mtx).mtx_offset = malloc(((*csc_mtx).col + 1) * sizeof(int));
          (*csc_mtx).mtx_row = malloc((*csr_mtx).size * sizeof(int));
          if((*csc_mtx).mtxf == NULL || (*csc_mtx).mtx_offset == NULL || (*csc_mtx).mtx_row == NULL) {
              perror("function: process_transpose()");
