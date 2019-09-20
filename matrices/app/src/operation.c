@@ -200,18 +200,18 @@ int matrix_mp(void) {
     print_csr(&csr_sparse_mtx[1]);
     print(" ... Completed reading matrix into sparse matrix representations.");
 
-    /*if(!process_multiplication(&csr_sparse_mtx[2], &csr_sparse_mtx[0], &csr_sparse_mtx[1])) {
+    if(!process_multiplication(&csr_sparse_mtx[2], &csr_sparse_mtx[0], &csr_sparse_mtx[1])) {
         fprintf(stderr, "Error performing matrix multiplication on given matrix.\n");
         return 0;
     }
-    */
+
 
     print(" ... Completed matrix multiplication calculation.");
 
 
-    //print_csr(&csr_sparse_mtx[1]); //print resultant info
+    print_csr(&csr_sparse_mtx[2]); //print resultant info
 
-    if(!log_csr_result(&csr_sparse_mtx[1])) {
+    if(!log_csr_result(&csr_sparse_mtx[2])) {
         fprintf(stderr, "Unable to log matrix result value.\n");
         return 0;
     }

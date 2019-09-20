@@ -128,7 +128,7 @@ extern int process_scalar(COO*, float);
 extern int process_trace(COO*,int*,float*);
 extern int process_addition(COO**);
 extern int process_transpose(CSR*, CSC*);
-extern int process_multiplication(CSR*, CSR*, CSC*);
+extern int process_multiplication(CSR*, CSR*, CSR*);
 
 // -- LOGGER --
 extern int log_coo_result(COO*);
