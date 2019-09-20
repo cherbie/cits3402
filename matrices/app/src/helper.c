@@ -118,8 +118,16 @@ void print_csr(CSR *csr_mtx) {
     else {
         for(int i = 0; i < (*csr_mtx).size; i++) {
             printf("%3.2f", (*csr_mtx).mtxf[i]);
-            print("\n");
         }
+        printf("\n");
+        for(int i = 0; i <= (*csr_mtx).row; i++) {
+            printf("%i", (int)(*csr_mtx).mtx_offset[i]);
+        }
+        printf("\n");
+        for(int i = 0; i < (*csr_mtx).size; i++) {
+            printf("%i", (int)(*csr_mtx).mtx_col[i]);
+        }
+        printf("\n");
     }
     print(" --- ");
 }
