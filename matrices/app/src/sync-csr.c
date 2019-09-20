@@ -52,7 +52,7 @@ int process_transpose(CSR *csr_mtx, CSC *csc_mtx) {
  * @param csc_mtx CSC* the second matrix given.
  * @return 1 to indicate success and zero to indicate failure.
  */
-int process_multiplication(CSC *res_mtx, CSR *csr_mtx, CSC *csc_mtx) {
+int process_multiplication(CSR *res_mtx, CSR *csr_mtx, CSC *csc_mtx) {
     if((*csr_mtx).col != (*csc_mtx).row) {
         fprintf(stderr, "The dimensions of the provided matrices are not suitable.\n");
         return 0;
@@ -66,9 +66,9 @@ int process_multiplication(CSC *res_mtx, CSR *csr_mtx, CSC *csc_mtx) {
     if((*res_mtx).is_int) {
         int sum;
         (*res_mtx).mtxi = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int)); //maximum size
-        (*res_mtx).mtx_offset = calloc((*res_mtx).col, sizeof(int));
-        (*res_mtx).mtx_row = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int));
-        if((*res_mtx).mtxi == NULL || (*res_mtx).mtx_offset == NULL || (*res_mtx).mtx_row == NULL) {
+        (*res_mtx).mtx_offset = calloc((*res_mtx).row+1, sizeof(int));
+        (*res_mtx).mtx_col = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int));
+        if((*res_mtx).mtxi == NULL || (*res_mtx).mtx_offset == NULL || (*res_mtx).mtx_col == NULL) {
             perror("function: process_multiplication().");
             return 0;
         }
@@ -103,7 +103,7 @@ int process_multiplication(CSC *res_mtx, CSR *csr_mtx, CSC *csc_mtx) {
                 if(sum != 0) {
                     (*res_mtx).mtxi[(*res_mtx).size] = sum;
                     (*res_mtx).mtx_offset[j] += 1;
-                    (*res_mtx).mtx_row[(*res_mtx).size] = j-1; //column under inspection
+                    (*res_mtx).mtx_col[(*res_mtx).size] = j-1; //column under inspection
                     (*res_mtx).size++;
                 }
             }
@@ -113,8 +113,8 @@ int process_multiplication(CSC *res_mtx, CSR *csr_mtx, CSC *csc_mtx) {
         float sum;
         (*res_mtx).mtxf = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(float)); //maximum size
         (*res_mtx).mtx_offset = calloc((*res_mtx).col, sizeof(int));
-        (*res_mtx).mtx_row = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int));
-        if((*res_mtx).mtxf == NULL || (*res_mtx).mtx_offset == NULL || (*res_mtx).mtx_row == NULL) {
+        (*res_mtx).mtx_col = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int));
+        if((*res_mtx).mtxf == NULL || (*res_mtx).mtx_offset == NULL || (*res_mtx).mtx_col == NULL) {
             perror("function: process_multiplication().");
             return 0;
         }
@@ -149,7 +149,7 @@ int process_multiplication(CSC *res_mtx, CSR *csr_mtx, CSC *csc_mtx) {
                 if(sum != 0) {
                     (*res_mtx).mtxf[(*res_mtx).size] = sum;
                     (*res_mtx).mtx_offset[j] += 1;
-                    (*res_mtx).mtx_row[(*res_mtx).size] = j-1; //column under inspection
+                    (*res_mtx).mtx_col[(*res_mtx).size] = j-1; //column under inspection
                     (*res_mtx).size++;
                 }
             }

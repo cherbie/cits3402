@@ -394,6 +394,8 @@ int read_csc_filei(CSC **csc_mtx, int k, int fid) {
     x = 0; y = 0; //immediate row and column respectively
     (*csc_mtx)[k].size = 0; //no elements
     (*csc_mtx)[k].mtxi = malloc(1 * sizeof(int));
+    //int *tmp_nz = malloc(1* sizeof(int));
+    //int *tmp_row = malloc(1*sizeof(int));
     (*csc_mtx)[k].mtx_row = malloc(1 * sizeof(int));
     (*csc_mtx)[k].mtx_offset = calloc((*csc_mtx)[k].col + 1, sizeof(int)); //offset size defined
     if((*csc_mtx)[k].mtxi == NULL || (*csc_mtx)[k].mtx_row == NULL || (*csc_mtx)[k].mtx_offset == NULL) {
@@ -405,9 +407,11 @@ int read_csc_filei(CSC **csc_mtx, int k, int fid) {
         fscanf(config.fd[fid], "%i", &val);
         fprintf(stdout, "\ninteger: %i\n", val);
         if(val == 0) continue; //value should not be recorded in the sparse matrix
-        x = i % (*csc_mtx)[k].row; //calculate row
-        y = i / (*csc_mtx)[k].col; //calculate column
+        x = i / (*csc_mtx)[k].row; //calculate row
+        y = i % (*csc_mtx)[k].col; //calculate column
         (*csc_mtx)[k].size += 1; //increment number of non-zero values
+        //tmp_nz = realloc(tmp_nz, (*csc_mtx)[k].size * sizeof(int));
+        //tmp_row = realloc(tmp_row, (*csc_mtx)[k].size * sizeof(int));
         (*csc_mtx)[k].mtxi = realloc((*csc_mtx)[k].mtxi, (*csc_mtx)[k].size * sizeof(int));
         (*csc_mtx)[k].mtx_row = realloc((*csc_mtx)[k].mtx_row, (*csc_mtx)[k].size * sizeof(int));
         if((*csc_mtx)[k].mtxi == NULL || (*csc_mtx)[k].mtx_row == NULL) {
@@ -419,6 +423,8 @@ int read_csc_filei(CSC **csc_mtx, int k, int fid) {
             perror(NULL);
             return 0;
         }
+        //tmp_nz[(*csc_mtx)[k].size] = val;
+        //tmp_row[(*csc_mtx)[k].size] = x;
     }
     return 1;
 }
@@ -444,8 +450,8 @@ int read_csc_filef(CSC **csc_mtx, int k, int fid) {
         fscanf(config.fd[fid], "%f", &val);
         fprintf(stdout, "\nfloat: %f\n", val);
         if(val == 0.0) continue; //value should not be recorded in the sparse matrix
-        x = i % (*csc_mtx)[k].row; //calculate row
-        y = i / (*csc_mtx)[k].col; //calculate column
+        x = i / (*csc_mtx)[k].row; //calculate row
+        y = i % (*csc_mtx)[k].col; //calculate column
         (*csc_mtx)[k].size += 1; //increment number of non-zero values
         (*csc_mtx)[k].mtxf = realloc((*csc_mtx)[k].mtxf, (*csc_mtx)[k].size * sizeof(float));
         (*csc_mtx)[k].mtx_row = realloc((*csc_mtx)[k].mtx_row, (*csc_mtx)[k].size * sizeof(int));
@@ -469,7 +475,7 @@ int read_csc_filef(CSC **csc_mtx, int k, int fid) {
 int add_int_csc(CSC *csc_mtx, int val, int row, int col, int count) {
     (*csc_mtx).mtxi[count] = val;
     (*csc_mtx).mtx_offset[col + 1] += 1;
-    (*csc_mtx).mtx_row[count] = col;
+    (*csc_mtx).mtx_row[count] = row;
     return 1;
 }
 
@@ -480,6 +486,6 @@ int add_int_csc(CSC *csc_mtx, int val, int row, int col, int count) {
 int add_float_csc(CSC *csc_mtx, float val, int row, int col, int count) {
     (*csc_mtx).mtxf[count] = val;
     (*csc_mtx).mtx_offset[col + 1] += 1;
-    (*csc_mtx).mtx_row[count] = col;
+    (*csc_mtx).mtx_row[count] = row;
     return 1;
 }
