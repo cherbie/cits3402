@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <ctype.h>
+#include <sys/time.h>
 
 #define NUM_OPERATIONS 5
 #define NUM_OPTIONS 7
@@ -17,12 +18,18 @@
 #define NUMBER_OF_INPUT_FILES 2
 
 //#define INPUT_NUM_LINES 3
-typedef struct {
+/*typedef struct {
     int   i;
     float f;
 } MTX_TYPE;
-
+*/
 // -- STRUCTURES --
+typedef struct {
+    struct timeval start;
+    struct timeval end;
+    float delta; //change in time
+} TIME_STAT;
+
 typedef struct {
     int  operation;
     char *op_str;
@@ -32,6 +39,9 @@ typedef struct {
     char **filename;
     FILE *log_fd;
     char *log_filename;
+    TIME_STAT *time;
+    struct tm *exec_time;
+    time_t rawtime;
 } CONFIG;
 
 typedef struct {
@@ -68,8 +78,8 @@ typedef struct {
 
 //GLOBAL VARIABLES
 CONFIG          config;
-struct tm       *exec_time;
-time_t          rawtime;
+//struct tm       *exec_time;
+//time_t          rawtime;
 char            *arg_options[NUM_OPTIONS];
 int             (*op_func[NUM_OPERATIONS])(); //pointer to operation functions
 
@@ -96,6 +106,7 @@ extern bool is_defined(COO*, int, int, int);
 extern void print_csr(CSR*);
 extern void print_csc(CSC*);
 extern int get_non_zero_csc(CSC*, bool**, int, int);
+extern int process_stat(void);
 
 // -- OPERATIONS --
 extern int operation_main(void);

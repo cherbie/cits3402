@@ -32,6 +32,8 @@ void dealloc_config(void) {
     }
     free(config.fd); //array of file descriptors
     free(config.filename); //array of filenames
+    free(config.time);
+    free(config.exec_time); //not malloced?
 }
 
 void dealloc_csr(CSR **csr_mtx, int size) {

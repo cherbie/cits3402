@@ -5,8 +5,9 @@ void print_usage(void) {
 }
 
 int initialise(void) {
-    time(&rawtime);
-    exec_time = localtime(&rawtime);
+    time(&config.rawtime);
+    config.exec_time = localtime(&config.rawtime);
+
     arg_options[0] = strdup("-sc");
     arg_options[1] = strdup("-tr");
     arg_options[2] = strdup("-ad");
@@ -25,6 +26,7 @@ int initialise(void) {
     }
     config.log_fd = NULL;
     config.log_filename = NULL;
+    config.time = malloc(2 * sizeof(TIME_STAT));
 
     //function pointers
     op_func[0] = scalar;
@@ -55,6 +57,8 @@ void print_config() {
     printf(" ... Input 2 -> %s\n", config.filename[1]);
     printf(" ... Logger file -> %s\n", config.log_filename);
     if(config.num_threads > 0) printf(" ... Number of threads -> %i\n", config.num_threads);
+    printf(" ... file reading time -> %12.10f\n", (float) config.time[0].delta);
+    printf(" ... operation processing time - > %12.10f\n", (float) config.time[1].delta);
     printf("\n");
 }
 
@@ -198,4 +202,16 @@ int get_non_zero_csc(CSC *csc_mtx, bool **seen, int col, int row) {
         }
     }
     return -1;
+}
+
+/**
+ * Calculate the difference between start and end time's
+ * @return 1 to indicate success and 0 to indicate failure.
+ */
+int process_stat(void) {
+    for(int i = 0; i < 2; i++) {
+        config.time[i].delta = (float)((config.time[i].end.tv_sec  -  config.time[i].start.tv_sec) * 1000000u +
+           config.time[i].end.tv_usec - config.time[i].start.tv_usec) / 1.e6;
+    }
+    return 1;
 }

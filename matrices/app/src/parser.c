@@ -158,8 +158,8 @@ int set_logger(void) {
     char *date = malloc(11 * sizeof(char));
     char *time = malloc(5 * sizeof(char));
     strncpy(buffer, STUDENT_NUMBER, strlen(STUDENT_NUMBER));
-    sprintf(date, "%02.0f%02.0f%i", (float) exec_time->tm_mday, (float) exec_time->tm_mon + 1.0, exec_time->tm_year + 1900);
-    sprintf(time, "%02.0f%02.0f", (float) exec_time->tm_hour, (float) exec_time->tm_min);
+    sprintf(date, "%02.0f%02.0f%i", (float) config.exec_time->tm_mday, (float) config.exec_time->tm_mon + 1.0, config.exec_time->tm_year + 1900);
+    sprintf(time, "%02.0f%02.0f", (float) config.exec_time->tm_hour, (float) config.exec_time->tm_min);
     sprintf(buffer, "%s_%s_%s_%s.out", STUDENT_NUMBER, date, time, op_to_string());
     free(date); free(time);
     config.log_filename = strdup(buffer);

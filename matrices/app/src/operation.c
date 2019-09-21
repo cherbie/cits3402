@@ -26,16 +26,21 @@ int scalar(void) {
         perror(NULL);
         return 0;
     }
+    gettimeofday(&config.time[0].start, NULL);
     if(!read_to_coo(&coo_sparse_mtx, coo_id, file_id)) {
         fprintf(stderr, "Error converting file to sparse matrix form.\n");
         return 0;
     }
+    gettimeofday(&config.time[0].end, NULL);
+    gettimeofday(&config.time[1].start, NULL);
     if(!process_scalar(&coo_sparse_mtx[coo_id], config.sm)) {
         fprintf(stderr, "Error performing scalar multiplication.\n");
         return 0;
     }
-
+    gettimeofday(&config.time[1].end, NULL);
     print_coo(&coo_sparse_mtx[coo_id]);
+
+    if(!process_stat()) fprintf(stderr, "Error determining duration of operations.\n");
 
     if(!log_coo_result(&(coo_sparse_mtx[coo_id]))) {
         fprintf(stderr, "Error logging result to file.\n");
@@ -61,15 +66,20 @@ int trace(void) {
         perror(NULL);
         return 0;
     }
+    gettimeofday(&config.time[0].start, NULL);
     if(!read_to_coo(&coo_sparse_mtx, coo_id, file_id)) {
         fprintf(stderr, "Error converting file to sparse matrix form.\n");
         return 0;
     }
+    gettimeofday(&config.time[0].end, NULL);
     int i; float f;
+    gettimeofday(&config.time[1].start, NULL);
     if(!process_trace(&coo_sparse_mtx[coo_id], &i, &f)) {
         fprintf(stderr, "Error calulating the trace of the matrix provided.\n");
         return 0;
     }
+    gettimeofday(&config.time[1].end, NULL);
+    if(!process_stat()) fprintf(stderr, "Error determining duration of operations.\n");
     if(!log_trace_result(&coo_sparse_mtx[coo_id], &i, &f)) {
         fprintf(stderr, "Error logging the result of the trace.\n");
         return 0;
@@ -92,16 +102,21 @@ int addition(void) {
         perror(NULL);
         return 0;
     }
+    gettimeofday(&config.time[0].start, NULL);
     for(int k = 0; k < NUMBER_OF_INPUT_FILES; k++) {
         if(!read_to_coo(&coo_sparse_mtx, coo_id++, k)) {
             fprintf(stderr, "Error converting file to sparse matrix form.\n");
             return 0;
         }
     }
+    gettimeofday(&config.time[0].end, NULL);
+    gettimeofday(&config.time[1].start, NULL);
     if(!process_addition(&coo_sparse_mtx)) {
         fprintf(stderr, "Error performing matrix addition.\n");
         return 0;
     }
+    gettimeofday(&config.time[1].end, NULL);
+    if(!process_stat()) fprintf(stderr, "Error determining duration of operations.\n");
 
     print_coo(&(coo_sparse_mtx[2]));
 
@@ -126,26 +141,30 @@ int transpose_matrix(void) {
     int csc_id = 0;
     int file_id = 0;
     //SPARSE MATRIX REP CSR.
-    CSR *csr_sparse_mtx; //structure containing coordinate format representation of matrix.
+    CSR *csr_sparse_mtx; CSC *csc_sparse_mtx; //structure containing coordinate format representation of matrix.
     if((csr_sparse_mtx = malloc(num_csr * sizeof(CSR))) == NULL) {
         perror(NULL);
         return 0;
     }
-    if(!read_to_csr(&csr_sparse_mtx, csr_id, file_id++)) {
-        fprintf(stderr, "Error converting file to sparse matrix form.\n");
-        return 0;
-    }
-    CSC *csc_sparse_mtx;
     if((csc_sparse_mtx = malloc(num_csc * sizeof(CSC))) == NULL) {
         perror(NULL);
         return 0;
     }
+    gettimeofday(&config.time[0].start, NULL);
+    if(!read_to_csr(&csr_sparse_mtx, csr_id, file_id++)) {
+        fprintf(stderr, "Error converting file to sparse matrix form.\n");
+        return 0;
+    }
+    gettimeofday(&config.time[0].end, NULL);
     print_csr(&csr_sparse_mtx[0]); //debugging
     print("FINISHED READING CSR FILE\n");
+    gettimeofday(&config.time[1].start, NULL);
     if(!process_transpose(&csr_sparse_mtx[csr_id], &csc_sparse_mtx[csc_id])) {
         fprintf(stderr, "Error transposing given matrix.\n");
         return 0;
     }
+    gettimeofday(&config.time[1].end, NULL);
+    if(!process_stat()) fprintf(stderr, "Error determining duration of operations.\n");
 
     print_csc(&csc_sparse_mtx[csc_id]);
 
@@ -180,11 +199,12 @@ int matrix_mp(void) {
         perror(NULL);
         return 0;
     }
+    gettimeofday(&config.time[0].start, NULL);
     if(!read_to_csr(&csr_sparse_mtx, csr_id, file_id++)) {
         fprintf(stderr, "Error converting file to sparse matrix form.\n");
         return 0;
     }
-    print_csr(&csr_sparse_mtx[csr_id]); //debugging
+    //print_csr(&csr_sparse_mtx[csr_id]); //debugging
 
     /*CSC *csc_sparse_mtx;
     if((csc_sparse_mtx = malloc(num_csc * sizeof(CSC))) == NULL) {
@@ -195,17 +215,21 @@ int matrix_mp(void) {
         fprintf(stderr, "Error converting file to sparse matrix form.\n");
         return 0;
     }
+    gettimeofday(&config.time[0].end, NULL);
     print_csr(&csr_sparse_mtx[1]);
     print(" ... Completed reading matrix into sparse matrix representations.");
 
+    gettimeofday(&config.time[1].start, NULL);
+    sleep(2);
     if(!process_multiplication(&csr_sparse_mtx[2], &csr_sparse_mtx[0], &csr_sparse_mtx[1])) {
         fprintf(stderr, "Error performing matrix multiplication on given matrix.\n");
         return 0;
     }
-
+    gettimeofday(&config.time[1].end, NULL);
 
     print(" ... Completed matrix multiplication calculation.");
 
+    if(!process_stat()) fprintf(stderr, "Error determining duration of operations.\n");
 
     print_csr(&csr_sparse_mtx[2]); //print resultant info
 

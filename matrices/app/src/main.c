@@ -13,8 +13,8 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Error parsing command line arguments.\n");
         exit(EXIT_FAILURE);
     }
-    print_config();
     if(!operation_main()) exit(EXIT_FAILURE);
+    print_config();
     dealloc_config();
     printf(" ... Program complete.\n");
     exit(EXIT_SUCCESS);
