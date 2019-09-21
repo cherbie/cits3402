@@ -172,5 +172,6 @@ int set_logger(void) {
         perror("location: /parser.c/set_logger()\n");
         return 0;
     }
+    free(buffer);
     return 1;
 }
