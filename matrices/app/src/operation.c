@@ -223,57 +223,6 @@ int transpose_matrix(void) {
  * Return 1 to indicate success and 0 to indicate failure.
  */
 int matrix_mp(void) {
-    /*
-        2 CSR struct
-        1 CSC struct
-    */
-    if(false) {
-        CSR *csr_sparse_mtx; //structure containing coordinate format representation of matrix.
-        if((csr_sparse_mtx = malloc(2 * sizeof(CSR))) == NULL) {
-            perror(NULL);
-            return 0;
-        }
-        if(!read_to_csr(&csr_sparse_mtx, 0, 0)) {
-            fprintf(stderr, "Error converting file to sparse matrix form.\n");
-            return 0;
-        }
-        print_csr(&csr_sparse_mtx[0]);
-        CSC *csc_sparse_mtx = malloc(1 * sizeof(CSC));
-        if((csc_sparse_mtx == NULL)) {
-            perror(NULL);
-            return 0;
-        }
-        if(!read_to_csc(&csc_sparse_mtx, 0, 1)) {
-            perror(NULL);
-            return 0;
-        }
-         print_csc(&csc_sparse_mtx[0]);
-         print(" ... Completed reading matrix into sparse matrix representations.");
-         if(!process_multiplication(&csr_sparse_mtx[1], &csr_sparse_mtx[0], &csc_sparse_mtx[0])) {
-             fprintf(stderr, "Error performing matrix multiplication on given matrix.\n");
-             return 0;
-         }
-
-         print(" ... Completed matrix multiplication calculation.");
-
-         print_csr(&csr_sparse_mtx[1]);
-
-         print(" --- LOG TO FILE --- \n");
-         if(!log_csr_result(&csr_sparse_mtx[1], stdout)) {
-             fprintf(stderr, "Unable to log matrix result value.\n");
-             return 0;
-         }
-
-         print(" --complete --");
-
-         dealloc_csr(&csr_sparse_mtx, 2);
-         dealloc_csc(&csc_sparse_mtx, 1);
-         free(csc_sparse_mtx);
-         free(csr_sparse_mtx);
-         return 1;
-    }
-
-
     // -- SPARSE MATRIX REP CSR. --
     CSR *csr_sparse_mtx = malloc(2 * sizeof(CSR)); //structure containing coordinate format representation of matrix.
     CSC *csc_sparse_mtx = malloc(1 * sizeof(CSC));
