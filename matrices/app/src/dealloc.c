@@ -7,15 +7,11 @@
 void dealloc_coo(COO **coo_mtx, int size) {
     for(int k = 0; k < size; k++) {
         if((*coo_mtx)[k].is_int) {
-            for(int i = 0; i < (*coo_mtx)[k].size; i++) {
-                free((*coo_mtx)[k].mtxi[i]);
-            }
+            for(int i = 0; i < (*coo_mtx)[k].size; i++) free((*coo_mtx)[k].mtxi[i]);
             free((*coo_mtx)[k].mtxi);
         }
         else {
-            for(int i = 0; i < (*coo_mtx)[k].size; i++) {
-                free((*coo_mtx)[k].mtxf[i]);
-            }
+            for(int i = 0; i < (*coo_mtx)[k].size; i++) free((*coo_mtx)[k].mtxf[i]);
             free((*coo_mtx)[k].mtxf);
         }
     }

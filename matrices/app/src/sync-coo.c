@@ -6,14 +6,10 @@
  */
 int process_scalar(COO *coo_mtx, float sc) {
     if((*coo_mtx).is_int) {
-        for(int i = 0; i < (*coo_mtx).size; i++){
-            (*coo_mtx).mtxi[i][2] *= sc;
-        }
+        for(int i = 0; i < (*coo_mtx).size; i++) (*coo_mtx).mtxi[i][2] *= sc;
     }
     else {
-        for(int i = 0; i < (*coo_mtx).size; i++){
-            (*coo_mtx).mtxf[i][2] *= sc;
-        }
+        for(int i = 0; i < (*coo_mtx).size; i++) (*coo_mtx).mtxf[i][2] *= sc;
     }
     return 1;
 }
@@ -70,15 +66,10 @@ int process_addition(COO **coo_mtx) {
             perror("Error allocating memory for resultant sparse matrix.");
             return 0;
         }
-        print("stage1");
         for(int i = 0; i < (*coo_mtx)[file1].row; i++) {
             if(((*coo_mtx)[file1].mtxf[block1][0] != (float) i) && ((*coo_mtx)[file2].mtxf[block2][0] != (float) i)) continue;
-            print("stage2");
             for(int j = 0; j < (*coo_mtx)[file1].col; j++) {
-                print("stage3");
-                printf("%li | %li | %li && size = %f\n", block1, block2, blockr, (float) ((*coo_mtx)[file1].size + (*coo_mtx)[file2].size));
                 if(is_defined(&(*coo_mtx)[file1], i, j, block1) && is_defined(&(*coo_mtx)[file2], i, j, block2)) {
-                    print("stage4");
                     val = (*coo_mtx)[file1].mtxf[block1][2] + (*coo_mtx)[file2].mtxf[block2][2];
                     (*coo_mtx)[res].size += 1;
                     if(!add_float_coo(&(*coo_mtx)[res], val, i, j, blockr)) {
@@ -86,10 +77,8 @@ int process_addition(COO **coo_mtx) {
                         return 0;
                     }
                     blockr++; block1++; block2++;
-                    print("stage5");
                 }
                 else if(is_defined(&(*coo_mtx)[file1], i, j, block1)) {
-                    print("stage6");
                     val = (*coo_mtx)[file1].mtxf[block1][2];
                     (*coo_mtx)[res].size += 1;
                     if(!add_float_coo(&(*coo_mtx)[res], val, i, j, blockr)){
@@ -97,10 +86,8 @@ int process_addition(COO **coo_mtx) {
                         return 0;
                     }
                     blockr++; block1++;
-                    print("stage7");
                 }
                 else if(is_defined(&(*coo_mtx)[file2], i, j, block2)) {
-                    print("stage8");
                     val = (*coo_mtx)[file2].mtxf[block2][2];
                     (*coo_mtx)[res].size += 1;
                     if(!add_float_coo(&(*coo_mtx)[res], val, i, j, blockr)) {
@@ -108,9 +95,7 @@ int process_addition(COO **coo_mtx) {
                         return 0;
                     }
                     blockr++; block2++;
-                    print("stage9");
                 }
-                print("stage10");
                 continue;
             }
         }
@@ -123,14 +108,10 @@ int process_addition(COO **coo_mtx) {
             perror("Error allocating memory for resultant sparse matrix.");
             return 0;
         }
-        print("stage1");
         for(int i = 0; i < (*coo_mtx)[file1].row; i++) {
             if((*coo_mtx)[file1].mtxi[block1][0] != i && (*coo_mtx)[file2].mtxi[block2][0] != i) continue;
-            print("stage2");
             for(int j = 0; j < (*coo_mtx)[file1].col; j++) {
-                print("stage3");
                 if(is_defined(&(*coo_mtx)[file1], i, j, block1) && is_defined(&(*coo_mtx)[file2], i, j, block2)) {
-                    print("stage4");
                     val = (*coo_mtx)[file1].mtxi[block1][2] + (*coo_mtx)[file2].mtxi[block2][2];
                     (*coo_mtx)[res].size += 1;
                     if(!add_int_coo(&(*coo_mtx)[res], val, i, j, blockr)) {
@@ -138,10 +119,8 @@ int process_addition(COO **coo_mtx) {
                         return 0;
                     }
                     blockr++; block1++; block2++;
-                    print("stage5");
                 }
                 else if(is_defined(&(*coo_mtx)[file1], i, j, block1)) {
-                    print("stage6");
                     val = (*coo_mtx)[file1].mtxi[block1][2];
                     (*coo_mtx)[res].size += 1;
                     if(!add_int_coo(&(*coo_mtx)[res], val, i, j, blockr)) {
@@ -149,10 +128,8 @@ int process_addition(COO **coo_mtx) {
                         return 0;
                     }
                     blockr++; block1++;
-                    print("stage7");
                 }
                 else if(is_defined(&(*coo_mtx)[file2], i, j, block2)) {
-                    print("stage8");
                     val = (*coo_mtx)[file2].mtxi[block2][2];
                     (*coo_mtx)[res].size += 1;
                     if(!add_int_coo(&(*coo_mtx)[res], val, i, j, blockr)) {
@@ -160,14 +137,9 @@ int process_addition(COO **coo_mtx) {
                         return 0;
                     }
                     blockr++; block2++;
-                    print("stage9");
                 }
-                print("stage11");
-                continue;
             }
         }
     }
-    print("addition complete\n");
-
     return 1;
 }

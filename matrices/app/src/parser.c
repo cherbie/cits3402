@@ -5,7 +5,7 @@
  * return 1 to indicate success and 0 to indicate failure
  */
 int parse_cmd(int argc, char *argv[]) {
-    int c, digit_optind, this_option_optind = 0;
+    int c = 0;
     struct option long_options[NUM_OPERATIONS + 1] = {
         {"sc",  required_argument, NULL, '0'},
         {"tr",  no_argument, NULL, '1'},
@@ -16,16 +16,10 @@ int parse_cmd(int argc, char *argv[]) {
     };
     bool operation_seen = false;
     while (1) {
-        this_option_optind = optind ? optind : 1;
-        printf("this_option_optind %i vs %i\n", this_option_optind, optind);
-
         c = getopt_long(argc, argv, "-:f:lt:", long_options, &config.operation);
         if (c == -1) break;
-
-        printf("char : %c\n", c);
         switch (c) {
             case 1: {
-                printf("Non-option argument encountered.\n ... %s\n", optarg);
                 if((optind >= argc) & !set_input_files(2, argv[optind -1])) {
                     return 0;
                 }
@@ -36,7 +30,6 @@ int parse_cmd(int argc, char *argv[]) {
                     fprintf(stderr, "More than one matrix operation specified.\n");
                     return 0;
                 }
-                printf("option = sm\n");
                 if((optind >= argc) & !set_config_sm(optarg)) return 0;
                 operation_seen = true;
                 break;
@@ -47,29 +40,20 @@ int parse_cmd(int argc, char *argv[]) {
                     return 0;
                 }
                 operation_seen = true;
-                printf("option %s", long_options[config.operation].name);
-                if (optarg) printf(" with arg %s", optarg);
-                printf("\n");
-                if (digit_optind != 0 && digit_optind != this_option_optind)
-                printf("digits occur in two different argv-elements.\n");
-                digit_optind = this_option_optind;
-                printf("option %i\n", c);
                 break;
             }
             case 'f': { //file
-                printf("option = f\n");
                 if((optind >= argc) & !set_input_files(1, optarg)) {
                     return 0;
                 }
                 break;
             }
             case 't': {
-                printf("option = t\n");
                 if((optind >= argc) & !set_config_threads(optarg)) return 0;
                 break;
             }
             case 'l': { //log
-                printf("option = l\n");
+                //printf("option = l\n");
                 if(!set_logger()) return 0;
                 break;
             }
@@ -77,18 +61,9 @@ int parse_cmd(int argc, char *argv[]) {
                 fprintf(stderr, "Missing option argument.\n");
                 return 0;
             }
-            default:
-                printf("?? getopt returned character code 0%o ??\n", c);
+            default: break;
         }
     }
-    /* Get all of the non-option arguments
-    if (optind < argc) {
-        printf("Non-option args: ");
-        while (optind < argc)
-            printf("%s ", argv[optind++]);
-        printf("\n");
-    }
-    */
     if(config.num_threads < 0) config.num_threads = DEFAULT_THREAD_COUNT;
     if(!config_is_setup()) return 0;
     return 1;

@@ -9,7 +9,6 @@ int operation_main(void) {
         fprintf(stderr, "Unable to perform matrix operation.\n");
         return 0;
     }
-    print(" ... end of operation main function.");
     return 1;
 }
 
@@ -36,10 +35,7 @@ int scalar(void) {
         return 0;
     }
     gettimeofday(&config.time[1].end, NULL);
-    print_coo(&coo_sparse_mtx[0]);
-
     if(!process_stat()) fprintf(stderr, "Error determining duration of operations.\n");
-
     // -- LOG RESULT TO FILE --
     if(config.log_fd != NULL) { //specified
         fprintf(config.log_fd, "%s\n", config.op_str);
@@ -51,10 +47,8 @@ int scalar(void) {
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
     }
-
     dealloc_coo(&coo_sparse_mtx, 1);
     free(coo_sparse_mtx);
-    print(" ... completed scalar multiplication & deallocated memory");
     return 1;
 }
 
@@ -83,7 +77,6 @@ int trace(void) {
     }
     gettimeofday(&config.time[1].end, NULL);
     if(!process_stat()) fprintf(stderr, "Error determining duration of operations.\n");
-
     // -- LOG RESULT TO FILE --
     if(config.log_fd != NULL) { //specified
         fprintf(config.log_fd, "%s\n", config.op_str);
@@ -95,10 +88,8 @@ int trace(void) {
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
     }
-
     dealloc_coo(&coo_sparse_mtx, 1);
     free(coo_sparse_mtx);
-    print(" ... finding trace of matrix.");
     return 1;
 }
 
@@ -129,9 +120,6 @@ int addition(void) {
     }
     gettimeofday(&config.time[1].end, NULL);
     if(!process_stat()) fprintf(stderr, "Error determining duration of operations.\n");
-
-    print_coo(&(coo_sparse_mtx[2]));
-
     // -- LOG RESULT TO FILE --
     if(config.log_fd != NULL) { //specified
         fprintf(config.log_fd, "%s\n", config.op_str);
@@ -145,11 +133,8 @@ int addition(void) {
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
     }
-
-
     dealloc_coo(&coo_sparse_mtx, 3);
     free(coo_sparse_mtx);
-    print(" ... performing matrix addition.");
     return 1;
 }
 
@@ -174,8 +159,6 @@ int transpose_matrix(void) {
         return 0;
     }
     gettimeofday(&config.time[0].end, NULL);
-    print_csr(&csr_sparse_mtx[0]); //debugging
-    print("FINISHED READING CSR FILE\n");
     gettimeofday(&config.time[1].start, NULL);
     if(!process_transpose(&csr_sparse_mtx[0], &csc_sparse_mtx[0])) {
         fprintf(stderr, "Error transposing given matrix.\n");
@@ -183,11 +166,6 @@ int transpose_matrix(void) {
     }
     gettimeofday(&config.time[1].end, NULL);
     if(!process_stat()) fprintf(stderr, "Error determining duration of operations.\n");
-
-    print_csc(&csc_sparse_mtx[0]);
-
-    printf("memcompare = %i\n", memcmp(&csr_sparse_mtx[0].mtxi, &csc_sparse_mtx[0].mtxi, csc_sparse_mtx[0].size * sizeof(int)));
-
     // -- LOG RESULT TO FILE --
     if(config.log_fd != NULL) { //specified
         fprintf(config.log_fd, "%s\n", config.op_str);
@@ -204,13 +182,10 @@ int transpose_matrix(void) {
         fprintf(stderr, "Error logging transposed matrix to file.\n");
         return 0;
     }
-
     dealloc_csr(&csr_sparse_mtx, 1);
     dealloc_csc(&csc_sparse_mtx, 1);
     free(csr_sparse_mtx);
     free(csc_sparse_mtx);
-
-    print(" ... transposing matrix.");
     return 1;
 }
 
@@ -236,24 +211,13 @@ int matrix_mp(void) {
         return 0;
     }
     gettimeofday(&config.time[0].end, NULL);
-    print_csr(&csr_sparse_mtx[0]);
-    print_csc(&csc_sparse_mtx[0]);
-
-    print(" ... Completed reading matrix into sparse matrix representations.");
-
     gettimeofday(&config.time[1].start, NULL);
     if(!process_multiplication(&csr_sparse_mtx[1], &csr_sparse_mtx[0], &csc_sparse_mtx[0])) {
         fprintf(stderr, "Error performing matrix multiplication on given matrix.\n");
         return 0;
     }
     gettimeofday(&config.time[1].end, NULL);
-
-    print(" ... Completed matrix multiplication calculation.");
-
     if(!process_stat()) fprintf(stderr, "Error determining duration of operations.\n");
-
-    print_csr(&csr_sparse_mtx[1]); //print resultant info
-
     // -- LOG RESULT TO FILE --
     if(config.log_fd != NULL) { //specified
         fprintf(config.log_fd, "%s\n", config.op_str);
@@ -267,16 +231,10 @@ int matrix_mp(void) {
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
     }
-
-    if(!log_csr_result(&csr_sparse_mtx[1], stdout)) {
-        fprintf(stderr, "Unable to log matrix result value.\n");
-        return 0;
-    }
     // -- DEALLOCATE --
     dealloc_csr(&csr_sparse_mtx, 2);
     dealloc_csc(&csc_sparse_mtx, 1);
     free(csc_sparse_mtx);
     free(csr_sparse_mtx);
-    print(" ... performing matrix multiplication.");
     return 1;
 }

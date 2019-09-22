@@ -17,12 +17,7 @@
 #define STUDENT_NUMBER "22245091"
 #define NUMBER_OF_INPUT_FILES 2
 #define DEFAULT_THREAD_COUNT 4
-//#define INPUT_NUM_LINES 3
-/*typedef struct {
-    int   i;
-    float f;
-} MTX_TYPE;
-*/
+
 // -- STRUCTURES --
 typedef struct {
     struct timeval start;
