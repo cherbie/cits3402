@@ -51,7 +51,7 @@ typedef struct {
     float **mtxf;
     int row;
     int col;
-    int size; //COO.size[0] - number of elements in mtx. COO.size[1] - number of elements in each sub array.
+    int size;
 } COO;
 
 typedef struct {
@@ -126,12 +126,9 @@ extern int add_int_coo(COO*,int,int,int,int);
 extern int add_float_coo(COO*,float,int,int,int);
 extern int read_csr_filei(CSR**, int, int);
 extern int read_csr_filef(CSR**, int, int);
-extern int read_csc_filei(CSC**, int, int);
-extern int read_csc_filef(CSC**, int, int);
+extern int read_coo2csc(COO*, CSC*);
 extern int add_int_csr(CSR*, int, int, int, int);
 extern int add_float_csr(CSR*, float, int, int, int);
-extern int add_int_csc(CSC*, int, int, int, int);
-extern int add_float_csc(CSC*, float, int, int, int);
 
 
 // -- SYNCHRONOUS --
@@ -139,7 +136,7 @@ extern int process_scalar(COO*, float);
 extern int process_trace(COO*,int*,float*);
 extern int process_addition(COO**);
 extern int process_transpose(CSR*, CSC*);
-extern int process_multiplication(CSR*, CSR*, CSR*);
+extern int process_multiplication(CSR*, CSR*, CSC*);
 
 // -- LOGGER --
 extern int log_coo_result(COO*, FILE*);

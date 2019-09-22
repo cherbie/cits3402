@@ -219,10 +219,61 @@ int transpose_matrix(void) {
  * Return 1 to indicate success and 0 to indicate failure.
  */
 int matrix_mp(void) {
-    const int num_csr = 3;
+    /*
+        2 CSR struct
+        1 CSC struct
+    */
+    if(false) {
+        CSR *csr_sparse_mtx; //structure containing coordinate format representation of matrix.
+        if((csr_sparse_mtx = malloc(2 * sizeof(CSR))) == NULL) {
+            perror(NULL);
+            return 0;
+        }
+        if(!read_to_csr(&csr_sparse_mtx, 0, 0)) {
+            fprintf(stderr, "Error converting file to sparse matrix form.\n");
+            return 0;
+        }
+        print_csr(&csr_sparse_mtx[0]);
+        CSC *csc_sparse_mtx = malloc(1 * sizeof(CSC));
+        if((csc_sparse_mtx == NULL)) {
+            perror(NULL);
+            return 0;
+        }
+        if(!read_to_csc(&csc_sparse_mtx, 0, 1)) {
+            perror(NULL);
+            return 0;
+        }
+         print_csc(&csc_sparse_mtx[0]);
+         print(" ... Completed reading matrix into sparse matrix representations.");
+         if(!process_multiplication(&csr_sparse_mtx[1], &csr_sparse_mtx[0], &csc_sparse_mtx[0])) {
+             fprintf(stderr, "Error performing matrix multiplication on given matrix.\n");
+             return 0;
+         }
+
+         print(" ... Completed matrix multiplication calculation.");
+
+         print_csr(&csr_sparse_mtx[1]);
+
+         print(" --- LOG TO FILE --- \n");
+         if(!log_csr_result(&csr_sparse_mtx[1], stdout)) {
+             fprintf(stderr, "Unable to log matrix result value.\n");
+             return 0;
+         }
+
+         print(" --complete --");
+
+         dealloc_csr(&csr_sparse_mtx, 2);
+         dealloc_csc(&csc_sparse_mtx, 1);
+         free(csc_sparse_mtx);
+         free(csr_sparse_mtx);
+         return 1;
+    }
+
+
     // -- SPARSE MATRIX REP CSR. --
-    CSR *csr_sparse_mtx; //structure containing coordinate format representation of matrix.
-    if((csr_sparse_mtx = malloc(num_csr * sizeof(CSR))) == NULL) {
+    CSR *csr_sparse_mtx = malloc(2 * sizeof(CSR)); //structure containing coordinate format representation of matrix.
+    CSC *csc_sparse_mtx = malloc(1 * sizeof(CSC));
+    if((csc_sparse_mtx == NULL) || csr_sparse_mtx == NULL) {
         perror(NULL);
         return 0;
     }
@@ -231,17 +282,18 @@ int matrix_mp(void) {
         fprintf(stderr, "Error converting file to sparse matrix form.\n");
         return 0;
     }
-    if(!read_to_csr(&csr_sparse_mtx, 1, 1)) {
+    if(!read_to_csc(&csc_sparse_mtx, 0, 1)) {
         fprintf(stderr, "Error converting file to sparse matrix form.\n");
         return 0;
     }
     gettimeofday(&config.time[0].end, NULL);
-    print_csr(&csr_sparse_mtx[1]);
+    print_csr(&csr_sparse_mtx[0]);
+    print_csc(&csc_sparse_mtx[0]);
 
     print(" ... Completed reading matrix into sparse matrix representations.");
 
     gettimeofday(&config.time[1].start, NULL);
-    if(!process_multiplication(&csr_sparse_mtx[2], &csr_sparse_mtx[0], &csr_sparse_mtx[1])) {
+    if(!process_multiplication(&csr_sparse_mtx[1], &csr_sparse_mtx[0], &csc_sparse_mtx[0])) {
         fprintf(stderr, "Error performing matrix multiplication on given matrix.\n");
         return 0;
     }
@@ -251,7 +303,7 @@ int matrix_mp(void) {
 
     if(!process_stat()) fprintf(stderr, "Error determining duration of operations.\n");
 
-    print_csr(&csr_sparse_mtx[2]); //print resultant info
+    print_csr(&csr_sparse_mtx[1]); //print resultant info
 
     // -- LOG RESULT TO FILE --
     if(config.log_fd != NULL) { //specified
@@ -260,14 +312,21 @@ int matrix_mp(void) {
             fprintf(config.log_fd, "%s\n", config.filename[i]);
         }
         fprintf(config.log_fd, "%i\n", config.num_threads);
-        if(!log_csr_result(&csr_sparse_mtx[2], config.log_fd)) {
+        if(!log_csr_result(&csr_sparse_mtx[1], config.log_fd)) {
             fprintf(stderr, "Unable to log matrix result value.\n");
             return 0;
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
     }
 
-    dealloc_csr(&csr_sparse_mtx, num_csr);
+    if(!log_csr_result(&csr_sparse_mtx[1], stdout)) {
+        fprintf(stderr, "Unable to log matrix result value.\n");
+        return 0;
+    }
+    // -- DEALLOCATE --
+    dealloc_csr(&csr_sparse_mtx, 2);
+    dealloc_csc(&csc_sparse_mtx, 1);
+    free(csc_sparse_mtx);
     free(csr_sparse_mtx);
     print(" ... performing matrix multiplication.");
     return 1;

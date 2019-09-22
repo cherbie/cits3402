@@ -52,7 +52,7 @@ int process_transpose(CSR *csr_mtx, CSC *csc_mtx) {
  * @param mtx_2 CSC* the second matrix given.
  * @return 1 to indicate success and zero to indicate failure.
  */
-int process_multiplication(CSR *res_mtx, CSR *mtx_1, CSR *mtx_2) {
+int process_multiplication(CSR *res_mtx, CSR *mtx_1, CSC *mtx_2) {
     if((*mtx_1).col != (*mtx_2).row) {
         fprintf(stderr, "The dimensions of the provided matrices are not suitable.\n");
         return 0;
@@ -61,10 +61,8 @@ int process_multiplication(CSR *res_mtx, CSR *mtx_1, CSR *mtx_2) {
     (*res_mtx).col = (*mtx_2).col;
     if(!(*mtx_1).is_int || !(*mtx_2).is_int) (*res_mtx).is_int = false;
     else (*res_mtx).is_int = true;
-    int num_nz_1, num_nz_2, sum_nz_1, sum_nz_2, index_1, index_2, count_1, count_2;
-    num_nz_1 = 0; num_nz_2 = 0; sum_nz_1 = 0; sum_nz_2 = 0;
-    bool *seen_2 = calloc(((*res_mtx).row * (*res_mtx).col), sizeof(bool));
-    bool *seen_1 = calloc(((*mtx_1).col), sizeof(bool));
+    int num_nz_1, num_nz_2, sum_nz_1, sum_nz_2, count_1, count_2;
+    num_nz_1 = 0; num_nz_2 = 0, sum_nz_1 = 0; sum_nz_2 = 0;
     if((*res_mtx).is_int) {
         int sum;
         (*res_mtx).mtxi = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int)); //maximum size
@@ -75,65 +73,43 @@ int process_multiplication(CSR *res_mtx, CSR *mtx_1, CSR *mtx_2) {
             return 0;
         }
         (*res_mtx).size = 0;
-        for(int i = 1; i <= (*mtx_1).row; i++) {
-            printf("row seen --- \n");
-            sum_nz_1 += (*mtx_1).mtx_offset[i-1]; //add previous amount of non-zero elements. starting index in nnz array
-            num_nz_1 = (*mtx_1).mtx_offset[i]; //current amount of non-zero elements
-            seen_2 = calloc(((*res_mtx).row * (*res_mtx).col), sizeof(bool));
-            for(int j = 1; j <= (*mtx_2).col; j++) { //represent col of  2nd matrix & resultant matrix
-                printf("col seen ---- \n");
-                seen_1 = calloc(((*mtx_1).col), sizeof(bool));
-                sum_nz_2 = 0; //zero non-zero lookup index
-                sum = 0; //row and column under inspection respectively
-                if(num_nz_1 == 0) continue; // resultant offset = 0;
-                for(int k = 1; k <= (*mtx_2).row; k++) { //represent rows of resultant matrix
-                    printf("k = %i\n", (k));
-                    sum_nz_2 += (*mtx_2).mtx_offset[k-1]; //number of  non-zero's before current row
-                    num_nz_2 = (*mtx_2).mtx_offset[k]; //number of non-zero's in current row
-                    index_2 = sum_nz_2;
-                    count_2 = 1;
-                    while(seen_2[index_2]) {
-                        count_2++;
-                        index_2++;
-                    }
-                    printf("count mtx 2 = %i\n", count_2);
-                    count_1 = 1;
-                    index_1 = sum_nz_1;  //row and column under inspection in first mtx
-                    while(seen_1[index_1]) {
+        sum_nz_1 = 0;
+        for(int i = 0; i < (*mtx_1).row; i++) { //row of first matrix
+            print(" -- row seen -- ");
+            if((*mtx_1).mtx_offset[i+1] == 0) continue;
+            //num_nz_1 = (*mtx_1).mtx_offset[i+1];
+            sum_nz_1 += (*mtx_1).mtx_offset[i];
+            sum_nz_2 = 0;
+            //num_nz_2 = 0;
+            for(int j = 0; j < (*mtx_2).col; j++) { //column of 2nd matrix
+                print(" -- column seen -- ");
+                if((*mtx_2).mtx_offset[j+1] == 0) continue;
+                //num_nz_2 = (*mtx_2).mtx_offset[j+1];
+                sum_nz_2 += (*mtx_2).mtx_offset[j];
+                num_nz_2 = sum_nz_2;
+                num_nz_1 = sum_nz_1;
+                sum = 0;
+                count_1 = 0;
+                count_2 = 0;
+                for(int k = 0; k < (*mtx_2).row; k++) { //row of 2nd matrix
+                    if(count_1 >= (*mtx_1).mtx_offset[i+1] || count_2 >= (*mtx_2).mtx_offset[j+1]) break;
+                    num_nz_1 += count_1;
+                    num_nz_2 += count_2;
+                    printf(" elem ---> %i & %i\n", k, j);
+                    printf(" col ---> %i & %i\n", (*mtx_1).mtx_col[num_nz_1], (*mtx_2).mtx_row[num_nz_2]);
+                    if((*mtx_1).mtx_col[num_nz_1] == k && (*mtx_2).mtx_row[num_nz_2] == k) {
+                        sum += (*mtx_1).mtxi[num_nz_1] * (*mtx_2).mtxi[num_nz_2];
+                        printf(" index ---> %i x %i => sum = %i\n", (*mtx_1).mtxi[num_nz_1], (*mtx_2).mtxi[num_nz_2], sum);
                         count_1++;
-                        index_1++;
+                        count_2++;
                     }
-                    if(count_2 > num_nz_2 || count_1 > num_nz_1) {
-                        seen_1[index_1] = true;
-                        continue;
-                    }
-
-                    printf(" elem ---> %i & %i\n",(k-1), (j-1));
-                    printf(" index ---> %i-%i || %i-%i\n", sum_nz_1, index_1, sum_nz_2, index_2);
-                    printf(" col ---> %i & %i\n", (*mtx_1).mtx_col[index_1], (*mtx_2).mtx_col[index_2]);
-                    if((*mtx_1).mtx_col[index_1] != (k-1)) {
-                        //seen_1[index_1] = true;
-                        continue;
-                    }
-                    //else one++;
-                    if((*mtx_2).mtx_col[index_2] != (j-1)) {
-                        seen_1[index_1] = true;
-                        continue;
-                    }
-                    //else two++;
-                    //if(two >= num_nz_2 || one >= num_nz_1) break;
-                    //if((*mtx_1).mtx_col[index_1] == (*mtx_2).mtx_col[index_2]) { //nz element column matches row
-                    sum += (*mtx_1).mtxi[index_1] * (*mtx_2).mtxi[index_2];
-                    printf("Multiplication ==> %i x %i ==> %i\n", (*mtx_1).mtxi[index_1], (*mtx_2).mtxi[index_2], sum);
-                    seen_2[index_2] = true;
-                    seen_1[index_1] = true;
-                    //}
+                    else if((*mtx_1).mtx_col[num_nz_1] == k) count_1++;
+                    else if((*mtx_2).mtx_row[num_nz_2] == k) count_2++;
                 }
-                //store sum;
                 if(sum != 0) {
                     (*res_mtx).mtxi[(*res_mtx).size] = sum;
-                    (*res_mtx).mtx_offset[i] += 1;
-                    (*res_mtx).mtx_col[(*res_mtx).size] = (j-1); //column under inspection
+                    (*res_mtx).mtx_offset[i+1] += 1;
+                    (*res_mtx).mtx_col[(*res_mtx).size] = j; //column under inspection
                     (*res_mtx).size += 1;
                 }
             }
@@ -149,71 +125,47 @@ int process_multiplication(CSR *res_mtx, CSR *mtx_1, CSR *mtx_2) {
             return 0;
         }
         (*res_mtx).size = 0;
-        for(int i = 1; i <= (*mtx_1).row; i++) {
-            printf("row seen --- \n");
-            sum_nz_1 += (*mtx_1).mtx_offset[i-1]; //add previous amount of non-zero elements. starting index in nnz array
-            num_nz_1 = (*mtx_1).mtx_offset[i]; //current amount of non-zero elements
-            seen_2 = calloc(((*res_mtx).row * (*res_mtx).col), sizeof(bool));
-            for(int j = 1; j <= (*mtx_2).col; j++) { //represent col of  2nd matrix & resultant matrix
-                printf("col seen ---- \n");
-                seen_1 = calloc(((*mtx_1).col), sizeof(bool));
-                sum_nz_2 = 0; //zero non-zero lookup index
-                sum = 0.0; //row and column under inspection respectively
-                if(num_nz_1 == 0) continue; // resultant offset = 0;
-                for(int k = 1; k <= (*mtx_2).row; k++) { //represent rows of resultant matrix
-                    printf("k = %i\n", (k));
-                    sum_nz_2 += (*mtx_2).mtx_offset[k-1]; //number of  non-zero's before current row
-                    num_nz_2 = (*mtx_2).mtx_offset[k]; //number of non-zero's in current row
-                    index_2 = sum_nz_2;
-                    count_2 = 1;
-                    while(seen_2[index_2]) {
-                        count_2++;
-                        index_2++;
-                    }
-                    printf("count mtx 2 = %i\n", count_2);
-                    count_1 = 1;
-                    index_1 = sum_nz_1;  //row and column under inspection in first mtx
-                    while(seen_1[index_1]) {
+        sum_nz_1 = 0;
+        for(int i = 0; i < (*mtx_1).row; i++) { //row of first matrix
+            print(" -- row seen -- ");
+            if((*mtx_1).mtx_offset[i+1] == 0) continue;
+            //num_nz_1 = (*mtx_1).mtx_offset[i+1];
+            sum_nz_1 += (*mtx_1).mtx_offset[i];
+            sum_nz_2 = 0;
+            //num_nz_2 = 0;
+            for(int j = 0; j < (*mtx_2).col; j++) { //column of 2nd matrix
+                print(" -- column seen -- ");
+                if((*mtx_2).mtx_offset[j+1] == 0) continue;
+                //num_nz_2 = (*mtx_2).mtx_offset[j+1];
+                sum_nz_2 += (*mtx_2).mtx_offset[j];
+                num_nz_2 = sum_nz_2;
+                num_nz_1 = sum_nz_1;
+                sum = 0;
+                count_1 = 0;
+                count_2 = 0;
+                for(int k = 0; k < (*mtx_2).row; k++) { //row of 2nd matrix
+                    if(count_1 >= (*mtx_1).mtx_offset[i+1] || count_2 >= (*mtx_2).mtx_offset[j+1]) break;
+                    num_nz_1 += count_1;
+                    num_nz_2 += count_2;
+                    printf(" elem ---> %i & %i\n", k, j);
+                    printf(" col ---> %i & %i\n", (*mtx_1).mtx_col[num_nz_1], (*mtx_2).mtx_row[num_nz_2]);
+                    if((*mtx_1).mtx_col[num_nz_1] == k && (*mtx_2).mtx_row[num_nz_2] == k) {
+                        sum += (*mtx_1).mtxf[num_nz_1] * (*mtx_2).mtxf[num_nz_2];
+                        printf(" index ---> %3.2f x %3.2f => sum = %3.2f\n", (*mtx_1).mtxf[num_nz_1], (*mtx_2).mtxf[num_nz_2], sum);
                         count_1++;
-                        index_1++;
+                        count_2++;
                     }
-                    if(count_2 > num_nz_2 || count_1 > num_nz_1) {
-                        seen_1[index_1] = true;
-                        continue;
-                    }
-
-                    printf(" elem ---> %i & %i\n",(k-1), (j-1));
-                    printf(" index ---> %i-%i || %i-%i\n", sum_nz_1, index_1, sum_nz_2, index_2);
-                    printf(" col ---> %i & %i\n", (*mtx_1).mtx_col[index_1], (*mtx_2).mtx_col[index_2]);
-                    if((*mtx_1).mtx_col[index_1] != (k-1)) {
-                        //seen_1[index_1] = true;
-                        continue;
-                    }
-                    //else one++;
-                    if((*mtx_2).mtx_col[index_2] != (j-1)) {
-                        seen_1[index_1] = true;
-                        continue;
-                    }
-                    //else two++;
-                    //if(two >= num_nz_2 || one >= num_nz_1) break;
-                    //if((*mtx_1).mtx_col[index_1] == (*mtx_2).mtx_col[index_2]) { //nz element column matches row
-                    sum += (*mtx_1).mtxf[index_1] * (*mtx_2).mtxf[index_2];
-                    printf("Multiplication ==> %3.2f x %3.2f ==> %3.2f\n", (*mtx_1).mtxf[index_1], (*mtx_2).mtxf[index_2], sum);
-                    seen_2[index_2] = true;
-                    seen_1[index_1] = true;
-                    //}
+                    else if((*mtx_1).mtx_col[num_nz_1] == k) count_1++;
+                    else if((*mtx_2).mtx_row[num_nz_2] == k) count_2++;
                 }
-                //store sum;
                 if(sum != 0) {
                     (*res_mtx).mtxf[(*res_mtx).size] = sum;
-                    (*res_mtx).mtx_offset[i] += 1;
-                    (*res_mtx).mtx_col[(*res_mtx).size] = (j-1); //column under inspection
+                    (*res_mtx).mtx_offset[i+1] += 1;
+                    (*res_mtx).mtx_col[(*res_mtx).size] = j; //column under inspection
                     (*res_mtx).size += 1;
                 }
             }
         }
     }
-    free(seen_1);
-    free(seen_2);
     return 1;
 }
