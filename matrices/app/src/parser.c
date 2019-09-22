@@ -89,6 +89,7 @@ int parse_cmd(int argc, char *argv[]) {
         printf("\n");
     }
     */
+    if(config.num_threads < 0) config.num_threads = DEFAULT_THREAD_COUNT;
     if(!config_is_setup()) return 0;
     return 1;
 }
@@ -103,11 +104,7 @@ bool config_is_setup(void) {
     }else if(config.fd[0] == NULL) {
         fprintf(stderr, "Error: No input files specified.\n");
         return false;
-    }else if(config.fd[1] == NULL) {
-        fprintf(stderr, "Error: Unable to establish output logging file.\n");
-        return false;
-    }
-    else return true;
+    }else return true;
 }
 
 

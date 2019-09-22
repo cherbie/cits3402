@@ -27,7 +27,7 @@ void dealloc_coo(COO **coo_mtx, int size) {
  */
 void dealloc_config(void) {
     free(config.op_str); //char pointers
-    for(int i = 0; i < NUMBER_OF_INPUT_FILES; i++) {
+    for(int i = 0; i < config.num_files; i++) {
         free(config.filename[i]); //char pointers in filenames
         fclose(config.fd[i]);
     }

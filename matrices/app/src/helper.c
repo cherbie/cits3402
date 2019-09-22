@@ -18,7 +18,8 @@ int initialise(void) {
 
     config.operation = -1;
     config.num_threads = -1;
-    config.fd = malloc(NUMBER_OF_INPUT_FILES * sizeof(int *));
+    config.num_files = -1;
+    config.fd = malloc(NUMBER_OF_INPUT_FILES * sizeof(FILE *));
     config.filename = malloc(NUMBER_OF_INPUT_FILES * sizeof(char *));
     if(config.fd == NULL || config.filename == NULL) {
         perror(NULL);
@@ -54,7 +55,6 @@ void print_config() {
     printf(" -- Configuration --\n");
     printf(" ... Matrix operation -> %s\n", op_to_string());
     printf(" ... Input 1 -> %s\n", config.filename[0]);
-    printf(" ... Input 2 -> %s\n", config.filename[1]);
     printf(" ... Logger file -> %s\n", config.log_filename);
     if(config.num_threads > 0) printf(" ... Number of threads -> %i\n", config.num_threads);
     printf(" ... file reading time -> %12.10f\n", (float) config.time[0].delta);

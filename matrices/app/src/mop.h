@@ -16,7 +16,7 @@
 #define BUFFER_SIZE 250
 #define STUDENT_NUMBER "22245091"
 #define NUMBER_OF_INPUT_FILES 2
-
+#define DEFAULT_THREAD_COUNT 4
 //#define INPUT_NUM_LINES 3
 /*typedef struct {
     int   i;
@@ -35,6 +35,7 @@ typedef struct {
     char *op_str;
     float sm; //scalar number
     int  num_threads;
+    int num_files;
     FILE **fd;
     char **filename;
     FILE *log_fd;

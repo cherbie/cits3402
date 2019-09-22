@@ -1,3 +1,3 @@
 #!/bin/bash
 clear
-./mop --ts -f ./input/file7.in ./input/file8.in -l -t 2
+./mop --mm -f ./input/float1024.in ./input/float1024.in -l -t 2
