@@ -171,13 +171,16 @@ void print_csc(CSC *csc_mtx) {
  * Calculates whether the COO struct has a non-zero value defined for a particular row & column in a block
  * @returns true if a non-zero value is defined, false otherwise.
  */
-bool is_defined(COO *coo_mtx, int row, int col, int block) {
-    if((*coo_mtx).is_int) {
-        if((*coo_mtx).mtxi[block][0] == row && (*coo_mtx).mtxi[block][1] == col) return true;
+bool is_defined(COO *coo_mtx, int row, int col, long int block) {
+    if(block >= (*coo_mtx).size) return false;
+    else if((*coo_mtx).is_int) {
+        print("l");
+        printf("%li :: max = %li\n", block, (*coo_mtx).size);
+        if(((*coo_mtx).mtxi[block][0] == row) && (*coo_mtx).mtxi[block][1] == col) return true;
         else return false;
     }
     else {
-        if((*coo_mtx).mtxf[block][0] == row && (*coo_mtx).mtxf[block][1] == col) return true;
+        if(((*coo_mtx).mtxf[block][0] == (float) row) && ((*coo_mtx).mtxf[block][1] == (float) col)) return true;
         else return false;
     }
 }

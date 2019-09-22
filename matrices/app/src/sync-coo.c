@@ -51,7 +51,7 @@ int process_addition(COO **coo_mtx) {
     const int file1 = 0;
     const int file2 = 1;
     const int res = 2;
-    int block1, block2, blockr;
+    long int block1, block2, blockr;
 
     if(((*coo_mtx)[file1].row != (*coo_mtx)[file2].row) || ((*coo_mtx)[file1].col != (*coo_mtx)[file2].col)) {
         fprintf(stderr, "Error dimensions of the input matrices are not equivalent.\n");
@@ -72,10 +72,11 @@ int process_addition(COO **coo_mtx) {
         }
         print("stage1");
         for(int i = 0; i < (*coo_mtx)[file1].row; i++) {
-            if((*coo_mtx)[file1].mtxf[block1][0] != (float) i && (*coo_mtx)[file2].mtxf[block2][0] != (float) i) continue;
+            if(((*coo_mtx)[file1].mtxf[block1][0] != (float) i) && ((*coo_mtx)[file2].mtxf[block2][0] != (float) i)) continue;
             print("stage2");
             for(int j = 0; j < (*coo_mtx)[file1].col; j++) {
                 print("stage3");
+                printf("%li | %li | %li && size = %f\n", block1, block2, blockr, (float) ((*coo_mtx)[file1].size + (*coo_mtx)[file2].size));
                 if(is_defined(&(*coo_mtx)[file1], i, j, block1) && is_defined(&(*coo_mtx)[file2], i, j, block2)) {
                     print("stage4");
                     val = (*coo_mtx)[file1].mtxf[block1][2] + (*coo_mtx)[file2].mtxf[block2][2];

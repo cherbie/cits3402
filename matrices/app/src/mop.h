@@ -52,7 +52,7 @@ typedef struct {
     float **mtxf;
     int row;
     int col;
-    int size;
+    long int size;
 } COO;
 
 typedef struct {
@@ -103,7 +103,7 @@ extern void print_usage(void);
 extern void print(char *);
 extern char *str_clean(char*);
 extern void print_coo(COO*);
-extern bool is_defined(COO*, int, int, int);
+extern bool is_defined(COO*, int, int, long int);
 extern void print_csr(CSR*);
 extern void print_csc(CSC*);
 extern int get_non_zero_csc(CSC*, bool**, int, int);
@@ -123,8 +123,8 @@ extern int read_to_csr(CSR **, int, int);
 extern int read_to_csc(CSC **, int, int);
 extern int read_coo_filei(COO**,int, int);
 extern int read_coo_filef(COO**, int, int);
-extern int add_int_coo(COO*,int,int,int,int);
-extern int add_float_coo(COO*,float,int,int,int);
+extern int add_int_coo(COO*,int,int,int,long int);
+extern int add_float_coo(COO*,float,int,int,long int);
 extern int coo2csc(COO*, CSC*);
 extern int coo2csr(COO*, CSR*);
 

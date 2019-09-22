@@ -1,3 +1,3 @@
 #!/bin/bash
 clear
-./mop --ts -f ./input/file5.in -l
+./mop --ad -f ./input/int256.in ./input/int256.in -l

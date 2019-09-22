@@ -150,7 +150,7 @@ int read_coo_filei(COO **coo_mtx, int k, int fid) {
  * @param k is the application file identifier.
  * @count is the array index of the coordinates.
  */
-int add_int_coo(COO *coo_mtx, int val, int row, int col, int index) {
+int add_int_coo(COO *coo_mtx, int val, int row, int col, long int index) {
     (*coo_mtx).mtxi[index] = malloc(3  * sizeof(int));
     if((*coo_mtx).mtxi == NULL) {
         perror("function: add_int_coo()");
@@ -167,7 +167,7 @@ int add_int_coo(COO *coo_mtx, int val, int row, int col, int index) {
  * @param k is the application file identifier.
  * @count is the array index of the coordinates.
  */
-int add_float_coo(COO *coo_mtx, float val, int row, int col, int index) {
+int add_float_coo(COO *coo_mtx, float val, int row, int col, long int index) {
     (*coo_mtx).mtxf[index] = malloc(3  * sizeof(float));
     if((*coo_mtx).mtxf == NULL) {
         perror("function: add_int_coo()");
@@ -175,7 +175,7 @@ int add_float_coo(COO *coo_mtx, float val, int row, int col, int index) {
     }
     (*coo_mtx).mtxf[index][0] = (float) row;
     (*coo_mtx).mtxf[index][1] = (float) col;
-    (*coo_mtx).mtxf[index][2] = val;
+    (*coo_mtx).mtxf[index][2] = (float) val;
     return 1;
 }
 
