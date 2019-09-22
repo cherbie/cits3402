@@ -124,11 +124,8 @@ extern int read_coo_filei(COO**,int, int);
 extern int read_coo_filef(COO**, int, int);
 extern int add_int_coo(COO*,int,int,int,int);
 extern int add_float_coo(COO*,float,int,int,int);
-extern int read_csr_filei(CSR**, int, int);
-extern int read_csr_filef(CSR**, int, int);
-extern int read_coo2csc(COO*, CSC*);
-extern int add_int_csr(CSR*, int, int, int, int);
-extern int add_float_csr(CSR*, float, int, int, int);
+extern int coo2csc(COO*, CSC*);
+extern int coo2csr(COO*, CSR*);
 
 
 // -- SYNCHRONOUS --

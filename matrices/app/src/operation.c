@@ -205,6 +205,10 @@ int transpose_matrix(void) {
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
     }
+    if(!log_csc_ts_result(&csc_sparse_mtx[0], stdout)) {
+        fprintf(stderr, "Error logging transposed matrix to file.\n");
+        return 0;
+    }
 
     dealloc_csr(&csr_sparse_mtx, 1);
     dealloc_csc(&csc_sparse_mtx, 1);

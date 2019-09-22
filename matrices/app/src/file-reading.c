@@ -181,153 +181,79 @@ int add_float_coo(COO *coo_mtx, float val, int row, int col, int index) {
 
 // -- Coordinate Sparse Row Matrix Representation --
 
+/*
+ * Read non-zero values from file into CSR struct.
+ * @return 1 to indicate success and zero to indicate failure.
+ */
 int read_to_csr(CSR **sparse_mtx, int k, int fid) {
-    int buffer_len = MAX_MTX_DIMENSIONS; //max number of digits
-    int res = 0;
-    char *buffer = calloc(5, sizeof(char)); //int or float
-    if(buffer == NULL) {
-        perror(NULL);
+    COO *coo_mtx = malloc(1 * sizeof(COO));
+    if(!read_to_coo(&coo_mtx, k, fid)) {
+        fprintf(stderr, "Error reading into sparse matrix.\n");
         return 0;
     }
-    if(fgets(buffer, buffer_len - 1, config.fd[fid]) != NULL) {
-        buffer = str_clean(buffer);
-        if(strcmp(buffer, "int") == 0) (*sparse_mtx)[k].is_int = true;
-        else (*sparse_mtx)[k].is_int = false;
-    }
-    buffer = calloc(buffer_len, sizeof(char));
-    if(buffer == NULL) {
-        perror(NULL);
+
+    // -- CONVERT COO TO CSR --
+
+    if(!coo2csr(&coo_mtx[k], &(*sparse_mtx)[k])) {
+        fprintf(stderr, "Error reading into sparse matrix.\n");
         return 0;
     }
-    if(fgets(buffer, buffer_len - 1, config.fd[fid]) != NULL) {
-        buffer = str_clean(buffer);
-        res = sscanf(buffer, "%i", &(*sparse_mtx)[k].row);
-        if(res == 0 || res == EOF) {
-            perror(NULL);
+    dealloc_coo(&coo_mtx, 1);
+    free(coo_mtx);
+    return 1;
+}
+
+/**
+ * Read matrix values given in a COO structure.
+ * Convert to CSR struct
+ * @param csr_mtx CSR struct *
+ */
+int coo2csr(COO *coo_mtx, CSR *csr_mtx) {
+    (*csr_mtx).is_int = (*coo_mtx).is_int;
+    (*csr_mtx).row = (*coo_mtx).row;
+    (*csr_mtx).col = (*coo_mtx).col;
+    (*csr_mtx).size = (*coo_mtx).size;
+
+    if((*coo_mtx).is_int) { //int
+        (*csr_mtx).mtxi = malloc((*csr_mtx).size * sizeof(int));
+        (*csr_mtx).mtx_offset = calloc((*csr_mtx).row + 1, sizeof(int));
+        (*csr_mtx).mtx_col = malloc(((*csr_mtx).size) * sizeof(int));
+        if((*csr_mtx).mtxi == NULL || (*csr_mtx).mtx_col == NULL || (*csr_mtx).mtx_offset == NULL) {
+            perror("function: read_coo2csc()");
             return 0;
         }
-    }
-    buffer = calloc(buffer_len, sizeof(char));
-    if(buffer == NULL) {
-        perror(NULL);
-        return 0;
-    }
-    if(fgets(buffer, buffer_len - 1, config.fd[fid]) != NULL) {
-        buffer = str_clean(buffer);
-        res = sscanf(buffer, "%i", &(*sparse_mtx)[k].col);
-        if(res == 0 || res == EOF) {
-            perror(NULL);
-            return 0;
+        int count = 0;
+        for(int i = 0; i < (*csr_mtx).row; i++) {
+            for(int j = 0; j < (*coo_mtx).size; j++) {
+                if((*coo_mtx).mtxi[j][0] == i) {
+                    (*csr_mtx).mtx_offset[(*coo_mtx).mtxi[j][0] + 1] += 1;
+                    (*csr_mtx).mtx_col[count] = (*coo_mtx).mtxi[j][1];
+                    (*csr_mtx).mtxi[count] = (*coo_mtx).mtxi[j][2];
+                    count++;
+                }
+            }
         }
-    }
-    free(buffer);
-    // -- READ MATRIX VALUES --
-    if((*sparse_mtx)[k].is_int) {
-        if(!read_csr_filei(sparse_mtx, k, fid)) return 0;
     }
     else {
-        if(!read_csr_filef(sparse_mtx, k, fid)) return 0;
-    }
-    return 1;
-}
-
-/**
- * Read matrix values given in a file.
- * @param csr_mtx CSR struct
- */
-int read_csr_filei(CSR **csr_mtx, int k, int fid) {
-    int val = 0;
-    int x,y;
-    x = 0; y = 0; //immediate row and column respectively
-    (*csr_mtx)[k].size = 0; //no elements
-    (*csr_mtx)[k].mtxi = malloc(1 * sizeof(int));
-    (*csr_mtx)[k].mtx_col = malloc(1 * sizeof(int));
-    (*csr_mtx)[k].mtx_offset = calloc((*csr_mtx)[k].row+1, sizeof(int)); //offset size defined
-    if((*csr_mtx)[k].mtxi == NULL || (*csr_mtx)[k].mtx_col == NULL || (*csr_mtx)[k].mtx_offset == NULL) {
-        perror("function: read_csr_filei()");
-        return 0;
-    }
-    int num = (*csr_mtx)[k].row * (*csr_mtx)[k].col; //number of matrix elements
-    for(int i = 0; i < num; i++) {
-        fscanf(config.fd[fid], "%i", &val);
-        fprintf(stdout, "\ninteger: %i\n", val);
-        if(val == 0) { //value should not be recorded in sparse matrix
-            continue;
-        }
-        x = i / (*csr_mtx)[k].col; //calculate row
-        y = i % (*csr_mtx)[k].col; //calculate column
-        (*csr_mtx)[k].size += 1; //increment number of non-zero values
-        (*csr_mtx)[k].mtxi = realloc((*csr_mtx)[k].mtxi, (*csr_mtx)[k].size * sizeof(int));
-        (*csr_mtx)[k].mtx_col = realloc((*csr_mtx)[k].mtx_col, (*csr_mtx)[k].size * sizeof(int));
-        if((*csr_mtx)[k].mtxi == NULL || (*csr_mtx)[k].mtx_col == NULL) {
-            perror("function: read_int_file()");
+        (*csr_mtx).mtxf = malloc((*csr_mtx).size * sizeof(float));
+        (*csr_mtx).mtx_offset = calloc((*csr_mtx).row + 1, sizeof(int));
+        (*csr_mtx).mtx_col = malloc(((*csr_mtx).size) * sizeof(int));
+        if((*csr_mtx).mtxf == NULL || (*csr_mtx).mtx_col == NULL || (*csr_mtx).mtx_offset == NULL) {
+            perror("function: read_coo2csc()");
             return 0;
         }
-        fprintf(stdout, "\n int: %i\n", val);
-        if(!add_int_csr(&(*csr_mtx)[k], val, x, y, (*csr_mtx)[k].size - 1)) {
-            perror(NULL);
-            return 0;
+        int count = 0;
+        for(int i = 0; i < (*csr_mtx).row; i++) {
+            for(int j = 0; j < (*coo_mtx).size; j++) {
+                if((*coo_mtx).mtxf[j][0] == i) {
+                    (*csr_mtx).mtx_offset[(int)(*coo_mtx).mtxf[j][0] + 1] += 1;
+                    (*csr_mtx).mtx_col[count] = (*coo_mtx).mtxf[j][1];
+                    (*csr_mtx).mtxf[count] = (*coo_mtx).mtxf[j][2];
+                    count++;
+                }
+            }
         }
     }
-    return 1;
-}
-
-/**
- * Read matrix values given in a file.
- * @param csr_mtx CSR struct
- */
-int read_csr_filef(CSR **csr_mtx, int k, int fid) {
-    float val = 0;
-    int x,y;
-    x = 0; y = 0; //immediate row and column respectively
-    (*csr_mtx)[k].size = 0; //no elements
-    (*csr_mtx)[k].mtxf = malloc(1 * sizeof(float));
-    (*csr_mtx)[k].mtx_col = malloc(1 * sizeof(int));
-    (*csr_mtx)[k].mtx_offset = calloc((*csr_mtx)[k].row+1, sizeof(int)); //offset size defined
-    if((*csr_mtx)[k].mtxf == NULL || (*csr_mtx)[k].mtx_col == NULL || (*csr_mtx)[k].mtx_offset == NULL) {
-        perror("function: read_csr_filef()");
-        return 0;
-    }
-    int num = (*csr_mtx)[k].row * (*csr_mtx)[k].col; //number of matrix elements
-    for(int i = 0; i < num; i++) {
-        fscanf(config.fd[fid], "%f", &val);
-        fprintf(stdout, "\nFLOAT: %f\n", val);
-        if(val == 0.0) { //value should not be recorded in sparse matrix
-            continue;
-        }
-        x = i / (*csr_mtx)[k].col; //calculate row
-        y = i % (*csr_mtx)[k].col; //calculate column
-        (*csr_mtx)[k].size += 1; //increment number of non-zero values
-        (*csr_mtx)[k].mtxf = realloc((*csr_mtx)[k].mtxf, (*csr_mtx)[k].size * sizeof(float));
-        (*csr_mtx)[k].mtx_col = realloc((*csr_mtx)[k].mtx_col, (*csr_mtx)[k].size * sizeof(int));
-        if((*csr_mtx)[k].mtxf == NULL || (*csr_mtx)[k].mtx_col == NULL) {
-            perror("function: read_int_file()");
-            return 0;
-        }
-        fprintf(stdout, "\n float: %f\n", val);
-        if(!add_float_csr(&(*csr_mtx)[k], val, x, y, (*csr_mtx)[k].size - 1)) {
-            perror(NULL);
-            return 0;
-        }
-    }
-    return 1;
-}
-
-/**
- * Update structure values
- * @param count is the index of the non-zero value.
- */
-int add_int_csr(CSR *csr_mtx, int val, int row, int col, int count) {
-    (*csr_mtx).mtxi[count] = val;
-    (*csr_mtx).mtx_offset[row + 1] += 1;
-    (*csr_mtx).mtx_col[count] = col;
-    return 1;
-}
-
-int add_float_csr(CSR *csr_mtx, float val, int row, int col, int count) {
-    (*csr_mtx).mtxf[count] = val;
-    (*csr_mtx).mtx_offset[row + 1] += 1;
-    (*csr_mtx).mtx_col[count] = col;
     return 1;
 }
 
@@ -343,7 +269,7 @@ int read_to_csc(CSC **sparse_mtx, int k, int fid) {
 
     // -- CONVERT COO TO CCS --
 
-    if(!read_coo2csc(&coo_mtx[k], &(*sparse_mtx)[k])) {
+    if(!coo2csc(&coo_mtx[k], &(*sparse_mtx)[k])) {
         fprintf(stderr, "Error reading into sparse matrix.\n");
         return 0;
     }
@@ -357,7 +283,7 @@ int read_to_csc(CSC **sparse_mtx, int k, int fid) {
  * Conversion to CSC struct
  * @param csc_mtx CSC struct
  */
-int read_coo2csc(COO *coo_mtx, CSC *csc_mtx) {
+int coo2csc(COO *coo_mtx, CSC *csc_mtx) {
     (*csc_mtx).is_int = (*coo_mtx).is_int;
     (*csc_mtx).row = (*coo_mtx).row;
     (*csc_mtx).col = (*coo_mtx).col;
