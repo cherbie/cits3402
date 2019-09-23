@@ -1,6 +1,6 @@
 #!/bin/bash
 clear
-rm -f int_result.txt
+rm -f int_results.txt
 echo "---------- START --------"
 ./mop --mm -f ./input/int64.in ./input/int64.in -l -s >> int_results.txt
 echo " --------- DONE 64 ---------"

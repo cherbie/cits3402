@@ -1,0 +1,16 @@
+mm
+./input/float64.in
+0.0019
+0.0019
+mm
+./input/float128.in
+0.0056
+0.0155
+mm
+./input/float256.in
+0.0250
+0.1103
+mm
+./input/float1024.in
+0.7182
+7.2580
