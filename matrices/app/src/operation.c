@@ -30,9 +30,16 @@ int scalar(void) {
     }
     gettimeofday(&config.time[0].end, NULL);
     gettimeofday(&config.time[1].start, NULL);
-    if(!process_scalar(&coo_sparse_mtx[0], config.sm)) {
-        fprintf(stderr, "Error performing scalar multiplication.\n");
-        return 0;
+    if(config.sync){
+        if(!process_scalar(&coo_sparse_mtx[0], config.sm)) {
+            fprintf(stderr, "Error performing scalar multiplication.\n");
+            return 0;
+        }
+    } else {
+        if(!process_scalar_async(&coo_sparse_mtx[0], config.sm)) {
+            fprintf(stderr, "Error performing scalar multiplication.\n");
+            return 0;
+        }
     }
     gettimeofday(&config.time[1].end, NULL);
     if(!process_stat()) fprintf(stderr, "Error determining duration of operations.\n");
@@ -71,9 +78,16 @@ int trace(void) {
     gettimeofday(&config.time[0].end, NULL);
     int i; float f;
     gettimeofday(&config.time[1].start, NULL);
-    if(!process_trace(&coo_sparse_mtx[0], &i, &f)) {
-        fprintf(stderr, "Error calulating the trace of the matrix provided.\n");
-        return 0;
+    if(config.sync) {
+        if(!process_trace(&coo_sparse_mtx[0], &i, &f)) {
+            fprintf(stderr, "Error calulating the trace of the matrix provided.\n");
+            return 0;
+        }
+    } else {
+        if(!process_trace_async(&coo_sparse_mtx[0], &i, &f)) {
+            fprintf(stderr, "Error calulating the trace of the matrix provided.\n");
+            return 0;
+        }
     }
     gettimeofday(&config.time[1].end, NULL);
     if(!process_stat()) fprintf(stderr, "Error determining duration of operations.\n");
@@ -114,9 +128,16 @@ int addition(void) {
     }
     gettimeofday(&config.time[0].end, NULL);
     gettimeofday(&config.time[1].start, NULL);
-    if(!process_addition(&coo_sparse_mtx)) {
-        fprintf(stderr, "Error performing matrix addition.\n");
-        return 0;
+    if(config.sync) {
+        if(!process_addition(&coo_sparse_mtx)) {
+            fprintf(stderr, "Error performing matrix addition.\n");
+            return 0;
+        }
+    } else {
+        if(!process_addition_async(&coo_sparse_mtx)) {
+            fprintf(stderr, "Error performing matrix addition.\n");
+            return 0;
+        }
     }
     gettimeofday(&config.time[1].end, NULL);
     if(!process_stat()) fprintf(stderr, "Error determining duration of operations.\n");
@@ -160,9 +181,16 @@ int transpose_matrix(void) {
     }
     gettimeofday(&config.time[0].end, NULL);
     gettimeofday(&config.time[1].start, NULL);
-    if(!process_transpose(&csr_sparse_mtx[0], &csc_sparse_mtx[0])) {
-        fprintf(stderr, "Error transposing given matrix.\n");
-        return 0;
+    if(config.sync) {
+        if(!process_transpose(&csr_sparse_mtx[0], &csc_sparse_mtx[0])) {
+            fprintf(stderr, "Error transposing given matrix.\n");
+            return 0;
+        }
+    }else {
+        if(!process_transpose_async(&csr_sparse_mtx[0], &csc_sparse_mtx[0])) {
+            fprintf(stderr, "Error transposing given matrix.\n");
+            return 0;
+        }
     }
     gettimeofday(&config.time[1].end, NULL);
     if(!process_stat()) fprintf(stderr, "Error determining duration of operations.\n");
@@ -212,9 +240,16 @@ int matrix_mp(void) {
     }
     gettimeofday(&config.time[0].end, NULL);
     gettimeofday(&config.time[1].start, NULL);
-    if(!process_multiplication(&csr_sparse_mtx[1], &csr_sparse_mtx[0], &csc_sparse_mtx[0])) {
-        fprintf(stderr, "Error performing matrix multiplication on given matrix.\n");
-        return 0;
+    if(config.sync) {
+        if(!process_multiplication(&csr_sparse_mtx[1], &csr_sparse_mtx[0], &csc_sparse_mtx[0])) {
+            fprintf(stderr, "Error performing matrix multiplication on given matrix.\n");
+            return 0;
+        }
+    } else {
+        if(!process_multiplication_async(&csr_sparse_mtx[1], &csr_sparse_mtx[0], &csc_sparse_mtx[0])) {
+            fprintf(stderr, "Error performing matrix multiplication on given matrix.\n");
+            return 0;
+        }
     }
     gettimeofday(&config.time[1].end, NULL);
     if(!process_stat()) fprintf(stderr, "Error determining duration of operations.\n");

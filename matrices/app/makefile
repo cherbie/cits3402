@@ -44,3 +44,6 @@ async-filereading.o: ./src/async-filereading.c $(HEADERS)
 
 clean:
 	rm -f *.o *.out ./src/*.h.gch
+
+clean-all:
+	rm -f *.o *.out *.txt ./src/*.h.gch

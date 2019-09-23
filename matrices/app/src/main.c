@@ -14,8 +14,10 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
     if(!operation_main()) exit(EXIT_FAILURE);
-    print_config();
+    fprintf(stdout, "%s\n%s\n", config.op_str, config.filename[0]);
+    fprintf(stdout, "%6.4f\n%6.4f\n", config.time[0].delta, config.time[1].delta);
+    //print_config();
     dealloc_config();
-    printf(" ... Program complete.\n");
+    //printf(" ... Program complete.\n");
     exit(EXIT_SUCCESS);
 }
