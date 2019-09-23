@@ -13,9 +13,10 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Error parsing command line arguments.\n");
         exit(EXIT_FAILURE);
     }
+    omp_set_num_threads(config.num_threads);
     if(!operation_main()) exit(EXIT_FAILURE);
     fprintf(stdout, "%s\n%s\n", config.op_str, config.filename[0]);
-    fprintf(stdout, "%6.4f\n%6.4f\n", config.time[0].delta, config.time[1].delta);
+    fprintf(stdout, "%12.10f\n%12.10f\n", config.time[0].delta, config.time[1].delta);
     //print_config();
     dealloc_config();
     //printf(" ... Program complete.\n");

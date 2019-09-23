@@ -32,6 +32,7 @@ int parse_cmd(int argc, char *argv[]) {
                 }
                 if((optind >= argc) & !set_config_sm(optarg)) return 0;
                 operation_seen = true;
+                op_to_string();
                 break;
             }
             case '1': case '2': case '3': case '4': {
@@ -40,6 +41,7 @@ int parse_cmd(int argc, char *argv[]) {
                     return 0;
                 }
                 operation_seen = true;
+                op_to_string();
                 break;
             }
             case 'f': { //file

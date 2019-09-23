@@ -76,7 +76,7 @@ int trace(void) {
         return 0;
     }
     gettimeofday(&config.time[0].end, NULL);
-    int i; float f;
+    int i = 0; float f = 0.0;
     gettimeofday(&config.time[1].start, NULL);
     if(config.sync) {
         if(!process_trace(&coo_sparse_mtx[0], &i, &f)) {

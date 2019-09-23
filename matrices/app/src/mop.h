@@ -42,7 +42,6 @@ typedef struct {
 } CONFIG;
 
 typedef struct {
-    //enum MTX_TYPE *type;
     bool is_int;
     int **mtxi;
     float **mtxf;
