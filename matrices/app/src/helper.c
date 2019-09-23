@@ -19,6 +19,7 @@ int initialise(void) {
     config.operation = -1;
     config.num_threads = -1;
     config.num_files = -1;
+    config.sync = false;
     config.fd = malloc(NUMBER_OF_INPUT_FILES * sizeof(FILE *));
     config.filename = malloc(NUMBER_OF_INPUT_FILES * sizeof(char *));
     if(config.fd == NULL || config.filename == NULL) {

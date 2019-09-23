@@ -1,6 +1,6 @@
 CC=gcc-9 -std=c99 -fopenmp
 WARNINGS=-Wall -Werror -pedantic
-OFILES=main.o parser.o helper.o sync-coo.o operation.o  sync-csr.o file-reading.o logger.o dealloc.o
+OFILES=main.o parser.o helper.o sync-coo.o operation.o  sync-csr.o file-reading.o logger.o dealloc.o async-coo.o async-csr.o async-filereading.o
 HEADERS=./src/mop.h
 
 project: $(OFILES)
@@ -32,6 +32,15 @@ logger.o: ./src/logger.c $(HEADERS)
 
 dealloc.o: ./src/dealloc.c $(HEADERS)
 	$(CC) $(WARNINGS) -c ./src/dealloc.c $(HEADERS)
+
+async-coo.o: ./src/async-coo.c $(HEADERS)
+	$(CC) $(WARNINGS) -c ./src/async-coo.c $(HEADERS)
+
+async-csr.o: ./src/async-csr.o $(HEADERS)
+	$(CC) $(WARNINGS) -c ./src/async-csr.c $(HEADERS)
+
+async-filereading.o: ./src/async-filereading.c $(HEADERS)
+	$(CC) $(WARNINGS) -c ./src/async-filereading.c $(HEADERS)
 
 clean:
 	rm -f *.o *.out ./src/*.h.gch

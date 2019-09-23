@@ -16,7 +16,7 @@ int parse_cmd(int argc, char *argv[]) {
     };
     bool operation_seen = false;
     while (1) {
-        c = getopt_long(argc, argv, "-:f:lt:", long_options, &config.operation);
+        c = getopt_long(argc, argv, "-:f:lst:", long_options, &config.operation);
         if (c == -1) break;
         switch (c) {
             case 1: {
@@ -53,8 +53,11 @@ int parse_cmd(int argc, char *argv[]) {
                 break;
             }
             case 'l': { //log
-                //printf("option = l\n");
                 if(!set_logger()) return 0;
+                break;
+            }
+            case 's' : {
+                config.sync = true;
                 break;
             }
             case ':': {
