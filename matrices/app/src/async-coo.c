@@ -90,27 +90,66 @@ int process_addition_async(COO **coo_mtx) {
                 if(is_defined(&(*coo_mtx)[file1], i, j, block1) && is_defined(&(*coo_mtx)[file2], i, j, block2)) {
                     val = (*coo_mtx)[file1].mtxf[block1][2] + (*coo_mtx)[file2].mtxf[block2][2];
                     (*coo_mtx)[res].size += 1;
-                    if(!add_float_coo(&(*coo_mtx)[res], val, i, j, blockr)) {
-                        fprintf(stderr, "Error allocating matrix addition to memory space.\n");
+                    (*coo_mtx)[res].mtxf[blockr] = malloc(3  * sizeof(float));
+                    if((*coo_mtx)[res].mtxf[blockr] == NULL) {
+                        perror("function: add_int_coo()");
                         return 0;
+                    }
+                    #pragma omp parallel shared(block1, block2, blockr)
+                    {
+                    #pragma omp single
+                    {
+                    #pragma omp task firstprivate(blockr, i, j, val)
+                    {
+                        (*coo_mtx)[res].mtxf[blockr][0] = i;
+                        (*coo_mtx)[res].mtxf[blockr][1] = j;
+                        (*coo_mtx)[res].mtxf[blockr][2] = val;
+                    }
+                    }
                     }
                     blockr++; block1++; block2++;
                 }
                 else if(is_defined(&(*coo_mtx)[file1], i, j, block1)) {
                     val = (*coo_mtx)[file1].mtxf[block1][2];
                     (*coo_mtx)[res].size += 1;
-                    if(!add_float_coo(&(*coo_mtx)[res], val, i, j, blockr)){
-                        fprintf(stderr, "Error allocating matrix addition to memory space.\n");
+                    (*coo_mtx)[res].mtxf[blockr] = malloc(3  * sizeof(float));
+                    if((*coo_mtx)[res].mtxf[blockr] == NULL) {
+                        perror("function: add_int_coo()");
                         return 0;
+                    }
+                    #pragma omp parallel shared(block1, block2, blockr)
+                    {
+                    #pragma omp single
+                    {
+                    #pragma omp task firstprivate(blockr, i, j, val)
+                    {
+                        (*coo_mtx)[res].mtxf[blockr][0] = i;
+                        (*coo_mtx)[res].mtxf[blockr][1] = j;
+                        (*coo_mtx)[res].mtxf[blockr][2] = val;
+                    }
+                    }
                     }
                     blockr++; block1++;
                 }
                 else if(is_defined(&(*coo_mtx)[file2], i, j, block2)) {
                     val = (*coo_mtx)[file2].mtxf[block2][2];
                     (*coo_mtx)[res].size += 1;
-                    if(!add_float_coo(&(*coo_mtx)[res], val, i, j, blockr)) {
-                        fprintf(stderr, "Error allocating matrix addition to memory space.\n");
+                    (*coo_mtx)[res].mtxf[blockr] = malloc(3  * sizeof(float));
+                    if((*coo_mtx)[res].mtxf[blockr] == NULL) {
+                        perror("function: add_int_coo()");
                         return 0;
+                    }
+                    #pragma omp parallel shared(block1, block2, blockr)
+                    {
+                    #pragma omp single
+                    {
+                    #pragma omp task firstprivate(blockr, i, j, val)
+                    {
+                        (*coo_mtx)[res].mtxf[blockr][0] = i;
+                        (*coo_mtx)[res].mtxf[blockr][1] = j;
+                        (*coo_mtx)[res].mtxf[blockr][2] = val;
+                    }
+                    }
                     }
                     blockr++; block2++;
                 }
@@ -132,27 +171,66 @@ int process_addition_async(COO **coo_mtx) {
                 if(is_defined(&(*coo_mtx)[file1], i, j, block1) && is_defined(&(*coo_mtx)[file2], i, j, block2)) {
                     val = (*coo_mtx)[file1].mtxi[block1][2] + (*coo_mtx)[file2].mtxi[block2][2];
                     (*coo_mtx)[res].size += 1;
-                    if(!add_int_coo(&(*coo_mtx)[res], val, i, j, blockr)) {
-                        fprintf(stderr, "Error allocating matrix addition to memory space.\n");
+                    (*coo_mtx)[res].mtxi[blockr] = malloc(3  * sizeof(int));
+                    if((*coo_mtx)[res].mtxi[blockr] == NULL) {
+                        perror("function: add_int_coo()");
                         return 0;
+                    }
+                    #pragma omp parallel
+                    {
+                    #pragma omp single
+                    {
+                    #pragma omp task firstprivate(blockr, i, j, val)
+                    {
+                        (*coo_mtx)[res].mtxi[blockr][0] = i;
+                        (*coo_mtx)[res].mtxi[blockr][1] = j;
+                        (*coo_mtx)[res].mtxi[blockr][2] = val;
+                    }
+                    }
                     }
                     blockr++; block1++; block2++;
                 }
                 else if(is_defined(&(*coo_mtx)[file1], i, j, block1)) {
                     val = (*coo_mtx)[file1].mtxi[block1][2];
                     (*coo_mtx)[res].size += 1;
-                    if(!add_int_coo(&(*coo_mtx)[res], val, i, j, blockr)) {
-                        fprintf(stderr, "Error allocating matrix addition to memory space.\n");
+                    (*coo_mtx)[res].mtxi[blockr] = malloc(3  * sizeof(int));
+                    if((*coo_mtx)[res].mtxi[blockr] == NULL) {
+                        perror("function: add_int_coo()");
                         return 0;
+                    }
+                    #pragma omp parallel
+                    {
+                    #pragma omp single
+                    {
+                    #pragma omp task firstprivate(blockr, i, j, val)
+                    {
+                        (*coo_mtx)[res].mtxi[blockr][0] = i;
+                        (*coo_mtx)[res].mtxi[blockr][1] = j;
+                        (*coo_mtx)[res].mtxi[blockr][2] = val;
+                    }
+                    }
                     }
                     blockr++; block1++;
                 }
                 else if(is_defined(&(*coo_mtx)[file2], i, j, block2)) {
                     val = (*coo_mtx)[file2].mtxi[block2][2];
                     (*coo_mtx)[res].size += 1;
-                    if(!add_int_coo(&(*coo_mtx)[res], val, i, j, blockr)) {
-                        fprintf(stderr, "Error allocating matrix addition to memory space.\n");
+                    (*coo_mtx)[res].mtxi[blockr] = malloc(3  * sizeof(int));
+                    if((*coo_mtx)[res].mtxi[blockr] == NULL) {
+                        perror("function: add_int_coo()");
                         return 0;
+                    }
+                    #pragma omp parallel
+                    {
+                    #pragma omp single
+                    {
+                    #pragma omp task firstprivate(blockr, i, j, val)
+                    {
+                        (*coo_mtx)[res].mtxi[blockr][0] = i;
+                        (*coo_mtx)[res].mtxi[blockr][1] = j;
+                        (*coo_mtx)[res].mtxi[blockr][2] = val;
+                    }
+                    }
                     }
                     blockr++; block2++;
                 }

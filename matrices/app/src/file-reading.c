@@ -144,7 +144,7 @@ int read_coo_filei(COO **coo_mtx, int k, int fid) {
  */
 int add_int_coo(COO *coo_mtx, int val, int row, int col, long int index) {
     (*coo_mtx).mtxi[index] = malloc(3  * sizeof(int));
-    if((*coo_mtx).mtxi == NULL) {
+    if((*coo_mtx).mtxi[index] == NULL) {
         perror("function: add_int_coo()");
         return 0;
     }

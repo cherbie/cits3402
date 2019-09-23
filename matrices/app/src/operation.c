@@ -112,6 +112,10 @@ int trace(void) {
  */
 int addition(void) {
     config.num_files = 2;
+    if(config.filename[0] == NULL || config.filename[1] == NULL) {
+        fprintf(stderr, "Error: not enough inputs specified.\n");
+        return 0;
+    }
     //SPARSE MATRIX REP.
     int coo_id = 0;
     COO *coo_sparse_mtx; //structure containing coordinate format representation of matrix.

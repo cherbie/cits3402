@@ -175,8 +175,6 @@ void print_csc(CSC *csc_mtx) {
 bool is_defined(COO *coo_mtx, int row, int col, long int block) {
     if(block >= (*coo_mtx).size) return false;
     else if((*coo_mtx).is_int) {
-        print("l");
-        printf("%li :: max = %li\n", block, (*coo_mtx).size);
         if(((*coo_mtx).mtxi[block][0] == row) && (*coo_mtx).mtxi[block][1] == col) return true;
         else return false;
     }
