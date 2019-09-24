@@ -125,14 +125,14 @@ extern int coo2csr(COO*, CSR*);
 // -- SYNCHRONOUS --
 extern int process_scalar(COO*, float);
 extern int process_trace(COO*,int*,float*);
-extern int process_addition(CSR**);
+extern int process_addition(CSR**, COO**);
 extern int process_transpose(CSR*, CSC*);
 extern int process_multiplication(CSR*, CSR*, CSC*);
 
 // -- ASYNCHRONOUS --
 extern int process_scalar_async(COO*, float);
 extern int process_trace_async(COO*,int*,float*);
-extern int process_addition_async(CSR**);
+extern int process_addition_async(CSR**, COO**);
 extern int process_transpose_async(CSR*, CSC*);
 extern int process_multiplication_async(CSR*, CSR*, CSC*);
 

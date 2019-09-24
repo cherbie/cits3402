@@ -4,8 +4,8 @@
  * Performs matrix multiplication on the sparse matrices provided.
  * @return 1 to indicate success and 0 to indicate failure.
 */
-int process_addition_async(CSR **csr_mtx) {
-    CSR *res_mtx = &(*csr_mtx)[2];
+int process_addition_async(CSR **csr_mtx, COO **coo_mtx) {
+    COO *res_mtx = &(*coo_mtx)[0];
     CSR *mtx_1 = &(*csr_mtx)[0];
     CSR *mtx_2 = &(*csr_mtx)[1];
 
@@ -23,25 +23,29 @@ int process_addition_async(CSR **csr_mtx) {
     if(!(*mtx_1).is_int && !(*mtx_2).is_int) { //float
         float val = 0.0;
         (*res_mtx).is_int = false;
-        (*res_mtx).mtxf = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(float)); //maximum size
-        (*res_mtx).mtx_offset = calloc((*res_mtx).row+1, sizeof(int));
-        (*res_mtx).mtx_col = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int));
-        if((*res_mtx).mtxf == NULL || (*res_mtx).mtx_offset == NULL || (*res_mtx).mtx_col == NULL) {
+        (*res_mtx).mtxf = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(float *)); //maximum size
+        if((*res_mtx).mtxf == NULL) {
             perror("function: process_multiplication().");
             return 0;
         }
+        for(int i = 0; i < ((*res_mtx).row * (*res_mtx).col); i++) {
+            (*res_mtx).mtxf[i] = malloc(3 * sizeof(float));
+            if((*res_mtx).mtxf[i] == NULL) {
+                perror(NULL);
+                return 0;
+            }
+        }
+        int size = 0;
         #pragma omp parallel
         {
         #pragma omp single
         {
-        (*res_mtx).size = 0;
         sum_nz_1 = 0;
         sum_nz_2 = 0;
         for(int i = 0; i < (*mtx_1).row; i++) { //row of first & second matrix
             sum_nz_1 += (*mtx_1).mtx_offset[i];
             sum_nz_2 += (*mtx_2).mtx_offset[i];
-            count_1 = 0;
-            count_2 = 0;
+            count_1 = 0; count_2 = 0;
             for(int j = 0; j < (*mtx_1).col; j++) { //columns of first and second matrix
                 set = false;
                 index_1 = sum_nz_1 + count_1;
@@ -49,8 +53,7 @@ int process_addition_async(CSR **csr_mtx) {
                 if((*mtx_1).mtx_col[index_1] == j && (*mtx_2).mtx_col[index_2] == j && count_1 < (*mtx_1).mtx_offset[i+1] && count_2 < (*mtx_2).mtx_offset[i+1]) {
                     val = (*mtx_1).mtxf[index_1] + (*mtx_2).mtxf[index_2];
                     set = true;
-                    count_1++;
-                    count_2++;
+                    count_1++; count_2++;
                 }
                 else if((*mtx_1).mtx_col[index_1] == j && count_1 < (*mtx_1).mtx_offset[i+1]) {
                     val = (*mtx_1).mtxf[index_1];
@@ -63,25 +66,31 @@ int process_addition_async(CSR **csr_mtx) {
                     count_2++;
                 }
                 if(set) {
-                    (*res_mtx).mtxf[(*res_mtx).size] = val;
-                    (*res_mtx).mtx_offset[i+1] += 1;
-                    (*res_mtx).mtx_col[(*res_mtx).size] = j;
-                    (*res_mtx).size += 1;
+                    (*res_mtx).mtxf[size][0] = (float) i;
+                    (*res_mtx).mtxf[size][1] = (float) j;
+                    (*res_mtx).mtxf[size][2] = val;
+                    size += 1;
                 }
             }
         }
+        (*res_mtx).size = size;
         }
         }
     }
     else {
         int val = 0;
         (*res_mtx).is_int = true;
-        (*res_mtx).mtxi = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int)); //maximum size
-        (*res_mtx).mtx_offset = calloc((*res_mtx).row+1, sizeof(int));
-        (*res_mtx).mtx_col = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int));
-        if((*res_mtx).mtxi == NULL || (*res_mtx).mtx_offset == NULL || (*res_mtx).mtx_col == NULL) {
+        (*res_mtx).mtxi = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int *)); //maximum size
+        if((*res_mtx).mtxi == NULL) {
             perror("function: process_multiplication().");
             return 0;
+        }
+        for(int i = 0; i < ((*res_mtx).row * (*res_mtx).col); i++) {
+            (*res_mtx).mtxi[i] = malloc(3 * sizeof(int));
+            if((*res_mtx).mtxi[i] == NULL) {
+                perror(NULL);
+                return 0;
+            }
         }
         #pragma omp parallel
         {
@@ -118,9 +127,9 @@ int process_addition_async(CSR **csr_mtx) {
                     count_2++;
                 }
                 if(set) {
-                    (*res_mtx).mtxi[size] = val;
-                    (*res_mtx).mtx_offset[i+1] += 1;
-                    (*res_mtx).mtx_col[size] = j;
+                    (*res_mtx).mtxi[size][0] = i;
+                    (*res_mtx).mtxi[size][1] = j;
+                    (*res_mtx).mtxi[size][2] = val;
                     size += 1;
                 }
             }

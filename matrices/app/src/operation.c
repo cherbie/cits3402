@@ -125,8 +125,36 @@ int addition(void) {
     }
     //SPARSE MATRIX REP.
     int csr_id = 0;
-    CSR *csr_sparse_mtx = malloc(3 * sizeof(CSR));
-    if(csr_sparse_mtx == NULL) {
+    if(false) {
+        CSR *csr_sparse_mtx = malloc(2 * sizeof(CSR));
+        COO *coo_sparse_mtx = malloc(1 * sizeof(COO));
+        if(csr_sparse_mtx == NULL || coo_sparse_mtx == NULL) {
+            perror(NULL);
+            return 0;
+        }
+        for(int k = 0; k < NUMBER_OF_INPUT_FILES; k++) {
+            if(!read_to_csr(&csr_sparse_mtx, csr_id++, k)) {
+                fprintf(stderr, "Error converting file to sparse matrix form.\n");
+                return 0;
+            }
+        }
+        if(!process_addition(&csr_sparse_mtx, &coo_sparse_mtx)) {
+            fprintf(stderr, "Error performing matrix addition.\n");
+            return 0;
+        }
+        if(!log_coo_result(&coo_sparse_mtx[0], stdout)) {
+            fprintf(stderr, "Error logging result to file.\n");
+            return 0;
+        }
+        dealloc_csr(&csr_sparse_mtx, 2);
+        dealloc_coo(&coo_sparse_mtx, 1);
+        free(coo_sparse_mtx);
+        free(csr_sparse_mtx);
+        return 1;
+    }
+    CSR *csr_sparse_mtx = malloc(2 * sizeof(CSR));
+    COO *coo_sparse_mtx = malloc(1 * sizeof(COO));
+    if(csr_sparse_mtx == NULL || coo_sparse_mtx == NULL) {
         perror(NULL);
         return 0;
     }
@@ -140,12 +168,12 @@ int addition(void) {
     gettimeofday(&config.time[0].end, NULL);
     gettimeofday(&config.time[1].start, NULL);
     if(config.sync) {
-        if(!process_addition(&csr_sparse_mtx)) {
+        if(!process_addition(&csr_sparse_mtx, &coo_sparse_mtx)) {
             fprintf(stderr, "Error performing matrix addition.\n");
             return 0;
         }
     } else {
-        if(!process_addition_async(&csr_sparse_mtx)) {
+        if(!process_addition_async(&csr_sparse_mtx, &coo_sparse_mtx)) {
             fprintf(stderr, "Error performing matrix addition.\n");
             return 0;
         }
@@ -159,17 +187,19 @@ int addition(void) {
             fprintf(config.log_fd, "%s\n", config.filename[i]);
         }
         fprintf(config.log_fd, "%i\n", config.num_threads);
-        if(!log_csr_result(&csr_sparse_mtx[2], config.log_fd)) {
+        if(!log_coo_result(&coo_sparse_mtx[0], config.log_fd)) {
             fprintf(stderr, "Error logging result to file.\n");
             return 0;
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
     }
-    if(!log_csr_result(&csr_sparse_mtx[2], stdout)) {
+    if(!log_coo_result(&coo_sparse_mtx[0], stdout)) {
         fprintf(stderr, "Error logging result to file.\n");
         return 0;
     }
-    dealloc_csr(&csr_sparse_mtx, 3);
+    dealloc_csr(&csr_sparse_mtx, 2);
+    dealloc_coo(&coo_sparse_mtx, 1);
+    free(coo_sparse_mtx);
     free(csr_sparse_mtx);
     return 1;
 }

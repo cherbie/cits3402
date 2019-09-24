@@ -7,9 +7,7 @@
 int log_coo_result(COO *coo_mtx, FILE *fp) {
     int k = 0;
     bool seen = false;
-    print("hello");
     if((*coo_mtx).is_int) {
-        print("int");
         int **mtx = malloc((*coo_mtx).size * sizeof(int *));
         if(mtx == NULL) {
             perror(NULL);
@@ -17,9 +15,7 @@ int log_coo_result(COO *coo_mtx, FILE *fp) {
         }
         for(int i = 0; i < (*coo_mtx).size; i++) {
             mtx[i] = malloc(3 * sizeof(int));
-            print("s");
             memcpy(mtx[i], (*coo_mtx).mtxi[i], 3 * sizeof(int));
-            print("t");
         }
         for(int i = 0; i < (*coo_mtx).row; i++) {
             for(int j = 0; j < (*coo_mtx).col; j++) {
