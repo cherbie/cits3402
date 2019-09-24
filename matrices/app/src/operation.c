@@ -54,7 +54,10 @@ int scalar(void) {
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
     }
-    print_coo(&coo_sparse_mtx[0]);
+    if(!log_coo_result(&coo_sparse_mtx[0], stdout)) {
+        fprintf(stderr, "Error logging result to file.\n");
+        return 0;
+    }
     dealloc_coo(&coo_sparse_mtx, 1);
     free(coo_sparse_mtx);
     return 1;
@@ -103,7 +106,6 @@ int trace(void) {
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
     }
-    print_coo(&coo_sparse_mtx[0]);
     if(!log_trace_result(&coo_sparse_mtx[0], &i, &f, stdout)) {
         fprintf(stderr, "Error logging the result of the trace.\n");
         return 0;
@@ -117,7 +119,6 @@ int trace(void) {
  * Return 1 to indicate success and 0 to indicate failure.
  */
 int addition(void) {
-    config.num_files = 2;
     if(config.filename[0] == NULL || config.filename[1] == NULL) {
         fprintf(stderr, "Error: not enough inputs specified.\n");
         return 0;
@@ -158,11 +159,15 @@ int addition(void) {
             fprintf(config.log_fd, "%s\n", config.filename[i]);
         }
         fprintf(config.log_fd, "%i\n", config.num_threads);
-        if(!log_csr_result(&csr_sparse_mtx[2], stdout)) {
+        if(!log_csr_result(&csr_sparse_mtx[2], config.log_fd)) {
             fprintf(stderr, "Error logging result to file.\n");
             return 0;
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
+    }
+    if(!log_csr_result(&csr_sparse_mtx[2], stdout)) {
+        fprintf(stderr, "Error logging result to file.\n");
+        return 0;
     }
     dealloc_csr(&csr_sparse_mtx, 3);
     free(csr_sparse_mtx);

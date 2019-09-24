@@ -6,15 +6,17 @@
  */
 int process_scalar_async(COO *coo_mtx, float sc) {
     if((*coo_mtx).is_int) {
+        int *mtx = (*coo_mtx).mtxi;
 #pragma omp parallel for
         for(int i = 0; i < (*coo_mtx).size; i++) {
-            (*coo_mtx).mtxi[i] *= sc;
+            mtx[i] *= sc;
         }
     }
     else {
+        float *mtx = (*coo_mtx).mtxf;
 #pragma omp parallel for
         for(int i = 0; i < (*coo_mtx).size; i++) {
-            (*coo_mtx).mtxf[i] *= sc;
+             mtx[i] *= sc;
         }
     }
     return 1;
@@ -32,24 +34,24 @@ int process_trace_async(COO *coo_mtx, int *i, float *f) {
     int size = (*coo_mtx).size;
     if((*coo_mtx).is_int) {
         int element = 0;
-#pragma omp parallel for reduction(+:element)
+        #pragma omp parallel for reduction(+:element)
         for(int j = 0; j < size; j++) {
             if((*coo_mtx).rowcol[j][0] == (*coo_mtx).rowcol[j][1])
                 element += (*coo_mtx).mtxi[j];
         }
-#pragma omp single
+        #pragma omp single
         {
             (*i) = element;
         }
     }
     else {
         float element = 0.0;
-#pragma omp parallel for reduction(+:element)
+        #pragma omp parallel for reduction(+:element)
         for(int j = 0; j < size; j++) {
             if((*coo_mtx).rowcol[j][0] == (*coo_mtx).rowcol[j][1])
                 element += (*coo_mtx).mtxf[j];
         }
-#pragma omp single
+        #pragma omp single
         {
             (*f) = element;
         }

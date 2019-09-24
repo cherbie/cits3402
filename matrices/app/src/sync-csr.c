@@ -36,8 +36,7 @@ int process_addition(CSR **csr_mtx) {
         for(int i = 0; i < (*mtx_1).row; i++) { //row of first & second matrix
             sum_nz_1 += (*mtx_1).mtx_offset[i];
             sum_nz_2 += (*mtx_2).mtx_offset[i];
-            count_1 = 0;
-            count_2 = 0;
+            count_1 = 0; count_2 = 0;
             for(int j = 0; j < (*mtx_1).col; j++) { //columns of first and second matrix
                 set = false;
                 index_1 = sum_nz_1 + count_1;

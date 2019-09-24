@@ -30,6 +30,10 @@ int process_addition_async(CSR **csr_mtx) {
             perror("function: process_multiplication().");
             return 0;
         }
+        #pragma omp parallel
+        {
+        #pragma omp single
+        {
         (*res_mtx).size = 0;
         sum_nz_1 = 0;
         sum_nz_2 = 0;
@@ -66,6 +70,8 @@ int process_addition_async(CSR **csr_mtx) {
                 }
             }
         }
+        }
+        }
     }
     else {
         int val = 0;
@@ -77,15 +83,21 @@ int process_addition_async(CSR **csr_mtx) {
             perror("function: process_multiplication().");
             return 0;
         }
-        (*res_mtx).size = 0;
+        #pragma omp parallel
+        {
+        #pragma omp c
+        {
+        int size = 0;
         sum_nz_1 = 0;
         sum_nz_2 = 0;
+        count_1 = 0;
+        count_2 = 0;
+        int j;
         for(int i = 0; i < (*mtx_1).row; i++) { //row of first & second matrix
             sum_nz_1 += (*mtx_1).mtx_offset[i];
             sum_nz_2 += (*mtx_2).mtx_offset[i];
-            count_1 = 0;
-            count_2 = 0;
-            for(int j = 0; j < (*mtx_1).col; j++) { //columns of first and second matrix
+            count_1 = 0; count_2 = 0;
+            for(j = 0; j < (*mtx_1).col; j++) { //columns of first and second matrix
                 set = false;
                 index_1 = sum_nz_1 + count_1;
                 index_2 = sum_nz_2 + count_2;
@@ -106,12 +118,15 @@ int process_addition_async(CSR **csr_mtx) {
                     count_2++;
                 }
                 if(set) {
-                    (*res_mtx).mtxi[(*res_mtx).size] = val;
+                    (*res_mtx).mtxi[size] = val;
                     (*res_mtx).mtx_offset[i+1] += 1;
-                    (*res_mtx).mtx_col[(*res_mtx).size] = j;
-                    (*res_mtx).size += 1;
+                    (*res_mtx).mtx_col[size] = j;
+                    size += 1;
                 }
             }
+        }
+        (*res_mtx).size = size;
+        }
         }
     }
     return 1;
@@ -212,11 +227,14 @@ int process_multiplication_async(CSR *res_mtx, CSR *mtx_1, CSC *mtx_2) {
                     else if((*mtx_1).mtx_col[index_1] == k) count_1++;
                     else if((*mtx_2).mtx_row[index_2] == k) count_2++;
                 }
-                if(sum != 0) {
-                    (*res_mtx).mtxi[(*res_mtx).size] = sum;
-                    (*res_mtx).mtx_offset[i+1] += 1;
-                    (*res_mtx).mtx_col[(*res_mtx).size] = j; //column under inspection
-                    (*res_mtx).size += 1;
+                #pragma omp single
+                {
+                    if(sum != 0) {
+                        (*res_mtx).mtxi[(*res_mtx).size] = sum;
+                        (*res_mtx).mtx_offset[i+1] += 1;
+                        (*res_mtx).mtx_col[(*res_mtx).size] = j; //column under inspection
+                        (*res_mtx).size += 1;
+                    }
                 }
             }
         }

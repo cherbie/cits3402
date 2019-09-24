@@ -36,7 +36,7 @@ dealloc.o: ./src/dealloc.c $(HEADERS)
 async-coo.o: ./src/async-coo.c $(HEADERS)
 	$(CC) $(WARNINGS) -c ./src/async-coo.c $(HEADERS)
 
-async-csr.o: ./src/async-csr.o $(HEADERS)
+async-csr.o: ./src/async-csr.c $(HEADERS)
 	$(CC) $(WARNINGS) -c ./src/async-csr.c $(HEADERS)
 
 async-filereading.o: ./src/async-filereading.c $(HEADERS)
