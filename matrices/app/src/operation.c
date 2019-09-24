@@ -54,6 +54,7 @@ int scalar(void) {
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
     }
+    print_coo(&coo_sparse_mtx[0]);
     dealloc_coo(&coo_sparse_mtx, 1);
     free(coo_sparse_mtx);
     return 1;
@@ -102,6 +103,11 @@ int trace(void) {
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
     }
+    print_coo(&coo_sparse_mtx[0]);
+    if(!log_trace_result(&coo_sparse_mtx[0], &i, &f, stdout)) {
+        fprintf(stderr, "Error logging the result of the trace.\n");
+        return 0;
+    }
     dealloc_coo(&coo_sparse_mtx, 1);
     free(coo_sparse_mtx);
     return 1;
@@ -132,7 +138,7 @@ int addition(void) {
     }
     gettimeofday(&config.time[0].end, NULL);
     gettimeofday(&config.time[1].start, NULL);
-    if(config.sync) {
+    /*if(config.sync) {
         if(!process_addition(&coo_sparse_mtx)) {
             fprintf(stderr, "Error performing matrix addition.\n");
             return 0;
@@ -142,7 +148,7 @@ int addition(void) {
             fprintf(stderr, "Error performing matrix addition.\n");
             return 0;
         }
-    }
+    }*/
     gettimeofday(&config.time[1].end, NULL);
     if(!process_stat()) fprintf(stderr, "Error determining duration of operations.\n");
     // -- LOG RESULT TO FILE --

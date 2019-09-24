@@ -1,6 +1,6 @@
 CC=gcc-9 -std=c99 -fopenmp
 WARNINGS=-Wall -Werror -pedantic
-OFILES=main.o parser.o helper.o sync-coo.o operation.o  sync-csr.o file-reading.o logger.o dealloc.o async-coo.o async-csr.o async-filereading.o
+OFILES=main.o parser.o helper.o sync-coo.o operation.o  sync-csr.o file-reading.o logger.o dealloc.o async-coo.o async-csr.o #async-filereading.o
 HEADERS=./src/mop.h
 
 project: $(OFILES)

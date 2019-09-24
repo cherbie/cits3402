@@ -33,7 +33,7 @@ int initialise(void) {
     //function pointers
     op_func[0] = scalar;
     op_func[1] = trace;
-    op_func[2] = addition;
+    //op_func[2] = addition;
     op_func[3] = transpose_matrix;
     op_func[4] = matrix_mp;
 
@@ -84,17 +84,17 @@ void print_coo(COO *coo_mtx) {
     print(" --- ");
     if((*coo_mtx).is_int) {
         for(int i = 0; i < (*coo_mtx).size; i++) {
-            printf(" %i ", (*coo_mtx).mtxi[i][0]);
-            printf(" %i ", (*coo_mtx).mtxi[i][1]);
-            printf(" %i ", (*coo_mtx).mtxi[i][2]);
+            printf(" %i ", (*coo_mtx).rowcol[i][0]);
+            printf(" %i ", (*coo_mtx).rowcol[i][1]);
+            printf(" %i ", (*coo_mtx).mtxi[i]);
             print("\n");
         }
     }
     else {
         for(int i = 0; i < (*coo_mtx).size; i++) {
-            printf(" %1.0f ", (*coo_mtx).mtxf[i][0]);
-            printf(" %1.0f ", (*coo_mtx).mtxf[i][1]);
-            printf(" %3.2f ", (*coo_mtx).mtxf[i][2]);
+            printf(" %i ", (*coo_mtx).rowcol[i][0]);
+            printf(" %i ", (*coo_mtx).rowcol[i][1]);
+            printf(" %3.2f ", (*coo_mtx).mtxf[i]);
             print("\n");
         }
     }
@@ -171,7 +171,7 @@ void print_csc(CSC *csc_mtx) {
 /**
  * Calculates whether the COO struct has a non-zero value defined for a particular row & column in a block
  * @returns true if a non-zero value is defined, false otherwise.
- */
+
 bool is_defined(COO *coo_mtx, int row, int col, long int block) {
     if(block >= (*coo_mtx).size) return false;
     else if((*coo_mtx).is_int) {
@@ -183,7 +183,7 @@ bool is_defined(COO *coo_mtx, int row, int col, long int block) {
         else return false;
     }
 }
-
+*/
 /**
  * O(n) lookup.
  * @param *csc_mtx CSC struct *

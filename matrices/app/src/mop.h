@@ -43,8 +43,9 @@ typedef struct {
 
 typedef struct {
     bool is_int;
-    int **mtxi;
-    float **mtxf;
+    int *mtxi;
+    float *mtxf;
+    int **rowcol;
     int row;
     int col;
     long int size;
@@ -108,7 +109,7 @@ extern int process_stat(void);
 extern int operation_main(void);
 extern int scalar(void);
 extern int trace(void);
-extern int addition(void);
+//extern int addition(void);
 extern int transpose_matrix(void);
 extern int matrix_mp(void);
 
@@ -123,16 +124,6 @@ extern int add_float_coo(COO*,float,int,int,long int);
 extern int coo2csc(COO*, CSC*);
 extern int coo2csr(COO*, CSR*);
 
-// -- ASYNCHRONOUS FILE READING --
-extern int read_to_coo_async(COO **, int, int);
-extern int read_to_csr_async(CSR **, int, int);
-extern int read_to_csc_async(CSC **, int, int);
-extern int read_coo_filei_async(COO**,int, int);
-extern int read_coo_filef_async(COO**, int, int);
-extern int add_int_coo_async(COO*,int,int,int,long int);
-extern int add_float_coo_async(COO*,float,int,int,long int);
-extern int coo2csc_async(COO*, CSC*);
-extern int coo2csr_async(COO*, CSR*);
 
 // -- SYNCHRONOUS --
 extern int process_scalar(COO*, float);
@@ -144,9 +135,10 @@ extern int process_multiplication(CSR*, CSR*, CSC*);
 // -- ASYNCHRONOUS --
 extern int process_scalar_async(COO*, float);
 extern int process_trace_async(COO*,int*,float*);
-extern int process_addition_async(COO**);
+//extern int process_addition_async(COO**);
 extern int process_transpose_async(CSR*, CSC*);
 extern int process_multiplication_async(CSR*, CSR*, CSC*);
+
 
 // -- LOGGER --
 extern int log_coo_result(COO*, FILE*);

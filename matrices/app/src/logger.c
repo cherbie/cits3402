@@ -9,8 +9,8 @@ int log_coo_result(COO *coo_mtx, FILE *fp) {
     if((*coo_mtx).is_int) {
         for(int i = 0; i < (*coo_mtx).row; i++) {
             for(int j = 0; j < (*coo_mtx).col; j++) {
-                if((count < (*coo_mtx).size) && (*coo_mtx).mtxi[count][0] == i && (*coo_mtx).mtxi[count][1] == j) {
-                    fprintf(fp, "%i ", (*coo_mtx).mtxi[count++][2]);
+                if((count < (*coo_mtx).size) && (*coo_mtx).rowcol[count][0] == i && (*coo_mtx).rowcol[count][1] == j) {
+                    fprintf(fp, "%i ", (*coo_mtx).mtxi[count++]);
                 }
                 else fprintf(fp, "%i ", 0);
             }
@@ -19,8 +19,8 @@ int log_coo_result(COO *coo_mtx, FILE *fp) {
     else {
         for(int i = 0; i < (*coo_mtx).row; i++) {
             for(int j = 0; j < (*coo_mtx).col; j++) {
-                if((count < (*coo_mtx).size) && (*coo_mtx).mtxf[count][0] == i && (*coo_mtx).mtxf[count][1] == j) {
-                    fprintf(fp, "%3.2f ", (*coo_mtx).mtxf[count++][2]);
+                if((count < (*coo_mtx).size) && (*coo_mtx).rowcol[count][0] == i && (*coo_mtx).rowcol[count][1] == j) {
+                    fprintf(fp, "%3.2f ", (*coo_mtx).mtxf[count++]);
                 }
                 else fprintf(fp, "%3.2f ", (float) 0.0);
             }

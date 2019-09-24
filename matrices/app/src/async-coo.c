@@ -8,13 +8,13 @@ int process_scalar_async(COO *coo_mtx, float sc) {
     if((*coo_mtx).is_int) {
 #pragma omp parallel for
         for(int i = 0; i < (*coo_mtx).size; i++) {
-            (*coo_mtx).mtxi[i][2] *= sc;
+            (*coo_mtx).mtxi[i] *= sc;
         }
     }
     else {
 #pragma omp parallel for
         for(int i = 0; i < (*coo_mtx).size; i++) {
-            (*coo_mtx).mtxf[i][2] *= sc;
+            (*coo_mtx).mtxf[i] *= sc;
         }
     }
     return 1;
@@ -34,8 +34,8 @@ int process_trace_async(COO *coo_mtx, int *i, float *f) {
         int element = 0;
 #pragma omp parallel for reduction(+:element)
         for(int j = 0; j < size; j++) {
-            if((*coo_mtx).mtxi[j][0] == (*coo_mtx).mtxi[j][1])
-                element += (*coo_mtx).mtxi[j][2];
+            if((*coo_mtx).rowcol[j][0] == (*coo_mtx).rowcol[j][1])
+                element += (*coo_mtx).mtxi[j];
         }
 #pragma omp single
         {
@@ -46,8 +46,8 @@ int process_trace_async(COO *coo_mtx, int *i, float *f) {
         float element = 0.0;
 #pragma omp parallel for reduction(+:element)
         for(int j = 0; j < size; j++) {
-            if((*coo_mtx).mtxf[j][0] == (*coo_mtx).mtxf[j][1])
-                element += (float) (*coo_mtx).mtxf[j][2];
+            if((*coo_mtx).rowcol[j][0] == (*coo_mtx).rowcol[j][1])
+                element += (*coo_mtx).mtxf[j];
         }
 #pragma omp single
         {
@@ -60,7 +60,7 @@ int process_trace_async(COO *coo_mtx, int *i, float *f) {
 /**
  * Performs matrix multiplication on the sparse matrices provided.
  * @return 1 to indicate success and 0 to indicate failure.
- */
+
 int process_addition_async(COO **coo_mtx) {
     const int file1 = 0;
     const int file2 = 1;
@@ -239,3 +239,5 @@ int process_addition_async(COO **coo_mtx) {
     }
     return 1;
 }
+
+*/

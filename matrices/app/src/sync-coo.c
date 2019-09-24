@@ -6,10 +6,10 @@
  */
 int process_scalar(COO *coo_mtx, float sc) {
     if((*coo_mtx).is_int) {
-        for(int i = 0; i < (*coo_mtx).size; i++) (*coo_mtx).mtxi[i][2] *= sc;
+        for(int i = 0; i < (*coo_mtx).size; i++) (*coo_mtx).mtxi[i] *= sc;
     }
     else {
-        for(int i = 0; i < (*coo_mtx).size; i++) (*coo_mtx).mtxf[i][2] *= sc;
+        for(int i = 0; i < (*coo_mtx).size; i++) (*coo_mtx).mtxf[i] *= sc;
     }
     return 1;
 }
@@ -26,14 +26,14 @@ int process_trace(COO *coo_mtx, int *i, float *f) {
     *i = 0; *f = 0.0;
     if((*coo_mtx).is_int) {
         for(int j = 0; j < (*coo_mtx).size; j++){
-            if((*coo_mtx).mtxi[j][0] == (*coo_mtx).mtxi[j][1])
-                (*i) += (*coo_mtx).mtxi[j][2];
+            if((*coo_mtx).rowcol[j][0] == (*coo_mtx).rowcol[j][1])
+                (*i) += (*coo_mtx).mtxi[j];
         }
     }
     else {
         for(int j = 0; j < (*coo_mtx).size; j++){
-            if((*coo_mtx).mtxf[j][0] == (*coo_mtx).mtxf[j][1])
-                (*f) += (float) (*coo_mtx).mtxf[j][2];
+            if((*coo_mtx).rowcol[j][0] == (*coo_mtx).rowcol[j][1])
+                (*f) += (float) (*coo_mtx).mtxf[j];
         }
     }
     return 1;
@@ -42,7 +42,7 @@ int process_trace(COO *coo_mtx, int *i, float *f) {
 /**
  * Performs matrix multiplication on the sparse matrices provided.
  * @return 1 to indicate success and 0 to indicate failure.
- */
+
 int process_addition(COO **coo_mtx) {
     const int file1 = 0;
     const int file2 = 1;
@@ -143,3 +143,4 @@ int process_addition(COO **coo_mtx) {
     }
     return 1;
 }
+*/
