@@ -73,11 +73,9 @@ typedef struct {
 } CSC;
 
 //GLOBAL VARIABLES
-CONFIG          config;
-//struct tm       *exec_time;
-//time_t          rawtime;
-char            *arg_options[NUM_OPTIONS];
-int             (*op_func[NUM_OPERATIONS])(); //pointer to operation functions
+CONFIG  config;
+char    *arg_options[NUM_OPTIONS];
+int     (*op_func[NUM_OPERATIONS])(); //pointer to operation functions
 
 
 // -- FUNCTION DECLARATIONS --
@@ -123,30 +121,21 @@ extern int add_float_coo(COO*,float,int,int,long int);
 extern int coo2csc(COO*, CSC*);
 extern int coo2csr(COO*, CSR*);
 
-// -- ASYNCHRONOUS FILE READING --
-extern int read_to_coo_async(COO **, int, int);
-extern int read_to_csr_async(CSR **, int, int);
-extern int read_to_csc_async(CSC **, int, int);
-extern int read_coo_filei_async(COO**,int, int);
-extern int read_coo_filef_async(COO**, int, int);
-extern int add_int_coo_async(COO*,int,int,int,long int);
-extern int add_float_coo_async(COO*,float,int,int,long int);
-extern int coo2csc_async(COO*, CSC*);
-extern int coo2csr_async(COO*, CSR*);
 
 // -- SYNCHRONOUS --
 extern int process_scalar(COO*, float);
 extern int process_trace(COO*,int*,float*);
-extern int process_addition(COO**);
+extern int process_addition(CSR**, COO**);
 extern int process_transpose(CSR*, CSC*);
-extern int process_multiplication(CSR*, CSR*, CSC*);
+extern int process_multiplication(COO*, CSR*, CSC*);
 
 // -- ASYNCHRONOUS --
 extern int process_scalar_async(COO*, float);
 extern int process_trace_async(COO*,int*,float*);
-extern int process_addition_async(COO**);
+extern int process_addition_async(CSR**, COO**);
 extern int process_transpose_async(CSR*, CSC*);
-extern int process_multiplication_async(CSR*, CSR*, CSC*);
+extern int process_multiplication_async(COO*, CSR*, CSC*);
+
 
 // -- LOGGER --
 extern int log_coo_result(COO*, FILE*);

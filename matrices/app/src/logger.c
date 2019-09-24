@@ -5,26 +5,59 @@
  * @return 1 to indicate success and 0 to indicate failure.
  */
 int log_coo_result(COO *coo_mtx, FILE *fp) {
-    int count = 0;
+    int k = 0;
+    bool seen = false;
     if((*coo_mtx).is_int) {
+        int **mtx = malloc((*coo_mtx).size * sizeof(int *));
+        if(mtx == NULL) {
+            perror(NULL);
+            return 0;
+        }
+        for(int i = 0; i < (*coo_mtx).size; i++) {
+            mtx[i] = malloc(3 * sizeof(int));
+            memcpy(mtx[i], (*coo_mtx).mtxi[i], 3 * sizeof(int));
+        }
         for(int i = 0; i < (*coo_mtx).row; i++) {
             for(int j = 0; j < (*coo_mtx).col; j++) {
-                if((count < (*coo_mtx).size) && (*coo_mtx).mtxi[count][0] == i && (*coo_mtx).mtxi[count][1] == j) {
-                    fprintf(fp, "%i ", (*coo_mtx).mtxi[count++][2]);
+                for(k = 0; k < (*coo_mtx).size; k++) {
+                    if(mtx[k][0] == i && mtx[k][1] == j) {
+                        seen = true;
+                        break;
+                    }
                 }
+                if(seen) fprintf(fp, "%i ", mtx[k][2]);
                 else fprintf(fp, "%i ", 0);
+                seen = false;
             }
         }
+        for(int i = 0; i < (*coo_mtx).size; i++) {
+            free(mtx[i]);
+        }
+        free(mtx);
     }
     else {
+        float **mtx = malloc((*coo_mtx).size * sizeof(float *));
+        for(int i = 0; i < (*coo_mtx).size; i++) {
+            mtx[i] = malloc(3 * sizeof(float));
+            memcpy(mtx[i], (*coo_mtx).mtxf[i], 3 * sizeof(float));
+        }
         for(int i = 0; i < (*coo_mtx).row; i++) {
             for(int j = 0; j < (*coo_mtx).col; j++) {
-                if((count < (*coo_mtx).size) && (*coo_mtx).mtxf[count][0] == i && (*coo_mtx).mtxf[count][1] == j) {
-                    fprintf(fp, "%3.2f ", (*coo_mtx).mtxf[count++][2]);
+                for(k = 0; k < (*coo_mtx).size; k++) {
+                    if(mtx[k][0] == (float) i && mtx[k][1] == (float) j) {
+                        seen = true;
+                        break;
+                    }
                 }
-                else fprintf(fp, "%3.2f ", (float) 0.0);
+                if(seen) fprintf(fp, "%3.2f ", mtx[k][2]);
+                else fprintf(fp, "%3.2f ", 0.0);
+                seen = false;
             }
         }
+        for(int i = 0; i < (*coo_mtx).size; i++) {
+            free(mtx[i]);
+        }
+        free(mtx);
     }
     fprintf(fp, "\n");
     return 1;

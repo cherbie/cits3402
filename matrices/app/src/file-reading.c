@@ -143,7 +143,7 @@ int read_coo_filei(COO **coo_mtx, int k, int fid) {
  * @count is the array index of the coordinates.
  */
 int add_int_coo(COO *coo_mtx, int val, int row, int col, long int index) {
-    (*coo_mtx).mtxi[index] = malloc(3  * sizeof(int));
+    (*coo_mtx).mtxi[index] = malloc(3 * sizeof(int));
     if((*coo_mtx).mtxi[index] == NULL) {
         perror("function: add_int_coo()");
         return 0;
@@ -160,14 +160,14 @@ int add_int_coo(COO *coo_mtx, int val, int row, int col, long int index) {
  * @count is the array index of the coordinates.
  */
 int add_float_coo(COO *coo_mtx, float val, int row, int col, long int index) {
-    (*coo_mtx).mtxf[index] = malloc(3  * sizeof(float));
-    if((*coo_mtx).mtxf == NULL) {
+    (*coo_mtx).mtxf[index] = malloc(3 * sizeof(float));
+    if((*coo_mtx).mtxf[index] == NULL) {
         perror("function: add_int_coo()");
         return 0;
     }
-    (*coo_mtx).mtxf[index][0] = (float) row;
-    (*coo_mtx).mtxf[index][1] = (float) col;
-    (*coo_mtx).mtxf[index][2] = (float) val;
+    (*coo_mtx).mtxf[index][0] = row;
+    (*coo_mtx).mtxf[index][1] = col;
+    (*coo_mtx).mtxf[index][2] = val;
     return 1;
 }
 
@@ -179,12 +179,12 @@ int add_float_coo(COO *coo_mtx, float val, int row, int col, long int index) {
  */
 int read_to_csr(CSR **sparse_mtx, int k, int fid) {
     COO *coo_mtx = malloc(1 * sizeof(COO));
-    if(!read_to_coo(&coo_mtx, k, fid)) {
+    if(!read_to_coo(&coo_mtx, 0, fid)) {
         fprintf(stderr, "Error reading into sparse matrix.\n");
         return 0;
     }
     // -- CONVERT COO TO CSR --
-    if(!coo2csr(&coo_mtx[k], &(*sparse_mtx)[k])) {
+    if(!coo2csr(&coo_mtx[0], &(*sparse_mtx)[k])) {
         fprintf(stderr, "Error reading into sparse matrix.\n");
         return 0;
     }
@@ -251,12 +251,12 @@ int coo2csr(COO *coo_mtx, CSR *csr_mtx) {
 
 int read_to_csc(CSC **sparse_mtx, int k, int fid) {
     COO *coo_mtx = malloc(1 * sizeof(COO));
-    if(!read_to_coo(&coo_mtx, k, fid)) {
+    if(!read_to_coo(&coo_mtx, 0, fid)) {
         fprintf(stderr, "Error reading into sparse matrix.\n");
         return 0;
     }
     // -- CONVERT COO TO CCS --
-    if(!coo2csc(&coo_mtx[k], &(*sparse_mtx)[k])) {
+    if(!coo2csc(&coo_mtx[0], &(*sparse_mtx)[k])) {
         fprintf(stderr, "Error reading into sparse matrix.\n");
         return 0;
     }

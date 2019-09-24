@@ -1,6 +1,151 @@
 #include "mop.h"
 
 /**
+ * Performs matrix multiplication on the sparse matrices provided.
+ * @return 1 to indicate success and 0 to indicate failure.
+*/
+int process_addition_async(CSR **csr_mtx, COO **coo_mtx) {
+    COO *res_mtx = &(*coo_mtx)[0];
+    CSR *mtx_1 = &(*csr_mtx)[0];
+    CSR *mtx_2 = &(*csr_mtx)[1];
+
+    if(((*mtx_1).row != (*mtx_2).row) || ((*mtx_1).col != (*mtx_2).col)) {
+        fprintf(stderr, "Error dimensions of the input matrices are not equivalent.\n");
+        return 0;
+    }
+    else {
+        (*res_mtx).row = (*mtx_1).row;
+        (*res_mtx).col =  (*mtx_2).col;
+    }
+    bool set = false;
+    int index_1, index_2, sum_nz_1, sum_nz_2, count_1, count_2;
+    sum_nz_1 = 0; sum_nz_2 = 0;
+    if(!(*mtx_1).is_int && !(*mtx_2).is_int) { //float
+        float val = 0.0;
+        (*res_mtx).is_int = false;
+        (*res_mtx).mtxf = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(float *)); //maximum size
+        if((*res_mtx).mtxf == NULL) {
+            perror("function: process_multiplication().");
+            return 0;
+        }
+        for(int i = 0; i < ((*res_mtx).row * (*res_mtx).col); i++) {
+            (*res_mtx).mtxf[i] = malloc(3 * sizeof(float));
+            if((*res_mtx).mtxf[i] == NULL) {
+                perror(NULL);
+                return 0;
+            }
+        }
+        int size, j;
+        size = 0; j = 0; sum_nz_1 = 0; sum_nz_2 = 0;
+        #pragma omp parallel private(j, set, val, count_1, count_2)
+        {
+        #pragma omp single
+        {
+        for(int i = 0; i < (*mtx_1).row; i++) {
+            sum_nz_1 += (*mtx_1).mtx_offset[i];
+            sum_nz_2 += (*mtx_2).mtx_offset[i];
+            count_1 = 0; count_2 = 0;
+            for(j = 0; j < (*mtx_1).col; j++) {
+                set = false;
+                index_1 = sum_nz_1 + count_1;
+                index_2 = sum_nz_2 + count_2;
+                if((*mtx_1).mtx_col[index_1] == j && (*mtx_2).mtx_col[index_2] == j && count_1 < (*mtx_1).mtx_offset[i+1] && count_2 < (*mtx_2).mtx_offset[i+1]) {
+                    val = (*mtx_1).mtxf[index_1] + (*mtx_2).mtxf[index_2];
+                    set = true;
+                    count_1++; count_2++;
+                }
+                else if((*mtx_1).mtx_col[index_1] == j && count_1 < (*mtx_1).mtx_offset[i+1]) {
+                    val = (*mtx_1).mtxf[index_1];
+                    set = true;
+                    count_1++;
+                }
+                else if((*mtx_2).mtx_col[index_2] == j && count_2 < (*mtx_2).mtx_offset[i+1]) {
+                    val = (*mtx_2).mtxf[index_2];
+                    set = true;
+                    count_2++;
+                }
+                if(set) {
+                    #pragma omp task firstprivate(i, j, val)
+                    {
+                        (*res_mtx).mtxf[size][0] = (float) i;
+                        (*res_mtx).mtxf[size][1] = (float) j;
+                        (*res_mtx).mtxf[size][2] = val;
+                    }
+                    size++;
+                }
+            }
+        }
+        #pragma omp critical
+        (*res_mtx).size = size;
+        }
+        }
+    }
+    else {
+        int val = 0;
+        (*res_mtx).is_int = true;
+        (*res_mtx).mtxi = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int *)); //maximum size
+        if((*res_mtx).mtxi == NULL) {
+            perror("function: process_multiplication().");
+            return 0;
+        }
+        for(int i = 0; i < ((*res_mtx).row * (*res_mtx).col); i++) {
+            (*res_mtx).mtxi[i] = malloc(3 * sizeof(int));
+            if((*res_mtx).mtxi[i] == NULL) {
+                perror(NULL);
+                return 0;
+            }
+        }
+        int size = 0; sum_nz_1 = 0; sum_nz_2 = 0; count_1 = 0; count_2 = 0;
+        int j;
+        #pragma omp parallel private(j, set, val, count_1, count_2)
+        {
+        #pragma omp single
+        {
+        for(int i = 0; i < (*mtx_1).row; i++) { //row of first & second matrix
+            sum_nz_1 = sum_nz_1 + (*mtx_1).mtx_offset[i];
+            sum_nz_2 = sum_nz_2 + (*mtx_2).mtx_offset[i];
+            count_1 = 0; count_2 = 0;
+            for(j = 0; j < (*mtx_1).col; j++) { //columns of first and second matrix
+                set = false;
+                index_1 = sum_nz_1 + count_1;
+                index_2 = sum_nz_2 + count_2;
+                if((*mtx_1).mtx_col[index_1] == j && (*mtx_2).mtx_col[index_2] == j && count_1 < (*mtx_1).mtx_offset[i+1] && count_2 < (*mtx_2).mtx_offset[i+1]) {
+                    val = (*mtx_1).mtxi[index_1] + (*mtx_2).mtxi[index_2];
+                    set = true;
+                    count_1++;
+                    count_2++;
+                }
+                else if((*mtx_1).mtx_col[index_1] == j && count_1 < (*mtx_1).mtx_offset[i+1]) {
+                    val = (*mtx_1).mtxi[index_1];
+                    set = true;
+                    count_1++;
+                }
+                else if((*mtx_2).mtx_col[index_2] == j && count_2 < (*mtx_2).mtx_offset[i+1]) {
+                    val = (*mtx_2).mtxi[index_2];
+                    set = true;
+                    count_2++;
+                }
+                if(set) {
+                    #pragma omp task firstprivate(i, j, val)
+                    {
+                        (*res_mtx).mtxi[size][0] = i;
+                        (*res_mtx).mtxi[size][1] = j;
+                        (*res_mtx).mtxi[size][2] = val;
+                    }
+                    size++;
+                }
+            }
+        }
+        #pragma omp critical
+        (*res_mtx).size = size;
+        }
+        }
+    }
+    return 1;
+}
+
+
+/**
  * Copies the CSR struct meta data to the CSC struct meta data.
  * @param csr_mtx typedef struct CSR
  * @param csc_mtx typedef struct CSC
@@ -47,12 +192,12 @@ int process_transpose_async(CSR *csr_mtx, CSC *csc_mtx) {
 /**
  * Performs matrix multiplcation on given arguments 1 & 2.
  * Stores the resulting matrix in argument 0.
- * @param res_mtx CSC* resulting matrix stored in CSC struct.
+ * @param res_mtx COO* resulting matrix stored in COO struct.
  * @param mtx_1 CSR* the first matrix given.
  * @param mtx_2 CSC* the second matrix given.
  * @return 1 to indicate success and zero to indicate failure.
  */
-int process_multiplication_async(CSR *res_mtx, CSR *mtx_1, CSC *mtx_2) {
+int process_multiplication_async(COO *res_mtx, CSR *mtx_1, CSC *mtx_2) {
     if((*mtx_1).col != (*mtx_2).row) {
         fprintf(stderr, "The dimensions of the provided matrices are not suitable.\n");
         return 0;
@@ -61,28 +206,37 @@ int process_multiplication_async(CSR *res_mtx, CSR *mtx_1, CSC *mtx_2) {
     (*res_mtx).col = (*mtx_2).col;
     if(!(*mtx_1).is_int || !(*mtx_2).is_int) (*res_mtx).is_int = false;
     else (*res_mtx).is_int = true;
-    int index_1, index_2, sum_nz_1, sum_nz_2, count_1, count_2;
+    int index_1, index_2, sum_nz_1, sum_nz_2, count_1, count_2, j, k;
     sum_nz_1 = 0; sum_nz_2 = 0;
     if((*res_mtx).is_int) {
         int sum;
-        (*res_mtx).mtxi = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int)); //maximum size
-        (*res_mtx).mtx_offset = calloc((*res_mtx).row+1, sizeof(int));
-        (*res_mtx).mtx_col = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int));
-        if((*res_mtx).mtxi == NULL || (*res_mtx).mtx_offset == NULL || (*res_mtx).mtx_col == NULL) {
+        (*res_mtx).mtxi = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int *)); //maximum size
+        if((*res_mtx).mtxi == NULL) {
             perror("function: process_multiplication().");
             return 0;
         }
-        (*res_mtx).size = 0;
+        for(int i = 0; i < ((*res_mtx).row * (*res_mtx).col); i++) {
+            (*res_mtx).mtxi[i] = malloc(3 * sizeof(int));
+            if((*res_mtx).mtxi[i] == NULL) {
+                perror(NULL);
+                return 0;
+            }
+        }
+        int size = 0;
         sum_nz_1 = 0;
+        #pragma omp parallel private(j, k, index_1, index_2, count_1, count_2, sum, sum_nz_2)
+        {
+        #pragma omp single
+        {
         for(int i = 0; i < (*mtx_1).row; i++) { //row of first matrix
             if((*mtx_1).mtx_offset[i+1] == 0) continue;
             sum_nz_1 += (*mtx_1).mtx_offset[i];
             sum_nz_2 = 0;
-            for(int j = 0; j < (*mtx_2).col; j++) { //column of 2nd matrix
+            for(j = 0; j < (*mtx_2).col; j++) { //column of 2nd matrix
                 if((*mtx_2).mtx_offset[j+1] == 0) continue;
                 sum_nz_2 += (*mtx_2).mtx_offset[j];
                 sum = 0; count_1 = 0; count_2 = 0;
-                for(int k = 0; k < (*mtx_2).row; k++) { //row of 2nd matrix
+                for(k = 0; k < (*mtx_2).row; k++) { //row of 2nd matrix
                     if(count_1 >= (*mtx_1).mtx_offset[i+1] || count_2 >= (*mtx_2).mtx_offset[j+1]) break;
                     index_1 = sum_nz_1 + count_1;
                     index_2 = sum_nz_2 + count_2;
@@ -95,25 +249,40 @@ int process_multiplication_async(CSR *res_mtx, CSR *mtx_1, CSC *mtx_2) {
                     else if((*mtx_2).mtx_row[index_2] == k) count_2++;
                 }
                 if(sum != 0) {
-                    (*res_mtx).mtxi[(*res_mtx).size] = sum;
-                    (*res_mtx).mtx_offset[i+1] += 1;
-                    (*res_mtx).mtx_col[(*res_mtx).size] = j; //column under inspection
-                    (*res_mtx).size += 1;
+                    #pragma omp task firstprivate(i, j, sum, size)
+                    {
+                        (*res_mtx).mtxi[size][0] = i;
+                        (*res_mtx).mtxi[size][1] = j;
+                        (*res_mtx).mtxi[size][2] = sum;
+                    }
+                    size += 1;
                 }
             }
+        }
+        (*res_mtx).size = size;
+        }
         }
     }
     else {
         float sum;
-        (*res_mtx).mtxf = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(float)); //maximum size
-        (*res_mtx).mtx_offset = calloc((*res_mtx).row+1, sizeof(int));
-        (*res_mtx).mtx_col = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int));
-        if((*res_mtx).mtxf == NULL || (*res_mtx).mtx_offset == NULL || (*res_mtx).mtx_col == NULL) {
+        (*res_mtx).mtxf = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(float *)); //maximum size
+        if((*res_mtx).mtxf == NULL) {
             perror("function: process_multiplication().");
             return 0;
         }
-        (*res_mtx).size = 0;
+        for(int i = 0; i < ((*res_mtx).row * (*res_mtx).col); i++) {
+            (*res_mtx).mtxf[i] = malloc(3 * sizeof(float));
+            if((*res_mtx).mtxf[i] == NULL) {
+                perror(NULL);
+                return 0;
+            }
+        }
+        int size = 0;
         sum_nz_1 = 0;
+        #pragma omp parallel private(j, k, index_1, index_2, count_1, count_2, sum, sum_nz_2)
+        {
+        #pragma omp single
+        {
         for(int i = 0; i < (*mtx_1).row; i++) { //row of first matrix
             if((*mtx_1).mtx_offset[i+1] == 0) continue;
             sum_nz_1 += (*mtx_1).mtx_offset[i];
@@ -121,7 +290,7 @@ int process_multiplication_async(CSR *res_mtx, CSR *mtx_1, CSC *mtx_2) {
             for(int j = 0; j < (*mtx_2).col; j++) { //column of 2nd matrix
                 if((*mtx_2).mtx_offset[j+1] == 0) continue;
                 sum_nz_2 += (*mtx_2).mtx_offset[j];
-                sum = 0; count_1 = 0; count_2 = 0;
+                sum = 0.0; count_1 = 0; count_2 = 0;
                 for(int k = 0; k < (*mtx_2).row; k++) { //row of 2nd matrix
                     if(count_1 >= (*mtx_1).mtx_offset[i+1] || count_2 >= (*mtx_2).mtx_offset[j+1]) break;
                     index_1 = sum_nz_1 + count_1;
@@ -135,12 +304,18 @@ int process_multiplication_async(CSR *res_mtx, CSR *mtx_1, CSC *mtx_2) {
                     else if((*mtx_2).mtx_row[index_2] == k) count_2++;
                 }
                 if(sum != 0) {
-                    (*res_mtx).mtxf[(*res_mtx).size] = sum;
-                    (*res_mtx).mtx_offset[i+1] += 1;
-                    (*res_mtx).mtx_col[(*res_mtx).size] = j; //column under inspection
-                    (*res_mtx).size += 1;
+                    #pragma omp task firstprivate(i, j, sum, size)
+                    {
+                        (*res_mtx).mtxf[size][0] = (float) i;
+                        (*res_mtx).mtxf[size][1] = (float) j;
+                        (*res_mtx).mtxf[size][2] = sum;
+                    }
+                    size++;
                 }
             }
+        }
+        (*res_mtx).size = size;
+        }
         }
     }
     return 1;

@@ -54,6 +54,10 @@ int scalar(void) {
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
     }
+    if(!log_coo_result(&coo_sparse_mtx[0], stdout)) {
+        fprintf(stderr, "Error logging result to file.\n");
+        return 0;
+    }
     dealloc_coo(&coo_sparse_mtx, 1);
     free(coo_sparse_mtx);
     return 1;
@@ -102,6 +106,10 @@ int trace(void) {
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
     }
+    if(!log_trace_result(&coo_sparse_mtx[0], &i, &f, stdout)) {
+        fprintf(stderr, "Error logging the result of the trace.\n");
+        return 0;
+    }
     dealloc_coo(&coo_sparse_mtx, 1);
     free(coo_sparse_mtx);
     return 1;
@@ -111,21 +119,21 @@ int trace(void) {
  * Return 1 to indicate success and 0 to indicate failure.
  */
 int addition(void) {
-    config.num_files = 2;
     if(config.filename[0] == NULL || config.filename[1] == NULL) {
         fprintf(stderr, "Error: not enough inputs specified.\n");
         return 0;
     }
     //SPARSE MATRIX REP.
-    int coo_id = 0;
-    COO *coo_sparse_mtx; //structure containing coordinate format representation of matrix.
-    if((coo_sparse_mtx = malloc(3 * sizeof(COO))) == NULL) {
+    int csr_id = 0;
+    CSR *csr_sparse_mtx = malloc(2 * sizeof(CSR));
+    COO *coo_sparse_mtx = malloc(1 * sizeof(COO));
+    if(csr_sparse_mtx == NULL || coo_sparse_mtx == NULL) {
         perror(NULL);
         return 0;
     }
     gettimeofday(&config.time[0].start, NULL);
-    for(int k = 0; k < config.num_files; k++) {
-        if(!read_to_coo(&coo_sparse_mtx, coo_id++, k)) {
+    for(int k = 0; k < NUMBER_OF_INPUT_FILES; k++) {
+        if(!read_to_csr(&csr_sparse_mtx, csr_id++, k)) {
             fprintf(stderr, "Error converting file to sparse matrix form.\n");
             return 0;
         }
@@ -133,12 +141,12 @@ int addition(void) {
     gettimeofday(&config.time[0].end, NULL);
     gettimeofday(&config.time[1].start, NULL);
     if(config.sync) {
-        if(!process_addition(&coo_sparse_mtx)) {
+        if(!process_addition(&csr_sparse_mtx, &coo_sparse_mtx)) {
             fprintf(stderr, "Error performing matrix addition.\n");
             return 0;
         }
     } else {
-        if(!process_addition_async(&coo_sparse_mtx)) {
+        if(!process_addition_async(&csr_sparse_mtx, &coo_sparse_mtx)) {
             fprintf(stderr, "Error performing matrix addition.\n");
             return 0;
         }
@@ -152,14 +160,20 @@ int addition(void) {
             fprintf(config.log_fd, "%s\n", config.filename[i]);
         }
         fprintf(config.log_fd, "%i\n", config.num_threads);
-        if(!log_coo_result(&coo_sparse_mtx[2], config.log_fd)) {
+        if(!log_coo_result(&coo_sparse_mtx[0], config.log_fd)) {
             fprintf(stderr, "Error logging result to file.\n");
             return 0;
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
     }
-    dealloc_coo(&coo_sparse_mtx, 3);
+    if(!log_coo_result(&coo_sparse_mtx[0], stdout)) {
+        fprintf(stderr, "Error logging result to file.\n");
+        return 0;
+    }
+    dealloc_csr(&csr_sparse_mtx, 2);
+    dealloc_coo(&coo_sparse_mtx, 1);
     free(coo_sparse_mtx);
+    free(csr_sparse_mtx);
     return 1;
 }
 
@@ -169,12 +183,9 @@ int addition(void) {
 int transpose_matrix(void) {
     config.num_files = 1;
     //SPARSE MATRIX REP CSR.
-    CSR *csr_sparse_mtx; CSC *csc_sparse_mtx; //structure containing coordinate format representation of matrix.
-    if((csr_sparse_mtx = malloc(1 * sizeof(CSR))) == NULL) {
-        perror(NULL);
-        return 0;
-    }
-    if((csc_sparse_mtx = malloc(1 * sizeof(CSC))) == NULL) {
+    CSR *csr_sparse_mtx = malloc(1 * sizeof(CSR));
+    CSC *csc_sparse_mtx = malloc(1 * sizeof(CSC)); //structure containing coordinate format representation of matrix.
+    if(csr_sparse_mtx == NULL || csc_sparse_mtx == NULL) {
         perror(NULL);
         return 0;
     }
@@ -227,9 +238,10 @@ int transpose_matrix(void) {
 int matrix_mp(void) {
     config.num_files = 2;
     // -- SPARSE MATRIX REP CSR. --
-    CSR *csr_sparse_mtx = malloc(2 * sizeof(CSR)); //structure containing coordinate format representation of matrix.
+    CSR *csr_sparse_mtx = malloc(1 * sizeof(CSR)); //structure containing coordinate format representation of matrix.
     CSC *csc_sparse_mtx = malloc(1 * sizeof(CSC));
-    if((csc_sparse_mtx == NULL) || csr_sparse_mtx == NULL) {
+    COO *coo_sparse_mtx = malloc(1 * sizeof(COO));
+    if((csc_sparse_mtx == NULL) || csr_sparse_mtx == NULL || coo_sparse_mtx == NULL) {
         perror(NULL);
         return 0;
     }
@@ -245,12 +257,12 @@ int matrix_mp(void) {
     gettimeofday(&config.time[0].end, NULL);
     gettimeofday(&config.time[1].start, NULL);
     if(config.sync) {
-        if(!process_multiplication(&csr_sparse_mtx[1], &csr_sparse_mtx[0], &csc_sparse_mtx[0])) {
+        if(!process_multiplication(&coo_sparse_mtx[0], &csr_sparse_mtx[0], &csc_sparse_mtx[0])) {
             fprintf(stderr, "Error performing matrix multiplication on given matrix.\n");
             return 0;
         }
     } else {
-        if(!process_multiplication_async(&csr_sparse_mtx[1], &csr_sparse_mtx[0], &csc_sparse_mtx[0])) {
+        if(!process_multiplication_async(&coo_sparse_mtx[0], &csr_sparse_mtx[0], &csc_sparse_mtx[0])) {
             fprintf(stderr, "Error performing matrix multiplication on given matrix.\n");
             return 0;
         }
@@ -264,15 +276,21 @@ int matrix_mp(void) {
             fprintf(config.log_fd, "%s\n", config.filename[i]);
         }
         fprintf(config.log_fd, "%i\n", config.num_threads);
-        if(!log_csr_result(&csr_sparse_mtx[1], config.log_fd)) {
+        if(!log_coo_result(&coo_sparse_mtx[0], config.log_fd)) {
             fprintf(stderr, "Unable to log matrix result value.\n");
             return 0;
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
     }
+    if(!log_coo_result(&coo_sparse_mtx[0], stdout)) {
+        fprintf(stderr, "Unable to log matrix result value.\n");
+        return 0;
+    }
     // -- DEALLOCATE --
-    dealloc_csr(&csr_sparse_mtx, 2);
+    dealloc_csr(&csr_sparse_mtx, 1);
     dealloc_csc(&csc_sparse_mtx, 1);
+    dealloc_coo(&coo_sparse_mtx, 1);
+    free(coo_sparse_mtx);
     free(csc_sparse_mtx);
     free(csr_sparse_mtx);
     return 1;

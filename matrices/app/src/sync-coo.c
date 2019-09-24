@@ -42,7 +42,7 @@ int process_trace(COO *coo_mtx, int *i, float *f) {
 /**
  * Performs matrix multiplication on the sparse matrices provided.
  * @return 1 to indicate success and 0 to indicate failure.
- */
+
 int process_addition(COO **coo_mtx) {
     const int file1 = 0;
     const int file2 = 1;
@@ -143,3 +143,4 @@ int process_addition(COO **coo_mtx) {
     }
     return 1;
 }
+*/
