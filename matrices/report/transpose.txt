@@ -1,0 +1,16 @@
+procedure TRANSPOSE(COO mtx)
+    for each element mtx[i] in mtx
+        mtx[i].row <--> mtx[i].col
+    end for
+end procedure
+
+
+Given the matrix A represented by the COO struct.
+
+program TRACE(COO A)
+    for each non-zero element i in A
+        if the row A[i].row equals the column A[i].col of for a non-zero element
+            trace_result <-- trace_result + A[i].element
+        end if
+    end for
+end program.
