@@ -63,8 +63,7 @@ int read_coo_filef(COO **coo_mtx, int k, int fid) {
     float val = 0.0;
     rows = 0, cols = 0;
     (*coo_mtx)[k].size = 0; //no elements
-    (*coo_mtx)[k].mtxf = malloc(1 * sizeof(float));
-    (*coo_mtx)[k].rowcol = malloc(1 *  sizeof(int *));
+    (*coo_mtx)[k].mtxf = malloc(1 * sizeof(float *));
 
     int num = (*coo_mtx)[k].row * (*coo_mtx)[k].col;
     for(int i = 0; i < num; i++) {
@@ -78,9 +77,8 @@ int read_coo_filef(COO **coo_mtx, int k, int fid) {
             continue;
         }
         (*coo_mtx)[k].size += 1;
-        (*coo_mtx)[k].mtxf = realloc((*coo_mtx)[k].mtxf, (*coo_mtx)[k].size * sizeof(float));
-        (*coo_mtx)[k].rowcol = realloc((*coo_mtx)[k].rowcol, (*coo_mtx)[k].size * sizeof(int *));
-        if((*coo_mtx)[k].rowcol == NULL || (*coo_mtx)[k].mtxf == NULL) {
+        (*coo_mtx)[k].mtxf = realloc((*coo_mtx)[k].mtxf, (*coo_mtx)[k].size * sizeof(float *));
+        if((*coo_mtx)[k].mtxf == NULL) {
             perror("function: read_int_file()");
             return 0;
         }
@@ -106,8 +104,7 @@ int read_coo_filei(COO **coo_mtx, int k, int fid) {
     int rows, cols, val;
     rows = 0, cols = 0; val = 0;
     (*coo_mtx)[k].size = 0; //no elements
-    (*coo_mtx)[k].mtxi = malloc(1 * sizeof(int));
-    (*coo_mtx)[k].rowcol = malloc(1 * sizeof(int *));
+    (*coo_mtx)[k].mtxi = malloc(1 * sizeof(int *));
 
     int num = (*coo_mtx)[k].row * (*coo_mtx)[k].col;
 
@@ -122,9 +119,8 @@ int read_coo_filei(COO **coo_mtx, int k, int fid) {
             continue;
         }
         (*coo_mtx)[k].size += 1;
-        (*coo_mtx)[k].mtxi = realloc((*coo_mtx)[k].mtxi, (*coo_mtx)[k].size * sizeof(int));
-        (*coo_mtx)[k].rowcol = realloc((*coo_mtx)[k].rowcol, (*coo_mtx)[k].size * sizeof(int *));
-        if((*coo_mtx)[k].mtxi == NULL || (*coo_mtx)[k].rowcol == NULL) {
+        (*coo_mtx)[k].mtxi = realloc((*coo_mtx)[k].mtxi, (*coo_mtx)[k].size * sizeof(int *));
+        if((*coo_mtx)[k].mtxi == NULL) {
             perror("function: read_int_file()");
             return 0;
         }
@@ -147,14 +143,14 @@ int read_coo_filei(COO **coo_mtx, int k, int fid) {
  * @count is the array index of the coordinates.
  */
 int add_int_coo(COO *coo_mtx, int val, int row, int col, long int index) {
-    (*coo_mtx).rowcol[index] = malloc(2 * sizeof(int));
-    if((*coo_mtx).rowcol[index] == NULL) {
+    (*coo_mtx).mtxi[index] = malloc(3 * sizeof(int));
+    if((*coo_mtx).mtxi[index] == NULL) {
         perror("function: add_int_coo()");
         return 0;
     }
-    (*coo_mtx).rowcol[index][0] = row;
-    (*coo_mtx).rowcol[index][1] = col;
-    (*coo_mtx).mtxi[index] = val;
+    (*coo_mtx).mtxi[index][0] = row;
+    (*coo_mtx).mtxi[index][1] = col;
+    (*coo_mtx).mtxi[index][2] = val;
     return 1;
 }
 
@@ -164,14 +160,14 @@ int add_int_coo(COO *coo_mtx, int val, int row, int col, long int index) {
  * @count is the array index of the coordinates.
  */
 int add_float_coo(COO *coo_mtx, float val, int row, int col, long int index) {
-    (*coo_mtx).rowcol[index] = malloc(2 * sizeof(int));
-    if((*coo_mtx).rowcol[index] == NULL) {
+    (*coo_mtx).mtxf[index] = malloc(3 * sizeof(float));
+    if((*coo_mtx).mtxf[index] == NULL) {
         perror("function: add_int_coo()");
         return 0;
     }
-    (*coo_mtx).rowcol[index][0] = row;
-    (*coo_mtx).rowcol[index][1] = col;
-    (*coo_mtx).mtxf[index] = val;
+    (*coo_mtx).mtxf[index][0] = row;
+    (*coo_mtx).mtxf[index][1] = col;
+    (*coo_mtx).mtxf[index][2] = val;
     return 1;
 }
 
@@ -218,10 +214,10 @@ int coo2csr(COO *coo_mtx, CSR *csr_mtx) {
         int count = 0;
         for(int i = 0; i < (*csr_mtx).row; i++) {
             for(int j = 0; j < (*coo_mtx).size; j++) {
-                if((*coo_mtx).rowcol[j][0] == i) {
-                    (*csr_mtx).mtx_offset[(*coo_mtx).rowcol[j][0] + 1] += 1;
-                    (*csr_mtx).mtx_col[count] = (*coo_mtx).rowcol[j][1];
-                    (*csr_mtx).mtxi[count] = (*coo_mtx).mtxi[j];
+                if((*coo_mtx).mtxi[j][0] == i) {
+                    (*csr_mtx).mtx_offset[(*coo_mtx).mtxi[j][0] + 1] += 1;
+                    (*csr_mtx).mtx_col[count] = (*coo_mtx).mtxi[j][1];
+                    (*csr_mtx).mtxi[count] = (*coo_mtx).mtxi[j][2];
                     count++;
                 }
             }
@@ -238,10 +234,10 @@ int coo2csr(COO *coo_mtx, CSR *csr_mtx) {
         int count = 0;
         for(int i = 0; i < (*csr_mtx).row; i++) {
             for(int j = 0; j < (*coo_mtx).size; j++) {
-                if((*coo_mtx).rowcol[j][0] == i) {
-                    (*csr_mtx).mtx_offset[(*coo_mtx).rowcol[j][0] + 1] += 1;
-                    (*csr_mtx).mtx_col[count] = (*coo_mtx).rowcol[j][1];
-                    (*csr_mtx).mtxf[count] = (*coo_mtx).mtxf[j];
+                if((*coo_mtx).mtxf[j][0] == i) {
+                    (*csr_mtx).mtx_offset[(int)(*coo_mtx).mtxf[j][0] + 1] += 1;
+                    (*csr_mtx).mtx_col[count] = (*coo_mtx).mtxf[j][1];
+                    (*csr_mtx).mtxf[count] = (*coo_mtx).mtxf[j][2];
                     count++;
                 }
             }
@@ -291,10 +287,10 @@ int coo2csc(COO *coo_mtx, CSC *csc_mtx) {
         int count = 0;
         for(int i = 0; i < (*csc_mtx).col; i++) {
             for(int j = 0; j < (*coo_mtx).size; j++) {
-                if((*coo_mtx).rowcol[j][1] == i) {
-                    (*csc_mtx).mtx_offset[(*coo_mtx).rowcol[j][1] + 1] += 1;
-                    (*csc_mtx).mtx_row[count] = (*coo_mtx).rowcol[j][0];
-                    (*csc_mtx).mtxi[count] = (*coo_mtx).mtxi[j];
+                if((*coo_mtx).mtxi[j][1] == i) {
+                    (*csc_mtx).mtx_offset[(*coo_mtx).mtxi[j][1] + 1] += 1;
+                    (*csc_mtx).mtx_row[count] = (*coo_mtx).mtxi[j][0];
+                    (*csc_mtx).mtxi[count] = (*coo_mtx).mtxi[j][2];
                     count++;
                 }
             }
@@ -311,10 +307,10 @@ int coo2csc(COO *coo_mtx, CSC *csc_mtx) {
         int count = 0;
         for(int i = 0; i < (*csc_mtx).col; i++) {
             for(int j = 0; j < (*coo_mtx).size; j++) {
-                if((*coo_mtx).rowcol[j][1] == i) {
-                    (*csc_mtx).mtx_offset[(*coo_mtx).rowcol[j][1] + 1] += 1;
-                    (*csc_mtx).mtx_row[count] = (*coo_mtx).rowcol[j][0];
-                    (*csc_mtx).mtxf[count] = (*coo_mtx).mtxf[j];
+                if((*coo_mtx).mtxf[j][1] == i) {
+                    (*csc_mtx).mtx_offset[(int)(*coo_mtx).mtxf[j][1] + 1] += 1;
+                    (*csc_mtx).mtx_row[count] = (*coo_mtx).mtxf[j][0];
+                    (*csc_mtx).mtxf[count] = (*coo_mtx).mtxf[j][2];
                     count++;
                 }
             }

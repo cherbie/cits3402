@@ -43,9 +43,8 @@ typedef struct {
 
 typedef struct {
     bool is_int;
-    int *mtxi;
-    float *mtxf;
-    int **rowcol;
+    int **mtxi;
+    float **mtxf;
     int row;
     int col;
     long int size;

@@ -85,7 +85,7 @@ int process_addition_async(CSR **csr_mtx) {
         }
         #pragma omp parallel
         {
-        #pragma omp c
+        #pragma omp single
         {
         int size = 0;
         sum_nz_1 = 0;

@@ -84,17 +84,17 @@ void print_coo(COO *coo_mtx) {
     print(" --- ");
     if((*coo_mtx).is_int) {
         for(int i = 0; i < (*coo_mtx).size; i++) {
-            printf(" %i ", (*coo_mtx).rowcol[i][0]);
-            printf(" %i ", (*coo_mtx).rowcol[i][1]);
-            printf(" %i ", (*coo_mtx).mtxi[i]);
+            printf(" %i ", (*coo_mtx).mtxi[i][0]);
+            printf(" %i ", (*coo_mtx).mtxi[i][1]);
+            printf(" %i ", (*coo_mtx).mtxi[i][2]);
             print("\n");
         }
     }
     else {
         for(int i = 0; i < (*coo_mtx).size; i++) {
-            printf(" %i ", (*coo_mtx).rowcol[i][0]);
-            printf(" %i ", (*coo_mtx).rowcol[i][1]);
-            printf(" %3.2f ", (*coo_mtx).mtxf[i]);
+            printf(" %2f ", (*coo_mtx).mtxf[i][0]);
+            printf(" %2f ", (*coo_mtx).mtxf[i][1]);
+            printf(" %3.2f ", (*coo_mtx).mtxf[i][2]);
             print("\n");
         }
     }
