@@ -74,11 +74,9 @@ typedef struct {
 } CSC;
 
 //GLOBAL VARIABLES
-CONFIG          config;
-//struct tm       *exec_time;
-//time_t          rawtime;
-char            *arg_options[NUM_OPTIONS];
-int             (*op_func[NUM_OPERATIONS])(); //pointer to operation functions
+CONFIG  config;
+char    *arg_options[NUM_OPTIONS];
+int     (*op_func[NUM_OPERATIONS])(); //pointer to operation functions
 
 
 // -- FUNCTION DECLARATIONS --
@@ -135,7 +133,7 @@ extern int process_multiplication(CSR*, CSR*, CSC*);
 // -- ASYNCHRONOUS --
 extern int process_scalar_async(COO*, float);
 extern int process_trace_async(COO*,int*,float*);
-//extern int process_addition_async(COO**);
+extern int process_addition_async(CSR**);
 extern int process_transpose_async(CSR*, CSC*);
 extern int process_multiplication_async(CSR*, CSR*, CSC*);
 

@@ -64,6 +64,7 @@ int read_coo_filef(COO **coo_mtx, int k, int fid) {
     rows = 0, cols = 0;
     (*coo_mtx)[k].size = 0; //no elements
     (*coo_mtx)[k].mtxf = malloc(1 * sizeof(float));
+    (*coo_mtx)[k].rowcol = malloc(1 *  sizeof(int *));
 
     int num = (*coo_mtx)[k].row * (*coo_mtx)[k].col;
     for(int i = 0; i < num; i++) {
@@ -77,8 +78,9 @@ int read_coo_filef(COO **coo_mtx, int k, int fid) {
             continue;
         }
         (*coo_mtx)[k].size += 1;
+        (*coo_mtx)[k].mtxf = realloc((*coo_mtx)[k].mtxf, (*coo_mtx)[k].size * sizeof(float));
         (*coo_mtx)[k].rowcol = realloc((*coo_mtx)[k].rowcol, (*coo_mtx)[k].size * sizeof(int *));
-        if((*coo_mtx)[k].rowcol == NULL) {
+        if((*coo_mtx)[k].rowcol == NULL || (*coo_mtx)[k].mtxf == NULL) {
             perror("function: read_int_file()");
             return 0;
         }

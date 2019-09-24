@@ -122,59 +122,33 @@ int addition(void) {
         fprintf(stderr, "Error: not enough inputs specified.\n");
         return 0;
     }
-    if(true) {
-        CSR *csr_sparse_mtx = malloc(3 * sizeof(CSR));
-        if(csr_sparse_mtx == NULL) {
-            perror(NULL);
-            return 0;
-        }
-        int csr_id = 0;
-        for(int k = 0; k < NUMBER_OF_INPUT_FILES; k++) {
-            if(!read_to_csr(&csr_sparse_mtx, csr_id++, k)) {
-                fprintf(stderr, "Error converting file to sparse matrix form.\n");
-                return 0;
-            }
-        }
-        if(!process_addition(&csr_sparse_mtx)) {
-            fprintf(stderr, "Error performing matrix addition.\n");
-            return 0;
-        }
-
-        print_csr(&csr_sparse_mtx[2]);
-        if(!log_csr_result(&csr_sparse_mtx[2], stdout)) {
-            fprintf(stderr, "Error logging result to file.\n");
-            return 0;
-        }
-        print("finished");
-        return 1;
-    }
     //SPARSE MATRIX REP.
-    int coo_id = 0;
-    COO *coo_sparse_mtx; //structure containing coordinate format representation of matrix.
-    if((coo_sparse_mtx = malloc(3 * sizeof(COO))) == NULL) {
+    int csr_id = 0;
+    CSR *csr_sparse_mtx = malloc(3 * sizeof(CSR));
+    if(csr_sparse_mtx == NULL) {
         perror(NULL);
         return 0;
     }
     gettimeofday(&config.time[0].start, NULL);
-    for(int k = 0; k < config.num_files; k++) {
-        if(!read_to_coo(&coo_sparse_mtx, coo_id++, k)) {
+    for(int k = 0; k < NUMBER_OF_INPUT_FILES; k++) {
+        if(!read_to_csr(&csr_sparse_mtx, csr_id++, k)) {
             fprintf(stderr, "Error converting file to sparse matrix form.\n");
             return 0;
         }
     }
     gettimeofday(&config.time[0].end, NULL);
     gettimeofday(&config.time[1].start, NULL);
-    /*if(config.sync) {
-        if(!process_addition(&coo_sparse_mtx)) {
+    if(config.sync) {
+        if(!process_addition(&csr_sparse_mtx)) {
             fprintf(stderr, "Error performing matrix addition.\n");
             return 0;
         }
     } else {
-        if(!process_addition_async(&coo_sparse_mtx)) {
+        if(!process_addition_async(&csr_sparse_mtx)) {
             fprintf(stderr, "Error performing matrix addition.\n");
             return 0;
         }
-    }*/
+    }
     gettimeofday(&config.time[1].end, NULL);
     if(!process_stat()) fprintf(stderr, "Error determining duration of operations.\n");
     // -- LOG RESULT TO FILE --
@@ -184,14 +158,14 @@ int addition(void) {
             fprintf(config.log_fd, "%s\n", config.filename[i]);
         }
         fprintf(config.log_fd, "%i\n", config.num_threads);
-        if(!log_coo_result(&coo_sparse_mtx[2], config.log_fd)) {
+        if(!log_csr_result(&csr_sparse_mtx[2], stdout)) {
             fprintf(stderr, "Error logging result to file.\n");
             return 0;
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
     }
-    dealloc_coo(&coo_sparse_mtx, 3);
-    free(coo_sparse_mtx);
+    dealloc_csr(&csr_sparse_mtx, 3);
+    free(csr_sparse_mtx);
     return 1;
 }
 
