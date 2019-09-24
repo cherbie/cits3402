@@ -194,7 +194,7 @@ int process_transpose_async(CSR *csr_mtx, CSC *csc_mtx) {
  * @param mtx_2 CSC* the second matrix given.
  * @return 1 to indicate success and zero to indicate failure.
  */
-int process_multiplication_async(CSR *res_mtx, CSR *mtx_1, CSC *mtx_2) {
+int process_multiplication_async(COO *res_mtx, CSR *mtx_1, CSC *mtx_2) {
     if((*mtx_1).col != (*mtx_2).row) {
         fprintf(stderr, "The dimensions of the provided matrices are not suitable.\n");
         return 0;
@@ -207,12 +207,17 @@ int process_multiplication_async(CSR *res_mtx, CSR *mtx_1, CSC *mtx_2) {
     sum_nz_1 = 0; sum_nz_2 = 0;
     if((*res_mtx).is_int) {
         int sum;
-        (*res_mtx).mtxi = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int)); //maximum size
-        (*res_mtx).mtx_offset = calloc((*res_mtx).row+1, sizeof(int));
-        (*res_mtx).mtx_col = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int));
-        if((*res_mtx).mtxi == NULL || (*res_mtx).mtx_offset == NULL || (*res_mtx).mtx_col == NULL) {
+        (*res_mtx).mtxi = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int *)); //maximum size
+        if((*res_mtx).mtxi == NULL) {
             perror("function: process_multiplication().");
             return 0;
+        }
+        for(int i = 0; i < ((*res_mtx).row * (*res_mtx).col); i++) {
+            (*res_mtx).mtxi[i] = malloc(3 * sizeof(int));
+            if((*res_mtx).mtxi[i] == NULL) {
+                perror(NULL);
+                return 0;
+            }
         }
         (*res_mtx).size = 0;
         sum_nz_1 = 0;
@@ -239,9 +244,9 @@ int process_multiplication_async(CSR *res_mtx, CSR *mtx_1, CSC *mtx_2) {
                 #pragma omp single
                 {
                     if(sum != 0) {
-                        (*res_mtx).mtxi[(*res_mtx).size] = sum;
-                        (*res_mtx).mtx_offset[i+1] += 1;
-                        (*res_mtx).mtx_col[(*res_mtx).size] = j; //column under inspection
+                        (*res_mtx).mtxi[(*res_mtx).size][0] = i;
+                        (*res_mtx).mtxi[(*res_mtx).size][1] = j;
+                        (*res_mtx).mtxi[(*res_mtx).size][2] = sum;
                         (*res_mtx).size += 1;
                     }
                 }
@@ -250,12 +255,17 @@ int process_multiplication_async(CSR *res_mtx, CSR *mtx_1, CSC *mtx_2) {
     }
     else {
         float sum;
-        (*res_mtx).mtxf = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(float)); //maximum size
-        (*res_mtx).mtx_offset = calloc((*res_mtx).row+1, sizeof(int));
-        (*res_mtx).mtx_col = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int));
-        if((*res_mtx).mtxf == NULL || (*res_mtx).mtx_offset == NULL || (*res_mtx).mtx_col == NULL) {
+        (*res_mtx).mtxf = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(float *)); //maximum size
+        if((*res_mtx).mtxf == NULL) {
             perror("function: process_multiplication().");
             return 0;
+        }
+        for(int i = 0; i < ((*res_mtx).row * (*res_mtx).col); i++) {
+            (*res_mtx).mtxf[i] = malloc(3 * sizeof(float));
+            if((*res_mtx).mtxf[i] == NULL) {
+                perror(NULL);
+                return 0;
+            }
         }
         (*res_mtx).size = 0;
         sum_nz_1 = 0;
@@ -266,7 +276,7 @@ int process_multiplication_async(CSR *res_mtx, CSR *mtx_1, CSC *mtx_2) {
             for(int j = 0; j < (*mtx_2).col; j++) { //column of 2nd matrix
                 if((*mtx_2).mtx_offset[j+1] == 0) continue;
                 sum_nz_2 += (*mtx_2).mtx_offset[j];
-                sum = 0; count_1 = 0; count_2 = 0;
+                sum = 0.0; count_1 = 0; count_2 = 0;
                 for(int k = 0; k < (*mtx_2).row; k++) { //row of 2nd matrix
                     if(count_1 >= (*mtx_1).mtx_offset[i+1] || count_2 >= (*mtx_2).mtx_offset[j+1]) break;
                     index_1 = sum_nz_1 + count_1;
@@ -280,9 +290,9 @@ int process_multiplication_async(CSR *res_mtx, CSR *mtx_1, CSC *mtx_2) {
                     else if((*mtx_2).mtx_row[index_2] == k) count_2++;
                 }
                 if(sum != 0) {
-                    (*res_mtx).mtxf[(*res_mtx).size] = sum;
-                    (*res_mtx).mtx_offset[i+1] += 1;
-                    (*res_mtx).mtx_col[(*res_mtx).size] = j; //column under inspection
+                    (*res_mtx).mtxf[(*res_mtx).size][0] = (float) i;
+                    (*res_mtx).mtxf[(*res_mtx).size][1] = (float) j;
+                    (*res_mtx).mtxf[(*res_mtx).size][2] = sum;
                     (*res_mtx).size += 1;
                 }
             }
