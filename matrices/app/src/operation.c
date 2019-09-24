@@ -122,6 +122,32 @@ int addition(void) {
         fprintf(stderr, "Error: not enough inputs specified.\n");
         return 0;
     }
+    if(true) {
+        CSR *csr_sparse_mtx = malloc(3 * sizeof(CSR));
+        if(csr_sparse_mtx == NULL) {
+            perror(NULL);
+            return 0;
+        }
+        int csr_id = 0;
+        for(int k = 0; k < NUMBER_OF_INPUT_FILES; k++) {
+            if(!read_to_csr(&csr_sparse_mtx, csr_id++, k)) {
+                fprintf(stderr, "Error converting file to sparse matrix form.\n");
+                return 0;
+            }
+        }
+        if(!process_addition(&csr_sparse_mtx)) {
+            fprintf(stderr, "Error performing matrix addition.\n");
+            return 0;
+        }
+
+        print_csr(&csr_sparse_mtx[2]);
+        if(!log_csr_result(&csr_sparse_mtx[2], stdout)) {
+            fprintf(stderr, "Error logging result to file.\n");
+            return 0;
+        }
+        print("finished");
+        return 1;
+    }
     //SPARSE MATRIX REP.
     int coo_id = 0;
     COO *coo_sparse_mtx; //structure containing coordinate format representation of matrix.

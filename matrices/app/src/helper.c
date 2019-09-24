@@ -33,7 +33,7 @@ int initialise(void) {
     //function pointers
     op_func[0] = scalar;
     op_func[1] = trace;
-    //op_func[2] = addition;
+    op_func[2] = addition;
     op_func[3] = transpose_matrix;
     op_func[4] = matrix_mp;
 

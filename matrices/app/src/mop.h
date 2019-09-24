@@ -109,7 +109,7 @@ extern int process_stat(void);
 extern int operation_main(void);
 extern int scalar(void);
 extern int trace(void);
-//extern int addition(void);
+extern int addition(void);
 extern int transpose_matrix(void);
 extern int matrix_mp(void);
 
@@ -128,7 +128,7 @@ extern int coo2csr(COO*, CSR*);
 // -- SYNCHRONOUS --
 extern int process_scalar(COO*, float);
 extern int process_trace(COO*,int*,float*);
-extern int process_addition(COO**);
+extern int process_addition(CSR**);
 extern int process_transpose(CSR*, CSC*);
 extern int process_multiplication(CSR*, CSR*, CSC*);
 

@@ -144,3 +144,121 @@ int process_addition(COO **coo_mtx) {
     return 1;
 }
 */
+
+
+/**
+ * Performs matrix multiplication on the sparse matrices provided.
+ * @return 1 to indicate success and 0 to indicate failure.
+*/
+int process_addition(CSR **csr_mtx) {
+    CSR *res_mtx = &(*csr_mtx)[2];
+    CSR *mtx_1 = &(*csr_mtx)[0];
+    CSR *mtx_2 = &(*csr_mtx)[1];
+
+    if(((*mtx_1).row != (*mtx_2).row) || ((*mtx_1).col != (*mtx_2).col)) {
+        fprintf(stderr, "Error dimensions of the input matrices are not equivalent.\n");
+        return 0;
+    }
+    else {
+        (*res_mtx).row = (*mtx_1).row;
+        (*res_mtx).col =  (*mtx_2).col;
+    }
+    bool set = false;
+    int index_1, index_2, sum_nz_1, sum_nz_2, count_1, count_2;
+    sum_nz_1 = 0; sum_nz_2 = 0;
+    if(!(*mtx_1).is_int && !(*mtx_2).is_int) { //float
+        float val = 0.0;
+        (*res_mtx).is_int = false;
+        (*res_mtx).mtxf = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(float)); //maximum size
+        (*res_mtx).mtx_offset = calloc((*res_mtx).row+1, sizeof(int));
+        (*res_mtx).mtx_col = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int));
+        if((*res_mtx).mtxf == NULL || (*res_mtx).mtx_offset == NULL || (*res_mtx).mtx_col == NULL) {
+            perror("function: process_multiplication().");
+            return 0;
+        }
+        (*res_mtx).size = 0;
+        sum_nz_1 = 0;
+        sum_nz_2 = 0;
+        for(int i = 0; i < (*mtx_1).row; i++) { //row of first & second matrix
+            sum_nz_1 += (*mtx_1).mtx_offset[i];
+            sum_nz_2 += (*mtx_2).mtx_offset[i];
+            count_1 = 0;
+            count_2 = 0;
+            for(int j = 0; j < (*mtx_1).col; j++) { //columns of first and second matrix
+                set = false;
+                index_1 = sum_nz_1 + count_1;
+                index_2 = sum_nz_2 + count_2;
+                if((*mtx_1).mtx_col[index_1] == j && (*mtx_2).mtx_col[index_2] == j && count_1 >= (*mtx_1).mtx_offset[i+1] && count_2 >= (*mtx_2).mtx_offset[i+1]) {
+                    val = (*mtx_1).mtxf[index_1] + (*mtx_2).mtxf[index_2];
+                    set = true;
+                    count_1++;
+                    count_2++;
+                }
+                else if((*mtx_1).mtx_col[index_1] == j && count_1 >= (*mtx_1).mtx_offset[i+1]) {
+                    val = (*mtx_1).mtxf[index_1];
+                    set = true;
+                    count_1++;
+                }
+                else if((*mtx_2).mtx_col[index_2] == j && count_2 >= (*mtx_2).mtx_offset[i+1]) {
+                    val = (*mtx_2).mtxf[index_2];
+                    set = true;
+                    count_2++;
+                }
+                if(set) {
+                    (*res_mtx).mtxf[(*res_mtx).size] = val;
+                    (*res_mtx).mtx_offset[i+1] += 1;
+                    (*res_mtx).mtx_col[(*res_mtx).size] = j;
+                    (*res_mtx).size += 1;
+                }
+            }
+        }
+    }
+    else {
+        int val = 0;
+        (*res_mtx).is_int = true;
+        (*res_mtx).mtxi = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int)); //maximum size
+        (*res_mtx).mtx_offset = calloc((*res_mtx).row+1, sizeof(int));
+        (*res_mtx).mtx_col = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int));
+        if((*res_mtx).mtxi == NULL || (*res_mtx).mtx_offset == NULL || (*res_mtx).mtx_col == NULL) {
+            perror("function: process_multiplication().");
+            return 0;
+        }
+        (*res_mtx).size = 0;
+        sum_nz_1 = 0;
+        sum_nz_2 = 0;
+        for(int i = 0; i < (*mtx_1).row; i++) { //row of first & second matrix
+            sum_nz_1 += (*mtx_1).mtx_offset[i];
+            sum_nz_2 += (*mtx_2).mtx_offset[i];
+            count_1 = 0;
+            count_2 = 0;
+            for(int j = 0; j < (*mtx_1).col; j++) { //columns of first and second matrix
+                set = false;
+                index_1 = sum_nz_1 + count_1;
+                index_2 = sum_nz_2 + count_2;
+                if((*mtx_1).mtx_col[index_1] == j && (*mtx_2).mtx_col[index_2] == j && count_1 < (*mtx_1).mtx_offset[i+1] && count_2 < (*mtx_2).mtx_offset[i+1]) {
+                    val = (*mtx_1).mtxi[index_1] + (*mtx_2).mtxi[index_2];
+                    set = true;
+                    count_1++;
+                    count_2++;
+                }
+                else if((*mtx_1).mtx_col[index_1] == j && count_1 < (*mtx_1).mtx_offset[i+1]) {
+                    val = (*mtx_1).mtxi[index_1];
+                    set = true;
+                    count_1++;
+                }
+                else if((*mtx_2).mtx_col[index_2] == j && count_2 < (*mtx_2).mtx_offset[i+1]) {
+                    val = (*mtx_2).mtxi[index_2];
+                    set = true;
+                    count_2++;
+                }
+                if(set) {
+                    (*res_mtx).mtxi[(*res_mtx).size] = val;
+                    (*res_mtx).mtx_offset[i+1] += 1;
+                    (*res_mtx).mtx_col[(*res_mtx).size] = j;
+                    (*res_mtx).size += 1;
+                }
+            }
+        }
+    }
+    return 1;
+}

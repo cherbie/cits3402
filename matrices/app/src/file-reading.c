@@ -181,12 +181,12 @@ int add_float_coo(COO *coo_mtx, float val, int row, int col, long int index) {
  */
 int read_to_csr(CSR **sparse_mtx, int k, int fid) {
     COO *coo_mtx = malloc(1 * sizeof(COO));
-    if(!read_to_coo(&coo_mtx, k, fid)) {
+    if(!read_to_coo(&coo_mtx, 0, fid)) {
         fprintf(stderr, "Error reading into sparse matrix.\n");
         return 0;
     }
     // -- CONVERT COO TO CSR --
-    if(!coo2csr(&coo_mtx[k], &(*sparse_mtx)[k])) {
+    if(!coo2csr(&coo_mtx[0], &(*sparse_mtx)[k])) {
         fprintf(stderr, "Error reading into sparse matrix.\n");
         return 0;
     }
@@ -253,12 +253,12 @@ int coo2csr(COO *coo_mtx, CSR *csr_mtx) {
 
 int read_to_csc(CSC **sparse_mtx, int k, int fid) {
     COO *coo_mtx = malloc(1 * sizeof(COO));
-    if(!read_to_coo(&coo_mtx, k, fid)) {
+    if(!read_to_coo(&coo_mtx, 0, fid)) {
         fprintf(stderr, "Error reading into sparse matrix.\n");
         return 0;
     }
     // -- CONVERT COO TO CCS --
-    if(!coo2csc(&coo_mtx[k], &(*sparse_mtx)[k])) {
+    if(!coo2csc(&coo_mtx[0], &(*sparse_mtx)[k])) {
         fprintf(stderr, "Error reading into sparse matrix.\n");
         return 0;
     }
