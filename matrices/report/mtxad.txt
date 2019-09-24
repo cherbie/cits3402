@@ -1,0 +1,27 @@
+struct COO
+    int *mtx;
+    int **rowcol; //the coordinates stored as (row,col) pairs
+    int num_rows;
+    int num_cols;
+    int size;
+
+procedure ADDITION(COO coo1, COO coo2, COO res)
+    count_1 <- 0
+    count_2 <- 0
+    res.size <- 0
+    for each r in coo1.num_rows
+        for each c in coo1.num_cols
+            if (coo1.rowcol[count_1][0] = r && coo1.rowcol[count_1][1] = c) && (coo2.rowcol[count_2][0] = r && coo2.rowcol[count_2][1] == c)
+                res.mtx[res.size] <- coo1.mtx[count_1] + coo2.mtx[count_2]
+                count_1++
+                count_2++
+                res.size++;
+            else if(coo1.rowcol[count_1][0] = r && coo1.rowcol[count_1][1] = c)
+                res.mtx[res.size] <- coo1.mtx[count_1]
+                count_1++
+                res.size++
+            else if(coo2.rowcol[count_2][0] = r && coo2.rowcol[count_2][1] == c)
+                res.mtx[res.size] <- coo2.mtx[count_2]
+                count_2++
+                res.size++
+end procedure
