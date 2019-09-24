@@ -1,5 +1,5 @@
 #!/bin/bash
 clear
-./mop --mm -f ./input/int128.in ./input/int128.in -s
-./mop --mm -f ./input/int128.in ./input/int128.in -t 4
+./mop --ad -f ./input/file3.in ./input/file4.in -s
+./mop --ad -f ./input/file3.in ./input/file4.in -t 4
 echo "... script complete"

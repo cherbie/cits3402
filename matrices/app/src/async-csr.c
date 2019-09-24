@@ -35,18 +35,17 @@ int process_addition_async(CSR **csr_mtx, COO **coo_mtx) {
                 return 0;
             }
         }
-        int size = 0;
-        #pragma omp parallel
+        int size, j;
+        size = 0; j = 0; sum_nz_1 = 0; sum_nz_2 = 0;
+        #pragma omp parallel private(j, set, val, count_1, count_2)
         {
         #pragma omp single
         {
-        sum_nz_1 = 0;
-        sum_nz_2 = 0;
-        for(int i = 0; i < (*mtx_1).row; i++) { //row of first & second matrix
+        for(int i = 0; i < (*mtx_1).row; i++) {
             sum_nz_1 += (*mtx_1).mtx_offset[i];
             sum_nz_2 += (*mtx_2).mtx_offset[i];
             count_1 = 0; count_2 = 0;
-            for(int j = 0; j < (*mtx_1).col; j++) { //columns of first and second matrix
+            for(j = 0; j < (*mtx_1).col; j++) {
                 set = false;
                 index_1 = sum_nz_1 + count_1;
                 index_2 = sum_nz_2 + count_2;
@@ -66,13 +65,17 @@ int process_addition_async(CSR **csr_mtx, COO **coo_mtx) {
                     count_2++;
                 }
                 if(set) {
-                    (*res_mtx).mtxf[size][0] = (float) i;
-                    (*res_mtx).mtxf[size][1] = (float) j;
-                    (*res_mtx).mtxf[size][2] = val;
-                    size += 1;
+                    #pragma omp task firstprivate(i, j, val)
+                    {
+                        (*res_mtx).mtxf[size][0] = (float) i;
+                        (*res_mtx).mtxf[size][1] = (float) j;
+                        (*res_mtx).mtxf[size][2] = val;
+                    }
+                    size++;
                 }
             }
         }
+        #pragma omp critical
         (*res_mtx).size = size;
         }
         }
@@ -92,19 +95,15 @@ int process_addition_async(CSR **csr_mtx, COO **coo_mtx) {
                 return 0;
             }
         }
-        #pragma omp parallel
+        int size = 0; sum_nz_1 = 0; sum_nz_2 = 0; count_1 = 0; count_2 = 0;
+        int j;
+        #pragma omp parallel private(j, set, val, count_1, count_2)
         {
         #pragma omp single
         {
-        int size = 0;
-        sum_nz_1 = 0;
-        sum_nz_2 = 0;
-        count_1 = 0;
-        count_2 = 0;
-        int j;
         for(int i = 0; i < (*mtx_1).row; i++) { //row of first & second matrix
-            sum_nz_1 += (*mtx_1).mtx_offset[i];
-            sum_nz_2 += (*mtx_2).mtx_offset[i];
+            sum_nz_1 = sum_nz_1 + (*mtx_1).mtx_offset[i];
+            sum_nz_2 = sum_nz_2 + (*mtx_2).mtx_offset[i];
             count_1 = 0; count_2 = 0;
             for(j = 0; j < (*mtx_1).col; j++) { //columns of first and second matrix
                 set = false;
@@ -127,13 +126,17 @@ int process_addition_async(CSR **csr_mtx, COO **coo_mtx) {
                     count_2++;
                 }
                 if(set) {
-                    (*res_mtx).mtxi[size][0] = i;
-                    (*res_mtx).mtxi[size][1] = j;
-                    (*res_mtx).mtxi[size][2] = val;
-                    size += 1;
+                    #pragma omp task firstprivate(i, j, val)
+                    {
+                        (*res_mtx).mtxi[size][0] = i;
+                        (*res_mtx).mtxi[size][1] = j;
+                        (*res_mtx).mtxi[size][2] = val;
+                    }
+                    size++;
                 }
             }
         }
+        #pragma omp critical
         (*res_mtx).size = size;
         }
         }
