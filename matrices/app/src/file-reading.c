@@ -105,7 +105,6 @@ int read_coo_filei(COO **coo_mtx, int k, int fid) {
     rows = 0, cols = 0; val = 0;
     (*coo_mtx)[k].size = 0; //no elements
     (*coo_mtx)[k].mtxi = malloc(1 * sizeof(int *));
-
     int num = (*coo_mtx)[k].row * (*coo_mtx)[k].col;
 
     for(int i = 0; i < num; i++) {
@@ -188,6 +187,7 @@ int read_to_csr(CSR **sparse_mtx, int k, int fid) {
         fprintf(stderr, "Error reading into sparse matrix.\n");
         return 0;
     }
+    // -- DEALLOCATE --
     dealloc_coo(&coo_mtx, 1);
     free(coo_mtx);
     return 1;
@@ -195,7 +195,7 @@ int read_to_csr(CSR **sparse_mtx, int k, int fid) {
 
 /**
  * Read matrix values given in a COO structure.
- * Convert to CSR struct
+ * Convert to CSR struct.
  * @param csr_mtx CSR struct *
  */
 int coo2csr(COO *coo_mtx, CSR *csr_mtx) {
@@ -262,6 +262,7 @@ int read_to_csc(CSC **sparse_mtx, int k, int fid) {
         fprintf(stderr, "Error reading into sparse matrix.\n");
         return 0;
     }
+    // -- DEALLOCATE --
     dealloc_coo(&coo_mtx, 1);
     free(coo_mtx);
     return 1;

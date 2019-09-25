@@ -54,22 +54,22 @@ typedef struct {
     bool is_int;
     int *mtxi; //non-zero values
     float *mtxf; //non-zero values
-    int *mtx_offset; //stores number of non-zero elements in each row. (convention index[0] = 0)
-    int *mtx_col; //stores the column index of each non-zero element
-    int size; //number of non-zero input elements
-    int row; //number of rows specified by the input file
-    int col; //number of columns specified by the input file
+    int *mtx_offset;
+    int *mtx_col;
+    int size;
+    int row;
+    int col;
 } CSR;
 
 typedef struct {
     bool is_int;
     int *mtxi; //non-zero values
     float *mtxf; //non-zero values
-    int *mtx_offset; //number of non-zero values in each row (convention index[0] = 0)
-    int *mtx_row; //stores the column index of each non-zero element
-    int size; //number of non-zero input elements
-    int row; //number of rows specified by the input file
-    int col; //nuumber of columns specified by the input file
+    int *mtx_offset;
+    int *mtx_row;
+    int size;
+    int row;
+    int col;
 } CSC;
 
 //GLOBAL VARIABLES
@@ -93,12 +93,7 @@ extern void print_config(void);
 extern int initialise(void);
 extern char *op_to_string(void);
 extern void print_usage(void);
-extern void print(char *);
 extern char *str_clean(char*);
-extern void print_coo(COO*);
-extern bool is_defined(COO*, int, int, long int);
-extern void print_csr(CSR*);
-extern void print_csc(CSC*);
 extern int get_non_zero_csc(CSC*, bool**, int, int);
 extern int process_stat(void);
 

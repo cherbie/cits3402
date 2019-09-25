@@ -52,21 +52,6 @@ char *op_to_string(void) {
     return config.op_str;
 }
 
-void print_config() {
-    printf(" -- Configuration --\n");
-    printf(" ... Matrix operation -> %s\n", op_to_string());
-    printf(" ... Input 1 -> %s\n", config.filename[0]);
-    printf(" ... Logger file -> %s\n", config.log_filename);
-    if(config.num_threads > 0) printf(" ... Number of threads -> %i\n", config.num_threads);
-    printf(" ... file reading time -> %12.10f\n", (float) config.time[0].delta);
-    printf(" ... operation processing time - > %12.10f\n", (float) config.time[1].delta);
-    printf("\n");
-}
-
-void print(char *str) {
-    printf("%s\n", str);
-}
-
 char *str_clean(char *str) {
     int i,j = 0;
     for(i = 0; str[i] != '\0'; i++) {
@@ -80,110 +65,6 @@ char *str_clean(char *str) {
     return str;
 }
 
-void print_coo(COO *coo_mtx) {
-    print(" --- ");
-    if((*coo_mtx).is_int) {
-        for(int i = 0; i < (*coo_mtx).size; i++) {
-            printf(" %i ", (*coo_mtx).mtxi[i][0]);
-            printf(" %i ", (*coo_mtx).mtxi[i][1]);
-            printf(" %i ", (*coo_mtx).mtxi[i][2]);
-            print("\n");
-        }
-    }
-    else {
-        for(int i = 0; i < (*coo_mtx).size; i++) {
-            printf(" %2f ", (*coo_mtx).mtxf[i][0]);
-            printf(" %2f ", (*coo_mtx).mtxf[i][1]);
-            printf(" %3.2f ", (*coo_mtx).mtxf[i][2]);
-            print("\n");
-        }
-    }
-    print(" --- ");
-}
-
-void print_csr(CSR *csr_mtx) {
-    print(" --- ");
-    printf("rows = %i\n", (*csr_mtx).row);
-    printf("cols = %i\n", (*csr_mtx).col);
-    printf("size = %i\n", (*csr_mtx).size);
-    if((*csr_mtx).is_int) {
-        for(int i = 0; i < (*csr_mtx).size; i++) {
-            printf("%i", (int)(*csr_mtx).mtxi[i]);
-        }
-        printf("\n");
-        for(int i = 0; i <= (*csr_mtx).row; i++) {
-            printf("%i", (int)(*csr_mtx).mtx_offset[i]);
-        }
-        printf("\n");
-        for(int i = 0; i < (*csr_mtx).size; i++) {
-            printf("%i", (int)(*csr_mtx).mtx_col[i]);
-        }
-        printf("\n");
-    }
-    else {
-        for(int i = 0; i < (*csr_mtx).size; i++) {
-            printf("%3.2f", (*csr_mtx).mtxf[i]);
-        }
-        printf("\n");
-        for(int i = 0; i <= (*csr_mtx).row; i++) {
-            printf("%i", (int)(*csr_mtx).mtx_offset[i]);
-        }
-        printf("\n");
-        for(int i = 0; i < (*csr_mtx).size; i++) {
-            printf("%i", (int)(*csr_mtx).mtx_col[i]);
-        }
-        printf("\n");
-    }
-    print(" --- ");
-}
-
-/**
- * Debugging function.
- */
-void print_csc(CSC *csc_mtx) {
-    print(" --- ");
-    printf("rows = %i\n", (*csc_mtx).row);
-    printf("cols = %i\n", (*csc_mtx).col);
-    printf("size = %i\n", (*csc_mtx).size);
-    if((*csc_mtx).is_int) {
-        for(int i = 0; i < (*csc_mtx).size; i++) {
-            printf("%i", (*csc_mtx).mtxi[i]);
-        }
-        printf("\n");
-        for(int i = 0; i <= (*csc_mtx).col; i++) {
-            printf("%i", (*csc_mtx).mtx_offset[i]);
-        }
-        printf("\n");
-        for(int i = 0; i < (*csc_mtx).size; i++) {
-            printf("%i", (*csc_mtx).mtx_row[i]);
-        }
-        printf("\n");
-    }
-    else {
-        for(int i = 0; i < (*csc_mtx).size; i++) {
-            printf("%3.2f", (*csc_mtx).mtxf[i]);
-            print("\n");
-        }
-    }
-    print(" --- ");
-}
-
-/**
- * Calculates whether the COO struct has a non-zero value defined for a particular row & column in a block
- * @returns true if a non-zero value is defined, false otherwise.
-
-bool is_defined(COO *coo_mtx, int row, int col, long int block) {
-    if(block >= (*coo_mtx).size) return false;
-    else if((*coo_mtx).is_int) {
-        if(((*coo_mtx).mtxi[block][0] == row) && (*coo_mtx).mtxi[block][1] == col) return true;
-        else return false;
-    }
-    else {
-        if(((*coo_mtx).mtxf[block][0] == (float) row) && ((*coo_mtx).mtxf[block][1] == (float) col)) return true;
-        else return false;
-    }
-}
-*/
 /**
  * O(n) lookup.
  * @param *csc_mtx CSC struct *

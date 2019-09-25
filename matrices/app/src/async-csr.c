@@ -39,45 +39,45 @@ int process_addition_async(CSR **csr_mtx, COO **coo_mtx) {
         size = 0; j = 0; sum_nz_1 = 0; sum_nz_2 = 0;
         #pragma omp parallel private(j, set, val, count_1, count_2)
         {
-        #pragma omp single
-        {
-        for(int i = 0; i < (*mtx_1).row; i++) {
-            sum_nz_1 += (*mtx_1).mtx_offset[i];
-            sum_nz_2 += (*mtx_2).mtx_offset[i];
-            count_1 = 0; count_2 = 0;
-            for(j = 0; j < (*mtx_1).col; j++) {
-                set = false;
-                index_1 = sum_nz_1 + count_1;
-                index_2 = sum_nz_2 + count_2;
-                if((*mtx_1).mtx_col[index_1] == j && (*mtx_2).mtx_col[index_2] == j && count_1 < (*mtx_1).mtx_offset[i+1] && count_2 < (*mtx_2).mtx_offset[i+1]) {
-                    val = (*mtx_1).mtxf[index_1] + (*mtx_2).mtxf[index_2];
-                    set = true;
-                    count_1++; count_2++;
-                }
-                else if((*mtx_1).mtx_col[index_1] == j && count_1 < (*mtx_1).mtx_offset[i+1]) {
-                    val = (*mtx_1).mtxf[index_1];
-                    set = true;
-                    count_1++;
-                }
-                else if((*mtx_2).mtx_col[index_2] == j && count_2 < (*mtx_2).mtx_offset[i+1]) {
-                    val = (*mtx_2).mtxf[index_2];
-                    set = true;
-                    count_2++;
-                }
-                if(set) {
-                    #pragma omp task firstprivate(i, j, val)
-                    {
-                        (*res_mtx).mtxf[size][0] = (float) i;
-                        (*res_mtx).mtxf[size][1] = (float) j;
-                        (*res_mtx).mtxf[size][2] = val;
+            #pragma omp single
+            {
+                for(int i = 0; i < (*mtx_1).row; i++) {
+                    sum_nz_1 += (*mtx_1).mtx_offset[i];
+                    sum_nz_2 += (*mtx_2).mtx_offset[i];
+                    count_1 = 0; count_2 = 0;
+                    for(j = 0; j < (*mtx_1).col; j++) {
+                        set = false;
+                        index_1 = sum_nz_1 + count_1;
+                        index_2 = sum_nz_2 + count_2;
+                        if((*mtx_1).mtx_col[index_1] == j && (*mtx_2).mtx_col[index_2] == j && count_1 < (*mtx_1).mtx_offset[i+1] && count_2 < (*mtx_2).mtx_offset[i+1]) {
+                            val = (*mtx_1).mtxf[index_1] + (*mtx_2).mtxf[index_2];
+                            set = true;
+                            count_1++; count_2++;
+                        }
+                        else if((*mtx_1).mtx_col[index_1] == j && count_1 < (*mtx_1).mtx_offset[i+1]) {
+                            val = (*mtx_1).mtxf[index_1];
+                            set = true;
+                            count_1++;
+                        }
+                        else if((*mtx_2).mtx_col[index_2] == j && count_2 < (*mtx_2).mtx_offset[i+1]) {
+                            val = (*mtx_2).mtxf[index_2];
+                            set = true;
+                            count_2++;
+                        }
+                        if(set) {
+                            #pragma omp task firstprivate(i, j, val)
+                            {
+                                (*res_mtx).mtxf[size][0] = (float) i;
+                                (*res_mtx).mtxf[size][1] = (float) j;
+                                (*res_mtx).mtxf[size][2] = val;
+                            }
+                            size++;
+                        }
                     }
-                    size++;
                 }
+                #pragma omp critical
+                (*res_mtx).size = size;
             }
-        }
-        #pragma omp critical
-        (*res_mtx).size = size;
-        }
         }
     }
     else {
@@ -99,46 +99,46 @@ int process_addition_async(CSR **csr_mtx, COO **coo_mtx) {
         int j;
         #pragma omp parallel private(j, set, val, count_1, count_2)
         {
-        #pragma omp single
-        {
-        for(int i = 0; i < (*mtx_1).row; i++) { //row of first & second matrix
-            sum_nz_1 = sum_nz_1 + (*mtx_1).mtx_offset[i];
-            sum_nz_2 = sum_nz_2 + (*mtx_2).mtx_offset[i];
-            count_1 = 0; count_2 = 0;
-            for(j = 0; j < (*mtx_1).col; j++) { //columns of first and second matrix
-                set = false;
-                index_1 = sum_nz_1 + count_1;
-                index_2 = sum_nz_2 + count_2;
-                if((*mtx_1).mtx_col[index_1] == j && (*mtx_2).mtx_col[index_2] == j && count_1 < (*mtx_1).mtx_offset[i+1] && count_2 < (*mtx_2).mtx_offset[i+1]) {
-                    val = (*mtx_1).mtxi[index_1] + (*mtx_2).mtxi[index_2];
-                    set = true;
-                    count_1++;
-                    count_2++;
-                }
-                else if((*mtx_1).mtx_col[index_1] == j && count_1 < (*mtx_1).mtx_offset[i+1]) {
-                    val = (*mtx_1).mtxi[index_1];
-                    set = true;
-                    count_1++;
-                }
-                else if((*mtx_2).mtx_col[index_2] == j && count_2 < (*mtx_2).mtx_offset[i+1]) {
-                    val = (*mtx_2).mtxi[index_2];
-                    set = true;
-                    count_2++;
-                }
-                if(set) {
-                    #pragma omp task firstprivate(i, j, val)
-                    {
-                        (*res_mtx).mtxi[size][0] = i;
-                        (*res_mtx).mtxi[size][1] = j;
-                        (*res_mtx).mtxi[size][2] = val;
+            #pragma omp single
+            {
+                for(int i = 0; i < (*mtx_1).row; i++) { //row of first & second matrix
+                    sum_nz_1 = sum_nz_1 + (*mtx_1).mtx_offset[i];
+                    sum_nz_2 = sum_nz_2 + (*mtx_2).mtx_offset[i];
+                    count_1 = 0; count_2 = 0;
+                    for(j = 0; j < (*mtx_1).col; j++) { //columns of first and second matrix
+                        set = false;
+                        index_1 = sum_nz_1 + count_1;
+                        index_2 = sum_nz_2 + count_2;
+                        if((*mtx_1).mtx_col[index_1] == j && (*mtx_2).mtx_col[index_2] == j && count_1 < (*mtx_1).mtx_offset[i+1] && count_2 < (*mtx_2).mtx_offset[i+1]) {
+                            val = (*mtx_1).mtxi[index_1] + (*mtx_2).mtxi[index_2];
+                            set = true;
+                            count_1++;
+                            count_2++;
+                        }
+                        else if((*mtx_1).mtx_col[index_1] == j && count_1 < (*mtx_1).mtx_offset[i+1]) {
+                            val = (*mtx_1).mtxi[index_1];
+                            set = true;
+                            count_1++;
+                        }
+                        else if((*mtx_2).mtx_col[index_2] == j && count_2 < (*mtx_2).mtx_offset[i+1]) {
+                            val = (*mtx_2).mtxi[index_2];
+                            set = true;
+                            count_2++;
+                        }
+                        if(set) {
+                            #pragma omp task firstprivate(i, j, val)
+                            {
+                                (*res_mtx).mtxi[size][0] = i;
+                                (*res_mtx).mtxi[size][1] = j;
+                                (*res_mtx).mtxi[size][2] = val;
+                            }
+                            size++;
+                        }
                     }
-                    size++;
                 }
+                #pragma omp critical
+                (*res_mtx).size = size;
             }
-        }
-        #pragma omp critical
-        (*res_mtx).size = size;
-        }
         }
     }
     return 1;
@@ -151,17 +151,11 @@ int process_addition_async(CSR **csr_mtx, COO **coo_mtx) {
  * @param csc_mtx typedef struct CSC
  */
 int process_transpose_async(CSR *csr_mtx, CSC *csc_mtx) {
-    /*
-    * Need to allocate to:
-    *  - csc_mtx.mtxi & csc_mtx.mtxf
-    *  - csc_mtx.mtx_offset
-    *  - csc_mtx.mtx_col
-    */
     (*csc_mtx).is_int = (*csr_mtx).is_int;
     (*csc_mtx).col = (*csr_mtx).row;
     (*csc_mtx).row = (*csr_mtx).col;
     (*csc_mtx).size = (*csr_mtx).size;
-    if((*csc_mtx).is_int) {
+    if((*csc_mtx).is_int) { //integer
         (*csc_mtx).mtxi = malloc((*csr_mtx).size * sizeof(int));
         (*csc_mtx).mtx_offset = malloc(((*csc_mtx).col + 1) * sizeof(int));
         (*csc_mtx).mtx_row = malloc((*csr_mtx).size * sizeof(int));
@@ -244,41 +238,42 @@ int process_multiplication_async(COO *res_mtx, CSR *mtx_1, CSC *mtx_2) {
         sum_nz_1 = 0;
         #pragma omp parallel private(j, k, index_1, index_2, count_1, count_2, sum, sum_nz_2)
         {
-        #pragma omp single
-        {
-        for(int i = 0; i < (*mtx_1).row; i++) { //row of first matrix
-            if((*mtx_1).mtx_offset[i+1] == 0) continue;
-            sum_nz_1 += (*mtx_1).mtx_offset[i];
-            sum_nz_2 = 0;
-            for(j = 0; j < (*mtx_2).col; j++) { //column of 2nd matrix
-                if((*mtx_2).mtx_offset[j+1] == 0) continue;
-                sum_nz_2 += (*mtx_2).mtx_offset[j];
-                sum = 0; count_1 = 0; count_2 = 0;
-                for(k = 0; k < (*mtx_2).row; k++) { //row of 2nd matrix
-                    if(count_1 >= (*mtx_1).mtx_offset[i+1] || count_2 >= (*mtx_2).mtx_offset[j+1]) break;
-                    index_1 = sum_nz_1 + count_1;
-                    index_2 = sum_nz_2 + count_2;
-                    if((*mtx_1).mtx_col[index_1] == k && (*mtx_2).mtx_row[index_2] == k) {
-                        sum += (*mtx_1).mtxi[index_1] * (*mtx_2).mtxi[index_2];
-                        count_1++;
-                        count_2++;
+            #pragma omp single
+            {
+                for(int i = 0; i < (*mtx_1).row; i++) { //row of first matrix
+                    if((*mtx_1).mtx_offset[i+1] == 0) continue;
+                    sum_nz_1 += (*mtx_1).mtx_offset[i];
+                    sum_nz_2 = 0;
+                    for(j = 0; j < (*mtx_2).col; j++) { //column of 2nd matrix
+                        if((*mtx_2).mtx_offset[j+1] == 0) continue;
+                        sum_nz_2 += (*mtx_2).mtx_offset[j];
+                        sum = 0; count_1 = 0; count_2 = 0;
+                        for(k = 0; k < (*mtx_2).row; k++) { //row of 2nd matrix
+                            if(count_1 >= (*mtx_1).mtx_offset[i+1] || count_2 >= (*mtx_2).mtx_offset[j+1]) break;
+                            index_1 = sum_nz_1 + count_1;
+                            index_2 = sum_nz_2 + count_2;
+                            if((*mtx_1).mtx_col[index_1] == k && (*mtx_2).mtx_row[index_2] == k) {
+                                sum += (*mtx_1).mtxi[index_1] * (*mtx_2).mtxi[index_2];
+                                count_1++;
+                                count_2++;
+                            }
+                            else if((*mtx_1).mtx_col[index_1] == k) count_1++;
+                            else if((*mtx_2).mtx_row[index_2] == k) count_2++;
+                        }
+                        if(sum != 0) {
+                            #pragma omp task firstprivate(i, j, sum, size)
+                            {
+                                (*res_mtx).mtxi[size][0] = i;
+                                (*res_mtx).mtxi[size][1] = j;
+                                (*res_mtx).mtxi[size][2] = sum;
+                            }
+                            size += 1;
+                        }
                     }
-                    else if((*mtx_1).mtx_col[index_1] == k) count_1++;
-                    else if((*mtx_2).mtx_row[index_2] == k) count_2++;
                 }
-                if(sum != 0) {
-                    #pragma omp task firstprivate(i, j, sum, size)
-                    {
-                        (*res_mtx).mtxi[size][0] = i;
-                        (*res_mtx).mtxi[size][1] = j;
-                        (*res_mtx).mtxi[size][2] = sum;
-                    }
-                    size += 1;
-                }
+                #pragma omp critical
+                (*res_mtx).size = size;
             }
-        }
-        (*res_mtx).size = size;
-        }
         }
     }
     else {
@@ -299,41 +294,42 @@ int process_multiplication_async(COO *res_mtx, CSR *mtx_1, CSC *mtx_2) {
         sum_nz_1 = 0;
         #pragma omp parallel private(j, k, index_1, index_2, count_1, count_2, sum, sum_nz_2)
         {
-        #pragma omp single
-        {
-        for(int i = 0; i < (*mtx_1).row; i++) { //row of first matrix
-            if((*mtx_1).mtx_offset[i+1] == 0) continue;
-            sum_nz_1 += (*mtx_1).mtx_offset[i];
-            sum_nz_2 = 0;
-            for(int j = 0; j < (*mtx_2).col; j++) { //column of 2nd matrix
-                if((*mtx_2).mtx_offset[j+1] == 0) continue;
-                sum_nz_2 += (*mtx_2).mtx_offset[j];
-                sum = 0.0; count_1 = 0; count_2 = 0;
-                for(int k = 0; k < (*mtx_2).row; k++) { //row of 2nd matrix
-                    if(count_1 >= (*mtx_1).mtx_offset[i+1] || count_2 >= (*mtx_2).mtx_offset[j+1]) break;
-                    index_1 = sum_nz_1 + count_1;
-                    index_2 = sum_nz_2 + count_2;
-                    if((*mtx_1).mtx_col[index_1] == k && (*mtx_2).mtx_row[index_2] == k) {
-                        sum += (*mtx_1).mtxf[index_1] * (*mtx_2).mtxf[index_2];
-                        count_1++;
-                        count_2++;
+            #pragma omp single
+            {
+                for(int i = 0; i < (*mtx_1).row; i++) { //row of first matrix
+                    if((*mtx_1).mtx_offset[i+1] == 0) continue;
+                    sum_nz_1 += (*mtx_1).mtx_offset[i];
+                    sum_nz_2 = 0;
+                    for(int j = 0; j < (*mtx_2).col; j++) { //column of 2nd matrix
+                        if((*mtx_2).mtx_offset[j+1] == 0) continue;
+                        sum_nz_2 += (*mtx_2).mtx_offset[j];
+                        sum = 0.0; count_1 = 0; count_2 = 0;
+                        for(int k = 0; k < (*mtx_2).row; k++) { //row of 2nd matrix
+                            if(count_1 >= (*mtx_1).mtx_offset[i+1] || count_2 >= (*mtx_2).mtx_offset[j+1]) break;
+                            index_1 = sum_nz_1 + count_1;
+                            index_2 = sum_nz_2 + count_2;
+                            if((*mtx_1).mtx_col[index_1] == k && (*mtx_2).mtx_row[index_2] == k) {
+                                sum += (*mtx_1).mtxf[index_1] * (*mtx_2).mtxf[index_2];
+                                count_1++;
+                                count_2++;
+                            }
+                            else if((*mtx_1).mtx_col[index_1] == k) count_1++;
+                            else if((*mtx_2).mtx_row[index_2] == k) count_2++;
+                        }
+                        if(sum != 0) {
+                            #pragma omp task firstprivate(i, j, sum, size)
+                            {
+                                (*res_mtx).mtxf[size][0] = (float) i;
+                                (*res_mtx).mtxf[size][1] = (float) j;
+                                (*res_mtx).mtxf[size][2] = sum;
+                            }
+                            size++;
+                        }
                     }
-                    else if((*mtx_1).mtx_col[index_1] == k) count_1++;
-                    else if((*mtx_2).mtx_row[index_2] == k) count_2++;
                 }
-                if(sum != 0) {
-                    #pragma omp task firstprivate(i, j, sum, size)
-                    {
-                        (*res_mtx).mtxf[size][0] = (float) i;
-                        (*res_mtx).mtxf[size][1] = (float) j;
-                        (*res_mtx).mtxf[size][2] = sum;
-                    }
-                    size++;
-                }
+                #pragma omp critical
+                (*res_mtx).size = size;
             }
-        }
-        (*res_mtx).size = size;
-        }
         }
     }
     return 1;

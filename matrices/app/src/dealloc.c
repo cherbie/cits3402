@@ -35,6 +35,10 @@ void dealloc_config(void) {
     free(config.log_filename);
 }
 
+/**
+ * Deallocate dynamic memory within CSR sparse matrix rep. data structure.
+ * @param size is the number of input files with meta data dynamically allocated.
+ */
 void dealloc_csr(CSR **csr_mtx, int size) {
     for(int k = 0; k < size; k++) {
         if((*csr_mtx)[k].is_int) free((*csr_mtx)[k].mtxi);
@@ -44,6 +48,10 @@ void dealloc_csr(CSR **csr_mtx, int size) {
     }
 }
 
+/**
+ * Deallocate dynamic memory within CCS sparse matrix rep. data structure.
+ * @param size is the number of input files with meta data dynamically allocated.
+ */
 void dealloc_csc(CSC **csc_mtx, int size) {
     for(int k = 0; k < size; k++) {
         if((*csc_mtx)[k].is_int) free((*csc_mtx)[k].mtxi);

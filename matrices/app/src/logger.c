@@ -1,7 +1,7 @@
 #include "mop.h"
 
 /**
- * Log the resulting matrix to stdout or file if specified.
+ * Log the resulting matrix to the file descriptor specified.
  * @return 1 to indicate success and 0 to indicate failure.
  */
 int log_coo_result(COO *coo_mtx, FILE *fp) {
@@ -30,6 +30,7 @@ int log_coo_result(COO *coo_mtx, FILE *fp) {
                 seen = false;
             }
         }
+        // -- DEALLOCATE --
         for(int i = 0; i < (*coo_mtx).size; i++) {
             free(mtx[i]);
         }
@@ -54,6 +55,7 @@ int log_coo_result(COO *coo_mtx, FILE *fp) {
                 seen = false;
             }
         }
+        // -- DEALLOCATE --
         for(int i = 0; i < (*coo_mtx).size; i++) {
             free(mtx[i]);
         }
@@ -75,7 +77,7 @@ int log_trace_result(COO *coo_mtx, int *tracei, float *tracef, FILE *fp) {
 }
 
 /**
- * Log the resulting matrix to stdout or file if specified.
+ * Log the resulting matrix to the specified file descriptor.
  * @param csr_mtx type CSR
  */
 int log_csr_result(CSR *csr_mtx, FILE *fp) {
@@ -91,13 +93,9 @@ int log_csr_result(CSR *csr_mtx, FILE *fp) {
                         fprintf(fp, "%i ", (*csr_mtx).mtxi[nz++]);
                         row_el--;
                     }
-                    else { //No non-zero element for this column
-                        fprintf(fp, "%i ", 0);
-                    }
+                    else fprintf(fp, "%i ", 0); //No non-zero element for this column
               	}
-                else {
-                    fprintf(fp, "%i ", 0);
-                }
+                else fprintf(fp, "%i ", 0);
            }
         }
     }
@@ -111,16 +109,11 @@ int log_csr_result(CSR *csr_mtx, FILE *fp) {
                         fprintf(fp, "%3.2f ", (*csr_mtx).mtxf[nz++]);
                         row_el--;
                     }
-                    else { //No non-zero element for this column
-                        fprintf(fp, "%3.2f ", 0.0);
-                    }
+                    else fprintf(fp, "%3.2f ", 0.0); //No non-zero element for this column
               	}
-                else {
-                    fprintf(fp, "%3.2f ", 0.0);
-                }
+                else fprintf(fp, "%3.2f ", 0.0);
            }
         }
-
     }
     fprintf(fp, "\n");
     return 1;

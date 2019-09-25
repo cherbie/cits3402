@@ -29,7 +29,6 @@ int process_addition(CSR **csr_mtx, COO **coo_mtx) {
             perror("function: process_multiplication().");
             return 0;
         }
-        sum_nz_1 = 0; sum_nz_2 = 0;
         for(int i = 0; i < (*mtx_1).row; i++) {
             sum_nz_1 += (*mtx_1).mtx_offset[i];
             sum_nz_2 += (*mtx_2).mtx_offset[i];
@@ -41,8 +40,7 @@ int process_addition(CSR **csr_mtx, COO **coo_mtx) {
                 if((*mtx_1).mtx_col[index_1] == j && (*mtx_2).mtx_col[index_2] == j && count_1 < (*mtx_1).mtx_offset[i+1] && count_2 < (*mtx_2).mtx_offset[i+1]) {
                     val = (*mtx_1).mtxf[index_1] + (*mtx_2).mtxf[index_2];
                     set = true;
-                    count_1++;
-                    count_2++;
+                    count_1++; count_2++;
                 }
                 else if((*mtx_1).mtx_col[index_1] == j && count_1 < (*mtx_1).mtx_offset[i+1]) {
                     val = (*mtx_1).mtxf[index_1];
@@ -69,18 +67,14 @@ int process_addition(CSR **csr_mtx, COO **coo_mtx) {
         (*res_mtx).is_int = true;
         (*res_mtx).size = 0;
         (*res_mtx).mtxi = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int *)); //maximum size
-        //(*res_mtx).mtx_offset = calloc((*res_mtx).row+1, sizeof(int));
-        //(*res_mtx).mtx_col = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int));
         if((*res_mtx).mtxi == NULL) {
             perror("function: process_multiplication().");
             return 0;
         }
-        sum_nz_1 = 0; sum_nz_2 = 0;
         for(int i = 0; i < (*mtx_1).row; i++) { //row of first & second matrix
             sum_nz_1 += (*mtx_1).mtx_offset[i];
             sum_nz_2 += (*mtx_2).mtx_offset[i];
-            count_1 = 0;
-            count_2 = 0;
+            count_1 = 0; count_2 = 0;
             for(int j = 0; j < (*mtx_1).col; j++) { //columns of first and second matrix
                 set = false;
                 index_1 = sum_nz_1 + count_1;
@@ -88,8 +82,7 @@ int process_addition(CSR **csr_mtx, COO **coo_mtx) {
                 if((*mtx_1).mtx_col[index_1] == j && (*mtx_2).mtx_col[index_2] == j && count_1 < (*mtx_1).mtx_offset[i+1] && count_2 < (*mtx_2).mtx_offset[i+1]) {
                     val = (*mtx_1).mtxi[index_1] + (*mtx_2).mtxi[index_2];
                     set = true;
-                    count_1++;
-                    count_2++;
+                    count_1++; count_2++;
                 }
                 else if((*mtx_1).mtx_col[index_1] == j && count_1 < (*mtx_1).mtx_offset[i+1]) {
                     val = (*mtx_1).mtxi[index_1];
@@ -125,12 +118,6 @@ int process_addition(CSR **csr_mtx, COO **coo_mtx) {
  * @param csc_mtx typedef struct CSC
  */
 int process_transpose(CSR *csr_mtx, CSC *csc_mtx) {
-    /*
-     * Need to allocate to:
-     *  - csc_mtx.mtxi & csc_mtx.mtxf
-     *  - csc_mtx.mtx_offset
-     *  - csc_mtx.mtx_col
-     */
      (*csc_mtx).is_int = (*csr_mtx).is_int;
      (*csc_mtx).col = (*csr_mtx).row;
      (*csc_mtx).row = (*csr_mtx).col;
@@ -166,7 +153,7 @@ int process_transpose(CSR *csr_mtx, CSC *csc_mtx) {
 /**
  * Performs matrix multiplcation on given arguments 1 & 2.
  * Stores the resulting matrix in argument 0.
- * @param res_mtx CSC* resulting matrix stored in CSC struct.
+ * @param res_mtx COO* resulting matrix stored in COO struct.
  * @param mtx_1 CSR* the first matrix given.
  * @param mtx_2 CSC* the second matrix given.
  * @return 1 to indicate success and zero to indicate failure.
@@ -190,7 +177,6 @@ int process_multiplication(COO *res_mtx, CSR *mtx_1, CSC *mtx_2) {
             return 0;
         }
         (*res_mtx).size = 0;
-        sum_nz_1 = 0;
         for(int i = 0; i < (*mtx_1).row; i++) { //row of first matrix
             if((*mtx_1).mtx_offset[i+1] == 0) continue;
             sum_nz_1 += (*mtx_1).mtx_offset[i];
@@ -205,8 +191,7 @@ int process_multiplication(COO *res_mtx, CSR *mtx_1, CSC *mtx_2) {
                     index_2 = sum_nz_2 + count_2;
                     if((*mtx_1).mtx_col[index_1] == k && (*mtx_2).mtx_row[index_2] == k) {
                         sum += (*mtx_1).mtxi[index_1] * (*mtx_2).mtxi[index_2];
-                        count_1++;
-                        count_2++;
+                        count_1++; count_2++;
                     }
                     else if((*mtx_1).mtx_col[index_1] == k) count_1++;
                     else if((*mtx_2).mtx_row[index_2] == k) count_2++;
@@ -233,7 +218,6 @@ int process_multiplication(COO *res_mtx, CSR *mtx_1, CSC *mtx_2) {
             return 0;
         }
         (*res_mtx).size = 0;
-        sum_nz_1 = 0;
         for(int i = 0; i < (*mtx_1).row; i++) { //row of first matrix
             if((*mtx_1).mtx_offset[i+1] == 0) continue;
             sum_nz_1 += (*mtx_1).mtx_offset[i];
@@ -248,8 +232,7 @@ int process_multiplication(COO *res_mtx, CSR *mtx_1, CSC *mtx_2) {
                     index_2 = sum_nz_2 + count_2;
                     if((*mtx_1).mtx_col[index_1] == k && (*mtx_2).mtx_row[index_2] == k) {
                         sum += (*mtx_1).mtxf[index_1] * (*mtx_2).mtxf[index_2];
-                        count_1++;
-                        count_2++;
+                        count_1++; count_2++;
                     }
                     else if((*mtx_1).mtx_col[index_1] == k) count_1++;
                     else if((*mtx_2).mtx_row[index_2] == k) count_2++;

@@ -117,7 +117,6 @@ int set_config_threads(char * arg) {
 }
 
 int set_config_sm(char *arg) {
-    //atof;
     float f = atof(arg);
     if(f == 0) {
         fprintf(stderr, "Either an error or scalar of zero was supplied.\n");
@@ -126,6 +125,7 @@ int set_config_sm(char *arg) {
     config.sm = f;
     return 1;
 }
+
 /**
  * Return 1 to indicate success and 0 to indicate failure.
  * @parama flag 1 indicates filename is not defined
@@ -138,7 +138,6 @@ int set_logger(void) {
     sprintf(date, "%02.0f%02.0f%i", (float) config.exec_time->tm_mday, (float) config.exec_time->tm_mon + 1.0, config.exec_time->tm_year + 1900);
     sprintf(time, "%02.0f%02.0f", (float) config.exec_time->tm_hour, (float) config.exec_time->tm_min);
     sprintf(buffer, "%s_%s_%s_%s.out", STUDENT_NUMBER, date, time, op_to_string());
-    free(date); free(time);
     config.log_filename = strdup(buffer);
     if(config.log_filename == NULL) {
         perror("location: /parser.c/set_logger()\n");
@@ -149,6 +148,6 @@ int set_logger(void) {
         perror("location: /parser.c/set_logger()\n");
         return 0;
     }
-    free(buffer);
+    free(buffer); free(date); free(time);
     return 1;
 }
