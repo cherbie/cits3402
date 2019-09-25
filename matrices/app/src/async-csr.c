@@ -152,41 +152,51 @@ int process_addition_async(CSR **csr_mtx, COO **coo_mtx) {
  */
 int process_transpose_async(CSR *csr_mtx, CSC *csc_mtx) {
     /*
-     * Need to allocate to:
-     *  - csc_mtx.mtxi & csc_mtx.mtxf
-     *  - csc_mtx.mtx_offset
-     *  - csc_mtx.mtx_col
-     */
-     (*csc_mtx).is_int = (*csr_mtx).is_int;
-     (*csc_mtx).col = (*csr_mtx).row;
-     (*csc_mtx).row = (*csr_mtx).col;
-     (*csc_mtx).size = (*csr_mtx).size;
-     if((*csc_mtx).is_int) {
-         (*csc_mtx).mtxi = malloc((*csr_mtx).size * sizeof(int));
-         (*csc_mtx).mtx_offset = malloc(((*csc_mtx).col + 1) * sizeof(int));
-         (*csc_mtx).mtx_row = malloc((*csr_mtx).size * sizeof(int));
-         if((*csc_mtx).mtxi == NULL || (*csc_mtx).mtx_offset == NULL || (*csc_mtx).mtx_row == NULL) {
-             perror("function: process_transpose()");
-             return 0;
-         }
-         memcpy((*csc_mtx).mtxi, (*csr_mtx).mtxi, (*csr_mtx).size * sizeof(int));
-         memcpy((*csc_mtx).mtx_offset, (*csr_mtx).mtx_offset, ((*csc_mtx).col+1) * sizeof(int));
-         memcpy((*csc_mtx).mtx_row, (*csr_mtx).mtx_col, (*csr_mtx).size * sizeof(int));
-         return 1;
-     }
-     else {
-         (*csc_mtx).mtxf = malloc((*csr_mtx).size * sizeof(float));
-         (*csc_mtx).mtx_offset = malloc(((*csc_mtx).col + 1) * sizeof(int));
-         (*csc_mtx).mtx_row = malloc((*csr_mtx).size * sizeof(int));
-         if((*csc_mtx).mtxf == NULL || (*csc_mtx).mtx_offset == NULL || (*csc_mtx).mtx_row == NULL) {
-             perror("function: process_transpose()");
-             return 0;
-         }
-         memcpy((*csc_mtx).mtxf, (*csr_mtx).mtxf, (*csr_mtx).size * sizeof(float));
-         memcpy((*csc_mtx).mtx_offset, (*csr_mtx).mtx_offset, ((*csc_mtx).col+1) * sizeof(int));
-         memcpy((*csc_mtx).mtx_row, (*csr_mtx).mtx_col, (*csr_mtx).size * sizeof(int));
-         return 1;
-     }
+    * Need to allocate to:
+    *  - csc_mtx.mtxi & csc_mtx.mtxf
+    *  - csc_mtx.mtx_offset
+    *  - csc_mtx.mtx_col
+    */
+    (*csc_mtx).is_int = (*csr_mtx).is_int;
+    (*csc_mtx).col = (*csr_mtx).row;
+    (*csc_mtx).row = (*csr_mtx).col;
+    (*csc_mtx).size = (*csr_mtx).size;
+    int threads = omp_get_num_threads();
+    if((*csc_mtx).is_int) {
+        (*csc_mtx).mtxi = malloc((*csr_mtx).size * sizeof(int));
+        (*csc_mtx).mtx_offset = malloc(((*csc_mtx).col + 1) * sizeof(int));
+        (*csc_mtx).mtx_row = malloc((*csr_mtx).size * sizeof(int));
+        if((*csc_mtx).mtxi == NULL || (*csc_mtx).mtx_offset == NULL || (*csc_mtx).mtx_row == NULL) {
+            perror("function: process_transpose()");
+            return 0;
+        }
+        #pragma omp parallel
+        {
+            #pragma omp for
+            for(int i = 0; i < (*csr_mtx).size; i++) {
+                memcpy(&(*csc_mtx).mtxi[i], &(*csr_mtx).mtxi[i], 1 * sizeof(int));
+                memcpy(&(*csc_mtx).mtx_row[i], &(*csr_mtx).mtx_col[i], 1 * sizeof(int));
+            }
+            #pragma omp for
+            for(int i = 0; i <= (*csr_mtx).col; i++) {
+                memcpy(&(*csc_mtx).mtx_offset[i], &(*csr_mtx).mtx_offset[i], 1 * sizeof(int));
+            }
+        }
+        return 1;
+    }
+    else {
+        (*csc_mtx).mtxf = malloc((*csr_mtx).size * sizeof(float));
+        (*csc_mtx).mtx_offset = malloc(((*csc_mtx).col + 1) * sizeof(int));
+        (*csc_mtx).mtx_row = malloc((*csr_mtx).size * sizeof(int));
+        if((*csc_mtx).mtxf == NULL || (*csc_mtx).mtx_offset == NULL || (*csc_mtx).mtx_row == NULL) {
+            perror("function: process_transpose()");
+            return 0;
+        }
+        memcpy((*csc_mtx).mtxf, (*csr_mtx).mtxf, (*csr_mtx).size * sizeof(float));
+        memcpy((*csc_mtx).mtx_offset, (*csr_mtx).mtx_offset, ((*csc_mtx).col+1) * sizeof(int));
+        memcpy((*csc_mtx).mtx_row, (*csr_mtx).mtx_col, (*csr_mtx).size * sizeof(int));
+        return 1;
+    }
 }
 
 /**
