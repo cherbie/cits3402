@@ -212,8 +212,9 @@ int coo2csr(COO *coo_mtx, CSR *csr_mtx) {
             return 0;
         }
         int count = 0;
+        int j = 0;
         for(int i = 0; i < (*csr_mtx).row; i++) {
-            for(int j = 0; j < (*coo_mtx).size; j++) {
+            for(j = 0; j < (*coo_mtx).size; j++) {
                 if((*coo_mtx).mtxi[j][0] == i) {
                     (*csr_mtx).mtx_offset[(*coo_mtx).mtxi[j][0] + 1] += 1;
                     (*csr_mtx).mtx_col[count] = (*coo_mtx).mtxi[j][1];
@@ -232,8 +233,9 @@ int coo2csr(COO *coo_mtx, CSR *csr_mtx) {
             return 0;
         }
         int count = 0;
+        int j = 0;
         for(int i = 0; i < (*csr_mtx).row; i++) {
-            for(int j = 0; j < (*coo_mtx).size; j++) {
+            for(j = 0; j < (*coo_mtx).size; j++) {
                 if((*coo_mtx).mtxf[j][0] == i) {
                     (*csr_mtx).mtx_offset[(int)(*coo_mtx).mtxf[j][0] + 1] += 1;
                     (*csr_mtx).mtx_col[count] = (*coo_mtx).mtxf[j][1];

@@ -1,6 +1,6 @@
 #!/bin/bash
 clear
 echo "start"
-./mop --mm -f ./input/int1-3.in ./input/int1-3.in
+./mop --ts -f ./input/file3.in ./input/file4.in
 echo "next"
-./mop --mm -f ./input/int1-3.in ./input/int1-3.in -s
+./mop --ts -f ./input/file3.in ./input/file4.in -s

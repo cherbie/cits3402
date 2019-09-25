@@ -161,7 +161,6 @@ int process_transpose_async(CSR *csr_mtx, CSC *csc_mtx) {
     (*csc_mtx).col = (*csr_mtx).row;
     (*csc_mtx).row = (*csr_mtx).col;
     (*csc_mtx).size = (*csr_mtx).size;
-    int threads = omp_get_num_threads();
     if((*csc_mtx).is_int) {
         (*csc_mtx).mtxi = malloc((*csr_mtx).size * sizeof(int));
         (*csc_mtx).mtx_offset = malloc(((*csc_mtx).col + 1) * sizeof(int));
@@ -192,9 +191,18 @@ int process_transpose_async(CSR *csr_mtx, CSC *csc_mtx) {
             perror("function: process_transpose()");
             return 0;
         }
-        memcpy((*csc_mtx).mtxf, (*csr_mtx).mtxf, (*csr_mtx).size * sizeof(float));
-        memcpy((*csc_mtx).mtx_offset, (*csr_mtx).mtx_offset, ((*csc_mtx).col+1) * sizeof(int));
-        memcpy((*csc_mtx).mtx_row, (*csr_mtx).mtx_col, (*csr_mtx).size * sizeof(int));
+        #pragma omp parallel
+        {
+            #pragma omp for
+            for(int i = 0; i < (*csr_mtx).size; i++) {
+                memcpy(&(*csc_mtx).mtxf[i], &(*csr_mtx).mtxf[i], 1 * sizeof(float));
+                memcpy(&(*csc_mtx).mtx_row[i], &(*csr_mtx).mtx_col[i], 1 * sizeof(int));
+            }
+            #pragma omp for
+            for(int i = 0; i <= (*csr_mtx).col; i++) {
+                memcpy(&(*csc_mtx).mtx_offset[i], &(*csr_mtx).mtx_offset[i], 1 * sizeof(int));
+            }
+        }
         return 1;
     }
 }
