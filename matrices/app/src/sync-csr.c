@@ -25,8 +25,6 @@ int process_addition(CSR **csr_mtx, COO **coo_mtx) {
         (*res_mtx).is_int = false;
         (*res_mtx).size = 0;
         (*res_mtx).mtxf = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(float *)); //maximum size
-        //(*res_mtx).mtx_offset = calloc((*res_mtx).row+1, sizeof(int));
-        //(*res_mtx).mtx_col = malloc(((*res_mtx).row * (*res_mtx).col) * sizeof(int));
         if((*res_mtx).mtxf == NULL) {
             perror("function: process_multiplication().");
             return 0;

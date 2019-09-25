@@ -54,10 +54,6 @@ int scalar(void) {
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
     }
-    if(!log_coo_result(&coo_sparse_mtx[0], stdout)) {
-        fprintf(stderr, "Error logging result to file.\n");
-        return 0;
-    }
     dealloc_coo(&coo_sparse_mtx, 1);
     free(coo_sparse_mtx);
     return 1;
@@ -105,10 +101,6 @@ int trace(void) {
             return 0;
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
-    }
-    if(!log_trace_result(&coo_sparse_mtx[0], &i, &f, stdout)) {
-        fprintf(stderr, "Error logging the result of the trace.\n");
-        return 0;
     }
     dealloc_coo(&coo_sparse_mtx, 1);
     free(coo_sparse_mtx);
@@ -166,10 +158,6 @@ int addition(void) {
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
     }
-    if(!log_coo_result(&coo_sparse_mtx[0], stdout)) {
-        fprintf(stderr, "Error logging result to file.\n");
-        return 0;
-    }
     dealloc_csr(&csr_sparse_mtx, 2);
     dealloc_coo(&coo_sparse_mtx, 1);
     free(coo_sparse_mtx);
@@ -219,11 +207,6 @@ int transpose_matrix(void) {
             return 0;
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
-    }
-
-    if(!log_csc_ts_result(&csc_sparse_mtx[0], stdout)) {
-        fprintf(stderr, "Error logging transposed matrix to file.\n");
-        return 0;
     }
     dealloc_csr(&csr_sparse_mtx, 1);
     dealloc_csc(&csc_sparse_mtx, 1);
@@ -281,10 +264,6 @@ int matrix_mp(void) {
             return 0;
         }
         fprintf(config.log_fd, "%5.3f\n%5.3f\n", config.time[0].delta, config.time[1].delta);
-    }
-    if(!log_coo_result(&coo_sparse_mtx[0], stdout)) {
-        fprintf(stderr, "Unable to log matrix result value.\n");
-        return 0;
     }
     // -- DEALLOCATE --
     dealloc_csr(&csr_sparse_mtx, 1);

@@ -10,11 +10,8 @@ class MatrixCreatorInt:
 	def populate(self, size):
 		self.file.write("int\n")
 		self.file.write(f"{self.rows}\n{self.cols}\n")
-		for i in range(0,size):
-			val = randrange(2056)
-			r = randrange(2056)
-			if (r % 7) == 0:
-				val = 0
+		for i in range(0,size**2):
+			val = randrange(256)
 			self.file.write(f"{val}\x20")
 		self.file.write("\n")
 
@@ -27,17 +24,14 @@ class MatrixCreatorFloat:
 	def populate(self, size):
 		self.file.write("float\n")
 		self.file.write(f"{self.rows}\n{self.cols}\n")
-		for i in range(0,size):
+		for i in range(0,size**2):
 			val = random() * 1000
-			r = random() * 100
-			if (r // 4) % 4 == 0:
-				val = 0.0
 			self.file.write(f"{val}\x20")
 		self.file.write("\n")
 
 def main():
 	if len(sys.argv) != 4:
-		print("Usage: python3 create-mtx.py filename rows cols size")
+		print("Usage: python3 create-mtx.py filename type size")
 	else:
 		if sys.argv[2] == "int":
 			mtx = MatrixCreatorInt(sys.argv[1], sys.argv[3], 19)
