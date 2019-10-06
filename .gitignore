@@ -1,2 +1,5 @@
-# Remove Mac System Files
+# Ingore Mac System Files
 .DS_Store
+
+# Ignore C Compiler Files
+*.o
