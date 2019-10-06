@@ -21,7 +21,7 @@ int parse_cmd(int argc, char *argv[]) {
         switch (c) {
             case 1: {
                 if((optind >= argc) & !set_input_files(2, argv[optind -1])) {
-                    return 0;
+                    return -1;
                 }
                 break;
             }
