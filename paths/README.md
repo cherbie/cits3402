@@ -2,7 +2,7 @@
 > **Author:** @clayton-herbst
 
 #### Description
-
+The goal of this project is to design an implement parallel algorithms to solve the all-pairs-shortest path problem for a number of large graphs using either Dijkstra’s or Floyd-Warshall algorithms. You will use C with the Message-Passing Interface (MPI) to write parallelized code. You will also need to observe and comment on how speedup is affected by changing the size of the problem and the number of nodes you use. A reasonable range for the size of your problems is 1024 to 4096 vertices. A reasonable range for the number of processors is one to 16.
 
 #### Details
  - **Due date**: Friday 25 October 2019
