@@ -1,3 +1,3 @@
 #!/bin/bash
 clear
-mpirun -n 4 ./sp -f ./input/graph1.in
+mpirun -n 4 ./sp -f ./examples/32.in
