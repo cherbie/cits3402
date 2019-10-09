@@ -1,5 +1,4 @@
 #include "sp.h"
-#define INTS_PER_BLK 1
 /**
  * Read the value of the input file.
  * @return 0 to indicate success and -1 to indicate failure.
@@ -10,6 +9,7 @@ int read_input_mpi(SP_CONFIG *config, PATHS *paths) {
         error_handler(&err);
         return -1;
     }
+
     MPI_Status status;
     MPI_Offset filesize = 0;
     MPI_File_get_size((*config).file_in, &filesize);
@@ -21,136 +21,45 @@ int read_input_mpi(SP_CONFIG *config, PATHS *paths) {
     printf(" number of nodes: %i\n", nnodes);
 
     // -- GET THE ADJCENCY MATRIX --
-    /*int bufsize = (filesize-2)/(*config).nproc;
-    //int *buf = malloc(bufsize);
-    int nints = bufsize/sizeof(int);
+    MPI_Datatype MPI_weights;
     int gsizes[2], distribs[2], dargs[2], psizes[2];
     gsizes[0] = nnodes;
-    distribs[0] = MPI_DISTRIBUTE_CYCLIC;
-    dargs[0] = 1;
-    psizes[0] = 2;
     gsizes[1] = nnodes;
-    distribs[1] = MPI_DISTRIBUTE_NONE;
-    dargs[1] = 0;
-    psizes[1] = 1;
-    int **weights = malloc(nnodes * sizeof(int*));
+    distribs[0] = MPI_DISTRIBUTE_CYCLIC;
+    distribs[1] = MPI_DISTRIBUTE_BLOCK;
+    dargs[0] = MPI_DISTRIBUTE_DFLT_DARG;
+    dargs[1] = MPI_DISTRIBUTE_DFLT_DARG;
+    psizes[0] = 2;
+    psizes[1] = 2;
+
+    MPI_Type_create_darray((*config).nproc, (*config).rank, 2, gsizes, distribs, dargs, psizes, MPI_ORDER_C, MPI_INT, &MPI_weights);
+    MPI_Type_commit(&MPI_weights);
+
+    int *weights = calloc(nnodes*nnodes, sizeof(int));
     if(weights == NULL) return -1;
-    for(int i = 0; i < nnodes; i++) {
-        weights[i] = malloc(nnodes * sizeof(int));
-        if(weights[i] == NULL) return -1;
-    }
 
+    MPI_File_set_view((*config).file_in, 4 + nnodes*sizeof(int)*(*config).rank, MPI_INT, MPI_weights, "native", MPI_INFO_NULL);
+    MPI_File_read_all((*config).file_in, weights, nnodes*nnodes, MPI_INT, &status);
 
-    err = MPI_Type_create_darray((*config).nproc, (*config).rank, 2, gsizes, distribs, dargs, psizes, MPI_ORDER_C, MPI_INT, &path_weights);
-    */
-    MPI_Datatype weights_d1;
-    MPI_Datatype weights_d2;
-    //int bufsize = (filesize-2)/(*config).nproc;
-    int **weights = malloc(nnodes * sizeof(int*));
-    if(weights == NULL) return -1;
-    for(int i = 0; i < nnodes; i++) {
-        weights[i] = calloc(nnodes, sizeof(int));
-        if(weights[i] == NULL) return -1;
-    }
-    //int ints_per_blk = nnodes;
-    //int nints = bufsize/sizeof(int);
-    err = MPI_Type_contiguous(nnodes, MPI_INT, &weights_d1);
-    MPI_Type_commit(&weights_d1);
-    err = MPI_Type_contiguous(nnodes, weights_d1, &weights_d2);
-    if(err != MPI_SUCCESS) {
-        error_handler(&err);
-        return -1;
-    }
-    printf("starting set view\n");
-    MPI_Type_commit(&weights_d2);
-    MPI_File_set_view((*config).file_in, 4, MPI_INT, weights_d1, "native", MPI_INFO_NULL); // set view to the location required
-    printf("read\n");
-    for(int i = 0; i < nnodes; i++) {
-        MPI_File_read((*config).file_in, &weights[i][0], 1, weights_d1, &status);
-    }
-    //MPI_File_read_shared((*config).file_in, &weights[0][0], nnodes*nnodes, MPI_INT, &status);
-
-
-
-/*
-    MPI_Datatype weights;
-    MPI_Type_vector(nints/INTS_PER_BLK, INTS_PER_BLK, INTS_PER_BLK*(*config).nproc, MPI_INT, &weights);
-    MPI_Type_commit(&weights);
-    MPI_File_set_view((*config).file_in, INTS_PER_BLK*sizeof(int)*(*config).rank, MPI_INT, weights, "native", MPI_INFO_NULL);
-    MPI_File_read_all((*config).file_in, buf, nints, MPI_INT, &status);
-*/
-    if((*config).rank == ROOT) {
-        //int count = 0;
-        for(int i = 0; i < nnodes; i++) {
-            int j = i % nnodes;
-            for(j = 0; j < nnodes; j++) printf("%i ", weights[i][j]);
-            printf("\n");
+    if((*config).rank == 2) {
+        int j = 0;
+        for(int i = 0; i < (nnodes*nnodes); i++) {
+            j = i % nnodes;
+            printf("%i ", weights[i]);
+            if(j == (nnodes -1)) printf("\n");
         }
         printf("-------");
-    }/*
-    else if((*config).rank == 1) {
-        for(int i = 0; i < nnodes; i++) {
-            int j = i % nnodes;
-            for(j = 0; j < nnodes; j++) printf("%i ", weights[i][j]);
-            printf("\n");
-        }
-    }*/
+    }
     else return 0;
-    //free(buf);
+
+    //receiveAllChildData(); // function that collects all data in master & broadbast this to the slave after. start of adjanceny matrix.
+
+    free(weights);
     if((*config).rank == ROOT) printf("Processing input file.\n");
     return 0;
 }
 
-/*
-int read_input(SP_CONFIG *config, PATHS *paths) {
-    (*config).fp_in = fopen((*config).filename_in, "rb");
-    if((*config).fp_in == NULL) {
-        perror(NULL);
-        return -1;
-    }
-    //find the number of nodes
-    size_t rtn = fread(&(*paths).nodes, sizeof(uint16_t), 1, (*config).fp_in);
-    if(rtn != 1) {
-        perror(NULL);
-        return -1;
-    }
-    fprintf(stdout, "%zu | %hu\n", rtn, (*paths).nodes);
-    (*paths).weight = malloc((*paths).nodes * sizeof(uint16_t));
-    if((*paths).weight == NULL) {
-        perror(NULL);
-        return -1;
-    }
-    int count = 0;
-    int node = 0;
-    int index = 0;
-    (*paths).weight[node] = malloc((*paths).nodes * sizeof(uint16_t));
-    if((*paths).weight[node] == NULL) {
-        perror(NULL);
-        return -1;
-    }
-    //unsigned char element[2];
-    //bool spacer = false;
-    while(fread(&(*paths).weight[node][index], sizeof(unsigned char), 2, (*config).fp_in) == 2) {
-        node = count/(*paths).nodes;
-        if(node >= (*config).size) break;
-        index = count%(*paths).nodes;
-        //if(element[2] == '\0' && element[3] == '\0') continue;
-        if(index == ((*paths).nodes-1) && node < (*paths).nodes) {
-            (*paths).weight[node+1] = malloc((*paths).nodes * sizeof(uint16_t));
-            if((*paths).weight[node] == NULL) {
-                perror(NULL);
-                return -1;
-            }
-        }
-        //memcpy(&(*paths).weight[node][index], &element[0], sizeof(uint16_t));
-        fprintf(stdout, "--> %hu\n", (*paths).weight[node][index]);
-        if(fseek((*config).fp_in, 2, SEEK_CUR)) fprintf(stderr, "Error with fseek()");
-        count++;
-    }
-    fprintf(stdout, "COMPLETED FILE READING\n");
-    return 0;
-}
-*/
+
 /**
  * Create the output filename.
  * @return 0 to indicate success and -1 to indicate failure.
