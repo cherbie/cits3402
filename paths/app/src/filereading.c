@@ -43,25 +43,30 @@ int read_input_mpi(SP_CONFIG *config, PATHS *paths) {
 
     err = MPI_Type_create_darray((*config).nproc, (*config).rank, 2, gsizes, distribs, dargs, psizes, MPI_ORDER_C, MPI_INT, &path_weights);
     */
-    MPI_Datatype path_weights;
+    MPI_Datatype weights_d1;
+    MPI_Datatype weights_d2;
     //int bufsize = (filesize-2)/(*config).nproc;
     int **weights = malloc(nnodes * sizeof(int*));
     if(weights == NULL) return -1;
     for(int i = 0; i < nnodes; i++) {
-        weights[i] = malloc(nnodes * sizeof(int));
+        weights[i] = calloc(nnodes, sizeof(int));
         if(weights[i] == NULL) return -1;
     }
     //int ints_per_blk = nnodes;
     //int nints = bufsize/sizeof(int);
-    MPI_Type_contiguous(nnodes, MPI_INT, &path_weights);
+    err = MPI_Type_contiguous(nnodes, MPI_INT, &weights_d1);
+    MPI_Type_commit(&weights_d1);
+    err = MPI_Type_contiguous(nnodes, weights_d1, &weights_d2);
     if(err != MPI_SUCCESS) {
         error_handler(&err);
         return -1;
     }
-    MPI_Type_commit(&path_weights);
-    for(int i = (*config).rank; i < nnodes; i += (*config).nproc) {
-        MPI_File_set_view((*config).file_in, (4+(i*nnodes*4)), MPI_INT, path_weights, "native", MPI_INFO_NULL); // set view to the location required
-        MPI_File_read_all((*config).file_in, &weights[i][0], 1, path_weights, &status);
+    printf("starting set view\n");
+    MPI_Type_commit(&weights_d2);
+    MPI_File_set_view((*config).file_in, 4, MPI_INT, weights_d1, "native", MPI_INFO_NULL); // set view to the location required
+    printf("read\n");
+    for(int i = 0; i < nnodes; i++) {
+        MPI_File_read((*config).file_in, &weights[i][0], 1, weights_d1, &status);
     }
     //MPI_File_read_shared((*config).file_in, &weights[0][0], nnodes*nnodes, MPI_INT, &status);
 
@@ -82,14 +87,14 @@ int read_input_mpi(SP_CONFIG *config, PATHS *paths) {
             printf("\n");
         }
         printf("-------");
-    }
+    }/*
     else if((*config).rank == 1) {
         for(int i = 0; i < nnodes; i++) {
             int j = i % nnodes;
             for(j = 0; j < nnodes; j++) printf("%i ", weights[i][j]);
             printf("\n");
         }
-    }
+    }*/
     else return 0;
     //free(buf);
     if((*config).rank == ROOT) printf("Processing input file.\n");
