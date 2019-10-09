@@ -52,6 +52,11 @@ int read_input_mpi(SP_CONFIG *config, PATHS *paths) {
     }
     else return 0;
 
+    /* Need master slave relationship to gather all data in the master matrix
+       - Blocking function may be required.
+       - after that broadcast the data to all nodes in MPI_COMM_WORLD.
+       - Can then start computation.
+     */
     //receiveAllChildData(); // function that collects all data in master & broadbast this to the slave after. start of adjanceny matrix.
 
     free(weights);
