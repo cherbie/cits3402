@@ -13,7 +13,7 @@
 // -- DATA STRUCTURES --
 
 typedef struct {
-    int size;
+    int nproc;
     int rank;
     char *filename_in;
     MPI_File file_in;
@@ -43,7 +43,8 @@ extern int initialise(SP_CONFIG*, PATHS*);
 extern int parse_args(SP_CONFIG*, int*, char***);
 
 // -- FILE READING --
-extern int read_input(SP_CONFIG*, PATHS*);
+extern int read_input_mpi(SP_CONFIG*, PATHS*);
+//extern int read_input(SP_CONFIG*, PATHS*);
 extern int create_output(SP_CONFIG*, char*);
 
 // -- ERRORS --

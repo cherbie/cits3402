@@ -15,12 +15,13 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
     // -- READ INPUT FILE --
-    if(read_input(&(config[0]), &(paths[0]))) {
+    if(read_input_mpi(&(config[0]), &(paths[0]))) {
         fprintf(stderr, "Unable to read input file.\n");
         return EXIT_FAILURE;
     }
     // -- ALGORITHM --
     if(config[0].rank == ROOT) printf("Hello World\n");
+    MPI_Barrier(MPI_COMM_WORLD);
 
     // -- DEALLOCATE MEMORY --
     dealloc_config(config);
@@ -39,9 +40,9 @@ int initialise(SP_CONFIG *config, PATHS *paths) {
         perror(NULL);
         return -1;
     }*/
-    MPI_Comm_size(MPI_COMM_WORLD, &(*config).size);
+    MPI_Comm_size(MPI_COMM_WORLD, &(*config).nproc);
     MPI_Comm_rank(MPI_COMM_WORLD, &(*config).rank);
-    printf("Information:\nSize = %i\nRank = %i\n", (*config).size, (*config).rank);
+    printf("Information:\nSize = %i\nRank = %i\n", (*config).nproc, (*config).rank);
 
     return 0;
 }
