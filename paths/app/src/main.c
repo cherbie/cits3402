@@ -15,13 +15,12 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
     // -- READ INPUT FILE --
-    if(read_input_mpi(&(config[0]), &(paths[0]))) {
+    if(read_file_mpi(&(config[0]), &(paths[0]))) {
         fprintf(stderr, "Unable to read input file.\n");
         return EXIT_FAILURE;
     }
     // -- ALGORITHM --
     if(config[0].rank == ROOT) printf("Hello World\n");
-    MPI_Barrier(MPI_COMM_WORLD);
 
     // -- DEALLOCATE MEMORY --
     dealloc_config(config);
