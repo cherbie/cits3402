@@ -21,34 +21,31 @@ int read_input_mpi(SP_CONFIG *config, PATHS *paths) {
     printf(" number of nodes: %i\n", nnodes);
 
     // -- GET THE ADJCENCY MATRIX --
-    MPI_Datatype MPI_weights;
-    int gsizes[2], distribs[2], dargs[2], psizes[2];
-    gsizes[0] = nnodes;
-    gsizes[1] = nnodes;
-    distribs[0] = MPI_DISTRIBUTE_CYCLIC;
-    distribs[1] = MPI_DISTRIBUTE_BLOCK;
-    dargs[0] = MPI_DISTRIBUTE_DFLT_DARG;
-    dargs[1] = MPI_DISTRIBUTE_DFLT_DARG;
-    psizes[0] = 2;
-    psizes[1] = 2;
+    MPI_Datatype mpi_vectors; // ~ array of path weights for a particular node
+    MPI_Datatype mpi_row;
+    int nrows = nnodes/(*config).nproc; // number of rows handled by the system
+    int stride = (*config).nproc;
+    int nints = nnodes*nnodes/(*config).nproc;
 
-    MPI_Type_create_darray((*config).nproc, (*config).rank, 2, gsizes, distribs, dargs, psizes, MPI_ORDER_C, MPI_INT, &MPI_weights);
-    MPI_Type_commit(&MPI_weights);
+    MPI_Type_contiguous(nnodes, MPI_INT, &mpi_row);
+    MPI_Type_commit(&mpi_row);
+    MPI_Type_vector(nrows, 1, stride, mpi_row, &mpi_vectors);
+    MPI_Type_commit(&mpi_vectors);
 
-    int *weights = calloc(nnodes*nnodes, sizeof(int));
+    int *weights = calloc(nints, sizeof(int));
     if(weights == NULL) return -1;
 
-    MPI_File_set_view((*config).file_in, 4 + nnodes*sizeof(int)*(*config).rank, MPI_INT, MPI_weights, "native", MPI_INFO_NULL);
-    MPI_File_read_all((*config).file_in, weights, nnodes*nnodes, MPI_INT, &status);
+    MPI_File_set_view((*config).file_in, 4 + nnodes*sizeof(int)*(*config).rank, mpi_row, mpi_vectors, "native", MPI_INFO_NULL);
+    MPI_File_read_all((*config).file_in, weights, nints, MPI_INT, &status);
 
     if((*config).rank == 2) {
         int j = 0;
-        for(int i = 0; i < (nnodes*nnodes); i++) {
+        for(int i = 0; i < nints; i++) {
             j = i % nnodes;
             printf("%i ", weights[i]);
-            if(j == (nnodes -1)) printf("\n");
+            if(j == (nnodes -1)) printf("\t|\t%i\n", i/nnodes);
         }
-        printf("-------");
+        printf("-------\n");
     }
     else return 0;
 
