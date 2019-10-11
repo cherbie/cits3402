@@ -25,31 +25,33 @@ typedef struct {
 
 // -- FOR REFERENCE --
 typedef struct {
-    uint16_t nodes;
-    uint16_t **weight; // weight of path.
+    int nodes;
+    int **weight; // weight of path.
 } PATHS;
-
-// -- MPI TYPES --
-//extern MPI_Datatype Paths;
-//extern const MPI_Datatype Path_type[TYPE_PATH_NUM_ELEM];
-//extern const MPI_Aint Path_disp[TYPE_PATH_NUM_ELEM];
 
 
 // -- FUNCTIONS --
 extern int main(int, char**);
 extern int initialise(SP_CONFIG*, PATHS*);
 
+
 // -- PARSING FUNCTIONS --
 extern int parse_args(SP_CONFIG*, int*, char***);
 
+
+// -- HELPER FUNCTIONS --
+extern void print_matrix(int ***, int *);
+
+
 // -- FILE READING --
 extern int read_file_mpi(SP_CONFIG*, PATHS*);
-//extern int read_input(SP_CONFIG*, PATHS*);
+extern int process_matrix_array(SP_CONFIG*, PATHS*, int*);
 extern int create_output(SP_CONFIG*, char*);
-extern int process_matrix_array(SP_CONFIG*, PATH*, int*);
+
 
 // -- ERRORS --
 extern void error_handler(int*);
+
 
 // -- DEALLOC --
 extern void dealloc_config(SP_CONFIG*);
