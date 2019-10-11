@@ -20,9 +20,17 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
     // -- ALGORITHM --
-    if(config[0].rank == ROOT) printf("Hello World\n");
-
+    if(config[0].rank == ROOT) {
+        if(find_apsp(&config[0], &paths[0])) {
+            fprintf(stderr, "Unable to calculate the all pairs shortest paths\n");
+            return -1;
+        }
+        printf("------\n");
+        print_matrix((*paths).sp, &(*paths).nodes);
+        printf("Completed calculation.\n");
+    }
     // -- DEALLOCATE MEMORY --
+    if((*config).rank == ROOT) free_mtx((void **)(*paths).sp, &(*paths).nodes);
     dealloc_config(config);
     dealloc_paths(paths);
 
@@ -34,11 +42,6 @@ int main(int argc, char *argv[]) {
  * Set config struct for distributed nodes.
  */
 int initialise(SP_CONFIG *config, PATHS *paths) {
-    /*config = malloc(1 * sizeof(SP_CONFIG));
-    if(config == NULL) {
-        perror(NULL);
-        return -1;
-    }*/
     MPI_Comm_size(MPI_COMM_WORLD, &(*config).nproc);
     MPI_Comm_rank(MPI_COMM_WORLD, &(*config).rank);
     printf("Information:\nSize = %i\nRank = %i\n", (*config).nproc, (*config).rank);

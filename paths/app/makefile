@@ -1,7 +1,7 @@
 # clang wrapper
 CC=mpicc
 WARNINGS=-Wall -Werror -pedantic
-OBJECT=main.o filereading.o parser.o dealloc.o errors.o helpers.o
+OBJECT=main.o filereading.o parser.o dealloc.o errors.o helpers.o shortestpath.o
 HEADERS=./src/sp.h
 
 sp: $(OBJECT)
@@ -24,6 +24,9 @@ errors.o: ./src/errors.c $(HEADERS)
 
 helpers.o: ./src/helpers.c $(HEADERS)
 	$(CC) $(WARNINGS) -c ./src/helpers.c
+
+shortestpath.o: ./src/shortestpath.c $(HEADERS)
+	$(CC) $(WARNINGS) -c ./src/shortestpath.c
 
 clean:
 	rm -f *.o

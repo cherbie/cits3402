@@ -43,7 +43,7 @@ int read_file_mpi(SP_CONFIG *config, PATHS *paths) {
     MPI_File_set_view((*config).file_in, 4 + nnodes*sizeof(int)*(*config).rank, mpi_row, mpi_vectors, "native", MPI_INFO_NULL);
     MPI_File_read_all((*config).file_in, weights, nints, MPI_INT, &status);
 
-    if((*config).rank == 0) {
+    /*if((*config).rank == 0) {
         int j = 0;
         for(int i = 0; i < nints; i++) {
             j = i % nnodes;
@@ -51,7 +51,7 @@ int read_file_mpi(SP_CONFIG *config, PATHS *paths) {
             if(j == (nnodes -1)) printf("\t|\t%i\n", i/nnodes);
         }
         printf("-------\n");
-    }
+    }*/
 
     // -- GATHER DATA --
     /* Need master slave relationship to gather all data in the master matrix
@@ -79,10 +79,10 @@ int read_file_mpi(SP_CONFIG *config, PATHS *paths) {
     }
 
     // -- debugging --
-    if((*config).rank == 2) {
-        printf("----------\n");
-        print_matrix(&(*paths).weight, &nnodes);
-    }
+    /*if((*config).rank == 2) {
+        printf("---------- process 2 reached this\n");
+        print_matrix((*paths).weight, &nnodes);
+    }*/
 
     MPI_Type_free(&mpi_row);
     MPI_Type_free(&mpi_vectors);
@@ -119,16 +119,6 @@ int process_matrix_array(SP_CONFIG *config, PATHS *paths, int *buf) {
     return 0;
 }
 
-
-/**
- *
- * @param config the execution details
- * @param size the number of elements in the weights buffer.
- * @param weights the path weights read from file. (sendbuf)
- */
-int receiveAllData(SP_CONFIG *config, int *weights, int size) {
-    return 1;
-}
 
 /**
  * Create the output filename.
