@@ -46,6 +46,7 @@ extern int parse_args(SP_CONFIG*, int*, char***);
 extern int read_file_mpi(SP_CONFIG*, PATHS*);
 //extern int read_input(SP_CONFIG*, PATHS*);
 extern int create_output(SP_CONFIG*, char*);
+extern int process_matrix_array(SP_CONFIG*, PATH*, int*);
 
 // -- ERRORS --
 extern void error_handler(int*);

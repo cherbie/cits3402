@@ -79,7 +79,7 @@ int read_file_mpi(SP_CONFIG *config, PATHS *paths) {
 
     MPI_Barrier(MPI_COMM_WORLD); // wait for all communication
 
-    //process_matrix_array(&paths[0], recvbuf);
+    process_matrix_array(&paths[0], recvbuf);
 
     MPI_Type_free(&mpi_row);
     MPI_Type_free(&mpi_vectors);
@@ -91,10 +91,28 @@ int read_file_mpi(SP_CONFIG *config, PATHS *paths) {
     return 0;
 }
 
-/*
-int process_matrix_array(PATHS *paths, int *buf) {
-    int size = (*paths).
-}*/
+
+int process_matrix_array(SP_CONFIG *config, PATHS *paths, int *buf) {
+    int size = (*paths).nodes;
+    (*paths).weights = malloc(size * sizeof(int *));
+    if((*paths).weights == NULL) {
+	perror(NULL);
+	return -1;
+    } 
+    int j = 0;
+    for(int i = 0; i < size; i++) {
+	(*paths).weights[i] = calloc(size, sizeof(int));
+	if((*paths).weights[i] == NULL) {
+ 	    perror(NULL);
+	    return -1;
+	}
+        int node = i/(*config).nproc;
+	int element = i%(*config).nproc*(*config).nproc;
+        j = node + element;
+	if((*config).rank == ROOT) printf("j is => %i\n", j);
+    }
+    return 0;
+}
 
 
 /**
