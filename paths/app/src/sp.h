@@ -57,6 +57,7 @@ extern int create_output(SP_CONFIG*, char*);
 
 // -- CALCULATIONS --
 extern int find_apsp(SP_CONFIG *, PATHS *);
+extern int block_apsp(SP_CONFIG *, PATHS *);
 
 // -- ERRORS --
 extern void error_handler(int*);

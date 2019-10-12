@@ -38,3 +38,56 @@ int find_apsp(SP_CONFIG *config, PATHS *paths) {
     (*paths).sp = next; // shortest path
     return 0;
 }
+
+/**
+ * spributed shortest path calucation using the floyd-warshall algorithm.
+ * @return 0 to indicate success and -1 to indicate failure.
+ */
+int block_apsp(SP_CONFIG *config, PATHS *paths) {
+    #define PATH_WEIGHT_ARR_SIZE 3
+    #define FINISHED 2
+
+    MPI_Status status;
+    int end = 0;
+    int block_rem = (*paths).nodes % ((*config).nproc - 1); // remainder of even block spribution
+    int block_rows = ((*paths).nodes - block_rem) / ((*config).nproc - 1); // number of rows handled by each node
+    int recv_arr[PATH_WEIGHT_ARR_SIZE];
+    int **sp = malloc((*paths).nodes * sizeof(int *)); //
+    if(sp == NULL) {
+        perror(NULL);
+        return -1;
+    }
+    if(dup_matrix(&sp[0], (*paths).weight, &(*paths).nodes)) return -1;
+    if((*config).rank == ROOT) {
+        do {
+            MPI_Recv(&recv_arr, PATH_WEIGHT_ARR_SIZE, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+            if (status.MPI_TAG == FINISHED)
+                end++;
+            else if(sp[recv_arr[1]][recv_arr[2]] > recv_arr[0]) // new path weight is smaller
+                sp[recv_arr[1]][recv_arr[2]] = recv_arr[0];
+        } while(end < ((*config).nproc-1)); // receive all processes finish signal (status.MPI_TAG = FINISHED)
+        //t2 = MPI_Wtime(); // timing
+        print_matrix(sp, &(*paths).nodes); // printout again the new array with shortest paths
+        (*paths).sp = sp;
+        //printf("total time %f \n",t2-t1);
+    }
+    else { // slaves
+        int i, j, k;
+        int node_out[PATH_WEIGHT_ARR_SIZE];
+
+        if((*config).rank+1 != (*config).nproc) block_rem = 0; // last rank block does more work
+        for (k = block_rows*((*config).rank-1); k < block_rows*((*config).rank-1)+block_rows+block_rem; ++k) // last node performs final block size
+            for (i = 0; i < (*paths).nodes; ++i)
+                for (j = 0; j < (*paths).nodes; ++j)
+                    if ((sp[i][k] * sp[k][j] != 0) && (i != j)) // path does exist
+                        if ((sp[i][k] + sp[k][j] < sp[i][j]) || (sp[i][j] == 0)) { // shorter path exists
+                            sp[i][j] = sp[i][k] + sp[k][j];
+                            node_out[0] = sp[i][j];
+                            node_out[1] = i;
+                            node_out[2] = j;
+                            MPI_Send(&node_out, PATH_WEIGHT_ARR_SIZE, MPI_INT, ROOT, 0, MPI_COMM_WORLD); // send to root
+                        }
+        MPI_Send(0, 0, MPI_INT, ROOT, FINISHED, MPI_COMM_WORLD); // send finish processing signal
+    }
+    return 0;
+}
