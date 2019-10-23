@@ -105,7 +105,7 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
     int worker; // focus the work performed by nodes
     int *tmp;
     int **next;
-    
+
     printf("10\n");
 
     tmp = calloc((*paths).nodes, sizeof(int)); // hold the broadcasted row.
@@ -207,24 +207,18 @@ int min_weight(int original, int new) {
 /**
  * Collect the shortest path metadata held by various distributed nodes.
  * based on their process rank. Send this data to the master rank.
- *
- *
-int collect_final_sp(SP_CONFIG * config, PATHS *paths) {
-    if((*config).rank == ROOT) {
-        do {
-            MPI_Recv(&recv_arr, PATH_WEIGHT_ARR_SIZE, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-            if (status.MPI_TAG == FINISHED)
-                end++;
-            else if(sp[recv_arr[1]][recv_arr[2]] > recv_arr[0]) // new path weight is smaller
-                sp[recv_arr[1]][recv_arr[2]] = recv_arr[0];
-        } while(end < ((*config).nproc-1)); // receive all processes finish signal (status.MPI_TAG = FINISHED)
-        //t2 = MPI_Wtime(); // timing
-        print_matrix(sp, &(*paths).nodes); // printout again the new array with shortest paths
-        (*paths).sp = sp;
-        //printf("total time %f \n",t2-t1);
-    }
-    else {
-        MPI_Send(&node_out, PATH_WEIGHT_ARR_SIZE, MPI_INT, ROOT, 0, MPI_COMM_WORLD); // send to root
-        MPI_Send(0, 0, MPI_INT, ROOT, FINISHED, MPI_COMM_WORLD); // send finish processing signal
-    }
-}*/
+ * Send an array of integers.
+ */
+int collect_final_sp(SP_CONFIG *config, PATHS *paths) {
+    int offset = 0;
+    int nelememts = 10;
+    int recvcounts[(*config).nproc] = {23, 123}; // integer array containing number of elements to be received.
+    int displs[(*config).nproc] = {123, 0, 0};
+
+    // GATHER ALL DATA
+    MPI_Gatherv(&(*config).mtx[offset][0], nelements, MPI_INT, &(*paths).sp[0][0], recvcounts, displs, MPI_INT, ROOT, MPI_COMM_WORLD);
+
+    // ROOT  SHOULD CONTAIN ALL SHORTEST PATHS AT THIS STAGE.
+
+    return 0;
+}

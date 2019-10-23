@@ -63,6 +63,7 @@ extern int compute_shortest_paths(SP_CONFIG *, PATHS *);
 extern int get_block_owner(int, int, int);
 extern int get_worker(int, int, int);
 extern int min_weight(int, int);
+extern int collect_final_sp(SP_CONFIG*, PATHS*);
 
 // -- ERRORS --
 extern void error_handler(int*);
