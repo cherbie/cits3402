@@ -99,7 +99,7 @@ int block_apsp(SP_CONFIG *config, PATHS *paths) {
  * @param p is the number of processes
  * @param a is the shortest path
  * @param n is the number of rows in adjacency matrix.
- */
+ *
 void compute_shortest_paths(int id, int p, double **a, int n) {
     int i, j, k;
     int offset; // Local index of broadcast row
@@ -135,5 +135,5 @@ int BLOCK_LOW(int id, int p, int n) {
 }
 
 int BLOCK_SIZE(int id, int p, int n) {
-    
-}
+
+}*/

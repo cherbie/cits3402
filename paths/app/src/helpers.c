@@ -39,6 +39,7 @@ int prep_weights(int **weights, int *size) {
     for(int i = 0; i < (*size); i++) {
         for(int j = 0; j < (*size); j++) {
             if(weights[i][j] == 0) weights[i][j] = LARGE_INT; // set high weight
+            if(i == j) weights[i][j] = LARGE_INT;
             else continue;
         }
     }
@@ -58,6 +59,7 @@ int dup_matrix(int **dest, int **orig, int *size) {
         }
         memcpy(&dest[i][0], &orig[i][0], (*size) * sizeof(int));
     }
+    if(prep_weights(dest, size) != 0) return -1;
     return 0;
 }
 
