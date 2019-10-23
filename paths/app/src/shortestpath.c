@@ -125,8 +125,10 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
             worker = get_worker(i, (*config).nproc, (*paths).nodes); // workers metadata
             printf("row: %i vs worker: %i\n", i, worker);
             if((*config).rank != worker) continue;
-            for (j = 0; j < (*paths).nodes; j++)
-                (*paths).weight[i][j] = min_weight((*paths).weight[i][j], (*paths).weight[i][k] + tmp[j]); // primitive distributed task
+            for (j = 0; j < (*paths).nodes; j++) {
+                if(i == j) (*paths).weight[i][j] = 0;
+                else (*paths).weight[i][j] = min_weight((*paths).weight[i][j], (*paths).weight[i][k] + tmp[j]); // primitive distributed task
+            }
         }
         /* ALL WORKERS BLOCKS OF RESPONSIBILITY ARE UPDATED AT THIS POINT */
     }
