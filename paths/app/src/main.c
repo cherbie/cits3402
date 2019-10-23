@@ -20,15 +20,21 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
     // -- ALGORITHM --
+    /*
     if(block_apsp(&config[0], &paths[0])) {
         fprintf(stderr, "Unable to calculate the all pairs shortest paths\n");
         return -1;
+    }*/
+    if(compute_shortest_paths(&config[0], &paths[0])) {
+        fprintf(stderr, "Unable to calculate the all pairs shortest paths\n");
+        return EXIT_FAILURE;
     }
-    //print_matrix((*paths).sp, &(*paths).nodes);
+    if((*config).rank == ROOT) print_matrix((*paths).weight, &(*paths).nodes);
+
     printf(" -- Completed calculation. -- \n");
 
     // -- DEALLOCATE MEMORY --
-    if((*config).rank == ROOT) free_mtx((void **)(*paths).sp, &(*paths).nodes);
+    //if((*config).rank == ROOT) free_mtx((void **)(*paths).sp, &(*paths).nodes);
     dealloc_config(config);
     dealloc_paths(paths);
 
