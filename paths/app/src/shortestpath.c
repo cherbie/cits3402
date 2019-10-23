@@ -4,13 +4,12 @@
  * Find the all pairs shortest path of a given graph.
  * @return matrix of integers containing the shortest paths.
  */
-int find_apsp(SP_CONFIG *config, PATHS *paths) {
+int compute_apsp(SP_CONFIG *config, PATHS *paths) {
     int pweight, sweight; // previous-weight & sum-weight respectively
     int rows = (*paths).nodes;
     int **prev = malloc(rows * sizeof(int  *));
     int **next = NULL;
     if(dup_matrix(&prev[0], (*paths).weight, &rows)) return -1;
-    if(prep_weights(&prev[0], &rows)) return -1;
     next  = create_matrix(&rows);
     if(next == NULL) return -1; // error allocating memory
     for(int k = 0; k < rows; k++) {
@@ -49,7 +48,7 @@ int block_apsp(SP_CONFIG *config, PATHS *paths) {
 
     MPI_Status status;
     int end = 0;
-    int block_rem = (*paths).nodes % ((*config).nproc - 1); // remainder of even block spribution
+    int block_rem = (*paths).nodes % ((*config).nproc - 1); // remainder of even block distribution
     int block_rows = ((*paths).nodes - block_rem) / ((*config).nproc - 1); // number of rows handled by each node
     int recv_arr[PATH_WEIGHT_ARR_SIZE];
     int **sp = malloc((*paths).nodes * sizeof(int *)); //
@@ -99,41 +98,80 @@ int block_apsp(SP_CONFIG *config, PATHS *paths) {
  * @param p is the number of processes
  * @param a is the shortest path
  * @param n is the number of rows in adjacency matrix.
- *
-void compute_shortest_paths(int id, int p, double **a, int n) {
+ * NOTE: need to broadcast all contained values in node to master before final processing.
+ */
+int compute_shortest_paths(SP_CONFIG *config, int p, int **a, int n) {
     int i, j, k;
     int offset; // Local index of broadcast row
-    int root; // Process controlling row to be bcast
-    double* tmp; // Holds the broadcast row
+    int owner; // Process controlling row to be bcast
+    int worker; // focus the work performed by nodes
+    int* tmp; // Holds the broadcast row
 
-    tmp = (double *) malloc(n * sizeof(double));
+    tmp = (int *) malloc(n * sizeof(int)); // row
     if(tmp == NULL) {
         perror(NULL);
         return -1;
     }
     for (k = 0; k < n; k++) {
-        root = BLOCK_OWNER(k,p,n); // receiving things? ROW-WISE DISTRIBUTION
-        if (root == id) {
-            offset = k - BLOCK_LOW(id,p,n); //
+        owner = BLOCK_OWNER(k,p,n); // receiving things? ROW-WISE DISTRIBUTION
+        if (owner == (*config).rank) { // if the current process is the owner.
+            //offset = k - BLOCK_LOW(id,p,n);
             for (j = 0; j < n; j++)
-                tmp[j] = a[offset][j];
+                tmp[j] = a[k][j]; // contains a column
         }
-        MPI_Bcast(tmp, n, MPI_DOUBLE, root, MPI_COMM_WORLD); // broadcast to all nodess worker nodes what root contains
-        for (i = 0; i < BLOCK_SIZE(id,p,n); i++)
+        MPI_Bcast(tmp, n, MPI_INT, owner, MPI_COMM_WORLD); // broadcast to all nodes worker nodes what root contains
+        for (i = 0; i < n; i++) {
+            worker = GET_WORKER(i, p, n); // workers metadata
+            if((*config).rank != worker) continue;
             for (j = 0; j < n; j++)
                 a[i][j] = MIN(a[i][j],a[i][k]+tmp[j]); // primitive distributed task
+        }
     }
     free(tmp);
+    return 0;
 }
 
+/**
+ * Calculates the owner of a row.
+ * The owner is considered to be the node contain the most up-to-date shortest path of that row.
+ */
 int BLOCK_OWNER(int k, int p, int n) {
-
+    int remainder = n % (p-1); // remainder of even block distribution
+    int rowsperblk = (n - remainder) / (p - 1); // number of rows handled by each node
+    int owner = k/rowsperblk;
+    if(owner >= p) return p; // last block
+    else return owner;
 }
 
-int BLOCK_LOW(int id, int p, int n) {
-
+int GET_WORKER(int i, int p, int n) {
+    int remainder = n % (p-1); // remainder of even block distribution
+    int rowsperblk = (n - remainder) / (p - 1); // number of rows handled by each node
+    int worker = k/rowsperblk;
+    if(worker >= p) return p;
+    else return worker;
 }
 
-int BLOCK_SIZE(int id, int p, int n) {
+int MIN(int original, int new) {
+    if(original <= new) return original;
+    else return new;
+}
 
-}*/
+int collect_final_sp(SP_CONFIG * config, PATHS *paths) {
+    if((*config).rank == ROOT) {
+        do {
+            MPI_Recv(&recv_arr, PATH_WEIGHT_ARR_SIZE, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+            if (status.MPI_TAG == FINISHED)
+                end++;
+            else if(sp[recv_arr[1]][recv_arr[2]] > recv_arr[0]) // new path weight is smaller
+                sp[recv_arr[1]][recv_arr[2]] = recv_arr[0];
+        } while(end < ((*config).nproc-1)); // receive all processes finish signal (status.MPI_TAG = FINISHED)
+        //t2 = MPI_Wtime(); // timing
+        print_matrix(sp, &(*paths).nodes); // printout again the new array with shortest paths
+        (*paths).sp = sp;
+        //printf("total time %f \n",t2-t1);
+    }
+    else {
+        MPI_Send(&node_out, PATH_WEIGHT_ARR_SIZE, MPI_INT, ROOT, 0, MPI_COMM_WORLD); // send to root
+        MPI_Send(0, 0, MPI_INT, ROOT, FINISHED, MPI_COMM_WORLD); // send finish processing signal
+    }
+}

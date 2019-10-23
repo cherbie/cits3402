@@ -38,8 +38,8 @@ int **create_matrix(int *size) {
 int prep_weights(int **weights, int *size) {
     for(int i = 0; i < (*size); i++) {
         for(int j = 0; j < (*size); j++) {
-            if(weights[i][j] == 0) weights[i][j] = LARGE_INT; // set high weight
-            if(i == j) weights[i][j] = LARGE_INT;
+            if(weights[i][j] == 0) weights[i][j] = 0; // set high weight
+            if(i == j) weights[i][j] = 0;
             else continue;
         }
     }
