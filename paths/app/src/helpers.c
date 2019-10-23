@@ -16,20 +16,15 @@ void print_matrix(int **mtx, int *size) {
  * Dynamically allocate memory for a matrix.
  * @return the pointer to the array or NULL on error.
 **/
-int **create_matrix(int *size) {
-    int **mtx = malloc((*size) * sizeof(int *));
-    if(mtx == NULL) {
-        perror(NULL);
-        return NULL;
-    }
+int create_matrix(int **mtx, int *size) {
     for(int i = 0; i < (*size); i++) {
         mtx[i] = calloc((*size), sizeof(int));
         if(mtx[i] == NULL) {
             perror(NULL);
-            return NULL;
+            return 1;
         }
     }
-    return mtx;
+    return 0;
 }
 
 /**

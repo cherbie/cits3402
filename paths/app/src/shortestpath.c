@@ -8,10 +8,9 @@ int compute_apsp(SP_CONFIG *config, PATHS *paths) {
     int pweight, sweight; // previous-weight & sum-weight respectively
     int rows = (*paths).nodes;
     int **prev = malloc(rows * sizeof(int  *));
-    int **next = NULL;
+    int **next = malloc(rows * sizeof(int *));
     if(dup_matrix(&prev[0], (*paths).weight, &rows)) return -1;
-    next  = create_matrix(&rows);
-    if(next == NULL) return -1; // error allocating memory
+    if(create_matrix(next, &rows)) return -1;
     for(int k = 0; k < rows; k++) {
         printf("new k value: %i\n", k);
         for(int i = 0; i < rows; i++) {
@@ -101,42 +100,46 @@ int block_apsp(SP_CONFIG *config, PATHS *paths) {
  * NOTE: need to broadcast all contained values in node to master before final processing.
  */
 int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
-    int i, j, k;
+    int i = 0, j = 0, k = 0;
     int owner; // Process controlling row to be bcast
     int worker; // focus the work performed by nodes
-    int* tmp; // Holds the broadcast row
-    int** next;
-    tmp = (int *) malloc((*paths).nodes * sizeof(int)); // row
+    int *tmp;
+    int **next;
+    
+    printf("10\n");
+
+    tmp = calloc((*paths).nodes, sizeof(int)); // hold the broadcasted row.
     if(tmp == NULL) {
         perror(NULL);
         return -1;
     }
+    printf("11");
 
     if(prep_weights((*paths).weight, &(*paths).nodes)) {
         perror(NULL);
         return -1;
     }
+    printf("12");
 
-    next  = create_matrix(&(*paths).nodes);
-    if(next == NULL) {
+    next = calloc((*paths).nodes, sizeof(int *));
+    if(create_matrix(next, &(*paths).nodes)) {
         perror(NULL);
         return -1;
     }
-
+    printf("14");
     if((*config).rank == ROOT) {
         printf("starting ...\n");
         print_matrix((*paths).weight, &(*paths).nodes);
     }
     for (k = 0; k < (*paths).nodes; k++) {
         owner = get_block_owner(k,(*config).nproc, (*paths).nodes); // receiving things? ROW-WISE DISTRIBUTION
-        //printf("k-value: %i vs owner: %i\n", k, owner);
+        printf("k-value: %i vs owner: %i\n", k, owner);
         if (owner == (*config).rank) { // if the current process is the owner.
-            //offset = k - BLOCK_LOW(id,p,n);
             for (j = 0; j < (*paths).nodes; j++)
                 tmp[j] = (*paths).weight[k][j]; // contains a column
         }
         MPI_Bcast(tmp, (*paths).nodes, MPI_INT, owner, MPI_COMM_WORLD); // broadcast to all nodes worker nodes what owner contains
-        //printf("k value = %i ... ", k);
+        printf("k value = %i ... ", k);
         //print_array(&tmp, &(*paths).nodes);
         for (i = 0; i < (*paths).nodes; i++) {
             worker = get_worker(i, (*config).nproc, (*paths).nodes); // workers metadata
@@ -158,6 +161,7 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
         /* ALL WORKERS BLOCKS OF RESPONSIBILITY ARE UPDATED AT THIS POINT */
     }
     free(tmp);
+    free_mtx((void **) next, &(*paths).nodes);
     return 0;
 }
 
@@ -166,34 +170,30 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
  * The owner is considered to be the node contain the most up-to-date shortest path of that row.
  */
 int get_block_owner(int k, int p, int n) {
-    if(n == p) return ROOT;
-    int remainder = n % (p-1); // remainder of even block distribution
+    printf(" ... calculate block owner\n");
+    //if(n == p) return ROOT;
+    int remainder = n % p; // remainder of even block distribution
     int rowsperblk = (n - remainder) / p; // number of rows handled by each node
     int owner = k/rowsperblk;
 
-    if(owner >= p) return ROOT;
-    else {
-        owner++;
-        if(owner >= p) return ROOT;
-        else return owner;
-    }
+    owner++;
+    if(owner >= p) return ROOT; // ROOT CONTAINS THE REMAINDER
+    else return owner;
 }
 
 /*
  * @return the rank of the block / row owner
  */
 int get_worker(int i, int p, int n) {
-    if(n == p) return ROOT;
-    int remainder = n % (p-1); // remainder of even block distribution
+    //if(n == p) return ROOT;
+    printf("calculate block owner\n");
+    int remainder = n % p; // remainder of even block distribution
     int rowsperblk = (n - remainder) / p; // number of rows handled by each node
     int worker = (i/rowsperblk);
 
-    if(worker >= p) return ROOT;
-    else {
-        worker++;
-        if(worker >= p) return ROOT;
-        else return worker;
-    }
+    worker++;
+    if(worker >= p) return ROOT; // ROOT CONTAINS THE REMAINDER
+    else return worker;
 }
 
 /**

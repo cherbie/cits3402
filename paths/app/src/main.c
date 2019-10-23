@@ -25,6 +25,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Unable to calculate the all pairs shortest paths\n");
         return -1;
     }*/
+    printf("reached\n");
     if(compute_shortest_paths(&config[0], &paths[0])) {
         fprintf(stderr, "Unable to calculate the all pairs shortest paths\n");
         return EXIT_FAILURE;
