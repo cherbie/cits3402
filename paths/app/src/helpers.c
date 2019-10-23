@@ -70,3 +70,10 @@ int cpy_matrix(int **dest, int **orig, int *size) {
     for(int i = 0; i < (*size); i++) memcpy(dest[i], orig[i], (*size) * sizeof(int));
     return 0;
 }
+
+void print_array(int **array, int *size) {
+    for(int i = 0; i < *size; i++) {
+        printf("%i ", (*array)[i]);
+    }
+    printf("\n");
+}

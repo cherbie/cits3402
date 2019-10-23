@@ -105,30 +105,55 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
     int owner; // Process controlling row to be bcast
     int worker; // focus the work performed by nodes
     int* tmp; // Holds the broadcast row
-
+    int** next;
     tmp = (int *) malloc((*paths).nodes * sizeof(int)); // row
     if(tmp == NULL) {
         perror(NULL);
         return -1;
     }
 
+    if(prep_weights((*paths).weight, &(*paths).nodes)) {
+        perror(NULL);
+        return -1;
+    }
+
+    next  = create_matrix(&(*paths).nodes);
+    if(next == NULL) {
+        perror(NULL);
+        return -1;
+    }
+
+    if((*config).rank == ROOT) {
+        printf("starting ...\n");
+        print_matrix((*paths).weight, &(*paths).nodes);
+    }
     for (k = 0; k < (*paths).nodes; k++) {
         owner = get_block_owner(k,(*config).nproc, (*paths).nodes); // receiving things? ROW-WISE DISTRIBUTION
-        printf("k-value: %i vs owner: %i\n", k, owner);
+        //printf("k-value: %i vs owner: %i\n", k, owner);
         if (owner == (*config).rank) { // if the current process is the owner.
             //offset = k - BLOCK_LOW(id,p,n);
             for (j = 0; j < (*paths).nodes; j++)
                 tmp[j] = (*paths).weight[k][j]; // contains a column
         }
         MPI_Bcast(tmp, (*paths).nodes, MPI_INT, owner, MPI_COMM_WORLD); // broadcast to all nodes worker nodes what owner contains
+        //printf("k value = %i ... ", k);
+        //print_array(&tmp, &(*paths).nodes);
         for (i = 0; i < (*paths).nodes; i++) {
             worker = get_worker(i, (*config).nproc, (*paths).nodes); // workers metadata
             printf("row: %i vs worker: %i\n", i, worker);
             if((*config).rank != worker) continue;
             for (j = 0; j < (*paths).nodes; j++) {
-                if(i == j) (*paths).weight[i][j] = 0;
-                else (*paths).weight[i][j] = min_weight((*paths).weight[i][j], (*paths).weight[i][k] + tmp[j]); // primitive distributed task
+                if(i == j) next[i][j] = 0;
+                else next[i][j] = min_weight((*paths).weight[i][j], (*paths).weight[i][k] + tmp[j]); // primitive distributed task
             }
+        }
+        if(cpy_matrix((*paths).weight, next, &(*paths).nodes)) {
+            fprintf(stderr, "Problem determining shortest path.\n");
+            return -1;
+        }
+        if((*config).rank == ROOT) {
+            printf(" -- matrix at k = %i -- \n", k);
+            print_matrix((*paths).weight, &(*paths).nodes);
         }
         /* ALL WORKERS BLOCKS OF RESPONSIBILITY ARE UPDATED AT THIS POINT */
     }
