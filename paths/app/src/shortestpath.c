@@ -91,3 +91,49 @@ int block_apsp(SP_CONFIG *config, PATHS *paths) {
     }
     return 0;
 }
+
+
+/**
+ *
+ * @param id is the the master process.
+ * @param p is the number of processes
+ * @param a is the shortest path
+ * @param n is the number of rows in adjacency matrix.
+ */
+void compute_shortest_paths(int id, int p, double **a, int n) {
+    int i, j, k;
+    int offset; // Local index of broadcast row
+    int root; // Process controlling row to be bcast
+    double* tmp; // Holds the broadcast row
+
+    tmp = (double *) malloc(n * sizeof(double));
+    if(tmp == NULL) {
+        perror(NULL);
+        return -1;
+    }
+    for (k = 0; k < n; k++) {
+        root = BLOCK_OWNER(k,p,n); // receiving things? ROW-WISE DISTRIBUTION
+        if (root == id) {
+            offset = k - BLOCK_LOW(id,p,n); //
+            for (j = 0; j < n; j++)
+                tmp[j] = a[offset][j];
+        }
+        MPI_Bcast(tmp, n, MPI_DOUBLE, root, MPI_COMM_WORLD); // broadcast to all nodess worker nodes what root contains
+        for (i = 0; i < BLOCK_SIZE(id,p,n); i++)
+            for (j = 0; j < n; j++)
+                a[i][j] = MIN(a[i][j],a[i][k]+tmp[j]); // primitive distributed task
+    }
+    free(tmp);
+}
+
+int BLOCK_OWNER(int k, int p, int n) {
+
+}
+
+int BLOCK_LOW(int id, int p, int n) {
+
+}
+
+int BLOCK_SIZE(int id, int p, int n) {
+    
+}
