@@ -170,10 +170,14 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
     free(next);
 
     // -- COLLECT DATA --
-    /*if(collect_final_sp(config, paths)) {
+    /*
+     * (*paths).weight contains the most up to date shortest paths ... distributed across systems.
+     * Store the final result only in main --> (*paths).sp
+     */
+    if(collect_final_sp(config, paths)) {
         fprintf(stderr, "Error collating computed shortest paths.\n");
         return -1;
-    }*/
+    }
     return 0;
 }
 
@@ -279,6 +283,8 @@ int collect_final_sp(SP_CONFIG *config, PATHS *paths) {
     MPI_Gatherv(&(*paths).weight[offset], nelements, MPI_INT, &(*paths).sp[0], recvcounts, displs, MPI_INT, ROOT, MPI_COMM_WORLD);
 
     // ROOT  SHOULD CONTAIN ALL SHORTEST PATHS AT THIS STAGE.
+
+    printf("... COMPLETED MERGE\n");
 
     return 0;
 }

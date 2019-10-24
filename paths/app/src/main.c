@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Unable to calculate the all pairs shortest paths\n");
         return EXIT_FAILURE;
     }
-    if((*config).rank == ROOT) print_matrix((*paths).weight, &(*paths).nodes);
+    if((*config).rank == ROOT) print_matrix((*paths).sp, &(*paths).nodes);
 
     printf(" -- Completed calculation. -- \n");
 
