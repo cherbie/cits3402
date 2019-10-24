@@ -112,7 +112,7 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
  */
 int get_block_owner(int k, int p, int n) {
     //printf(" ... calculate block owner\n");
-    //if(n == p) return ROOT;
+    if(n <= p) return ROOT;
     int remainder = n % p; // remainder of even block distribution
     int rowsperblk = (n - remainder) / p; // number of rows handled by each node
     int owner = k/rowsperblk;
@@ -156,6 +156,7 @@ int get_merge_info(SP_CONFIG* config, PATHS* paths, int *offset, int *nelem, int
  */
 int get_worker(int i, int p, int n) {
     //printf("calculate block owner\n");
+    if(n <= p) return ROOT;
     int remainder = n % p; // remainder of even block distribution
     int rowsperblk = (n - remainder) / p; // number of rows handled by each node
     int worker = (i/rowsperblk);

@@ -32,4 +32,4 @@ clean:
 	rm -f *.o *.out
 
 clean-all:
-	rm -f *.o *.out ./results/* ./time/*
+	rm -f *.o *.out ./results/*.out ./time/*.out

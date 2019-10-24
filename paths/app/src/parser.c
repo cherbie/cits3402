@@ -45,9 +45,9 @@ int set_logger(SP_CONFIG *config) {
     struct tm *exec_time;
     time(&rawtime);
     exec_time = localtime(&rawtime);
-    char *buffer = calloc(50, sizeof(char));
-    char *date = malloc(11 * sizeof(char));
-    char *time = malloc(5 * sizeof(char));
+    char *buffer = calloc(100, sizeof(char));
+    char *date = malloc(20 * sizeof(char));
+    char *time = malloc(20 * sizeof(char));
     if(buffer == NULL || date == NULL || time == NULL) {
         perror(NULL);
         return -1;
@@ -56,7 +56,7 @@ int set_logger(SP_CONFIG *config) {
     sprintf(time, "%02.0f%02.0f", (float) exec_time->tm_hour, (float) exec_time->tm_min);
     sprintf(buffer, "./results/%d_%s_%s.out", STUDENT_NUMBER, date, time);
 
-    (*config).filename_out = calloc(50, sizeof(char));
+    (*config).filename_out = calloc(100, sizeof(char));
     if((*config).filename_out == NULL) {
         perror(NULL);
         return -1;
@@ -66,6 +66,7 @@ int set_logger(SP_CONFIG *config) {
     (*config).fp_out = fopen((*config).filename_out, "wb"); //writing in binary mode
     if((*config).fp_out == NULL) {
         perror("location: /parser.c/set_logger()\n");
+	fprintf(stderr, "%s\n", buffer);
         return -1;
     }
     free(buffer);
@@ -87,8 +88,8 @@ int set_time_logger(SP_CONFIG *config, PATHS *paths) {
     exec_time = localtime(&rawtime);
 
     char *buffer = calloc(50, sizeof(char));
-    char *date = malloc(11 * sizeof(char));
-    char *info = malloc(10 * sizeof(char));
+    char *date = malloc(20 * sizeof(char));
+    char *info = malloc(20 * sizeof(char));
     if(buffer == NULL || date == NULL || info == NULL) {
         perror(NULL);
         return -1;
