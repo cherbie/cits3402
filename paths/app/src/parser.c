@@ -9,7 +9,7 @@ int parse_args(SP_CONFIG *config, int *argc, char ***argv)  {
             case 'f': { // file specified
                 if(optind > *argc) return -1;
                 int len = strlen(optarg);
-                (*config).filename_in = malloc((len+1) * sizeof(char));
+                (*config).filename_in = calloc((len+1), sizeof(char));
                 if((*config).filename_in == NULL) {
                     perror(NULL);
                     return -1;
