@@ -3,13 +3,13 @@
 /**
  * Find the all pairs shortest path of a given graph.
  * @return matrix of integers containing the shortest paths.
- */
+
 int compute_apsp(SP_CONFIG *config, PATHS *paths) {
     int pweight, sweight; // previous-weight & sum-weight respectively
     int rows = (*paths).nodes;
     int **prev = malloc(rows * sizeof(int  *));
     int **next = malloc(rows * sizeof(int *));
-    if(dup_matrix(&prev[0], (*paths).weight, &rows)) return -1;
+    //if(dup_matrix(&prev[0], (*paths).weight, &rows)) return -1;
     if(create_matrix(next, &rows)) return -1;
     for(int k = 0; k < rows; k++) {
         printf("new k value: %i\n", k);
@@ -36,11 +36,12 @@ int compute_apsp(SP_CONFIG *config, PATHS *paths) {
     (*paths).sp = next; // shortest path
     return 0;
 }
+*/
 
 /**
  * spributed shortest path calucation using the floyd-warshall algorithm.
  * @return 0 to indicate success and -1 to indicate failure.
- */
+ *
 int block_apsp(SP_CONFIG *config, PATHS *paths) {
     #define PATH_WEIGHT_ARR_SIZE 3
     #define FINISHED 2
@@ -89,7 +90,7 @@ int block_apsp(SP_CONFIG *config, PATHS *paths) {
     }
     return 0;
 }
-
+*/
 
 /**
  *
@@ -104,8 +105,8 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
     int owner; // Process controlling row to be bcast
     int worker; // focus the work performed by nodes
     int *tmp;
-    int **next;
-    int rowoffset; // ROW STARTING INDEX
+    int *next;
+    int offset; // ROW STARTING INDEX
 
     printf("10\n");
 
@@ -122,8 +123,8 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
     }
     printf("12");
 
-    next = calloc((*paths).nodes, sizeof(int *));
-    if(create_matrix(next, &(*paths).nodes)) {
+    next = calloc((*paths).nodes * (*paths).nodes, sizeof(int));
+    if(next == NULL) {
         perror(NULL);
         return -1;
     }
@@ -135,27 +136,30 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
     for (k = 0; k < (*paths).nodes; k++) {
         owner = get_block_owner(k,(*config).nproc, (*paths).nodes); // receiving things? ROW-WISE DISTRIBUTION
         printf("k-value: %i vs owner: %i\n", k, owner);
+
         if (owner == (*config).rank) { // if the current process is the owner.
+            offset = k * (*paths).nodes; // start index of row
             for (j = 0; j < (*paths).nodes; j++)
-                tmp[j] = (*paths).weight[k][j]; // contains a column
+                tmp[j] = (*paths).weight[offset + j]; // contains a column
         }
+
         MPI_Bcast(tmp, (*paths).nodes, MPI_INT, owner, MPI_COMM_WORLD); // broadcast to all nodes worker nodes what owner contains
+
         printf("k value = %i ... ", k);
         //print_array(&tmp, &(*paths).nodes);
         for (i = 0; i < (*paths).nodes; i++) {
             worker = get_worker(i, (*config).nproc, (*paths).nodes); // workers metadata
             printf("row: %i vs worker: %i\n", i, worker);
             if((*config).rank != worker) continue;
-            rowoffset = i * (*paths).nodes;
+
+            offset = i * (*paths).nodes; // start index of row
+
             for (j = 0; j < (*paths).nodes; j++) {
-                if(i == j) next[i][j] = 0;
-                else next[i][j] = min_weight((*paths).weight[i][j], (*paths).weight[i][k] + tmp[j]); // primitive distributed task
+                if(i == j) next[offset + j] = 0;
+                else next[offset + j] = min_weight((*paths).weight[offset+j], (*paths).weight[offset + k] + tmp[j]); // primitive distributed task
             }
         }
-        if(cpy_matrix((*paths).weight, next, &(*paths).nodes)) {
-            fprintf(stderr, "Problem determining shortest path.\n");
-            return -1;
-        }
+        memcpy((void *) (*paths).weight, (void *) next, (*paths).nodes * (*paths).nodes * sizeof(int));
         if((*config).rank == ROOT) {
             printf(" -- matrix at k = %i -- \n", k);
             print_matrix((*paths).weight, &(*paths).nodes);
@@ -163,7 +167,13 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
         /* ALL WORKERS BLOCKS OF RESPONSIBILITY ARE UPDATED AT THIS POINT */
     }
     free(tmp);
-    free_mtx((void **) next, &(*paths).nodes);
+    free(next);
+
+    // -- COLLECT DATA --
+    /*if(collect_final_sp(config, paths)) {
+        fprintf(stderr, "Error collating computed shortest paths.\n");
+        return -1;
+    }*/
     return 0;
 }
 
@@ -186,7 +196,8 @@ int get_block_owner(int k, int p, int n) {
 /**
  * @return the starting index of block owners units / weights.
  */
-int get_merge_info(CONFIG* config, PATHS* paths, int *offset, int *nelem, int **recvcounts, int **displ) {
+int get_merge_info(SP_CONFIG* config, PATHS* paths, int *offset, int *nelem, int **recvcounts, int **displ) {
+    printf("... merge info\n");
     int remainder = (*paths).nodes % (*config).nproc; // remainder of even block distribution
     int rowsperblk = ((*paths).nodes - remainder) / (*config).nproc; // number of rows handled by each node
     //int unitsperblk = rowsperblk * (*paths).nodes;
@@ -201,12 +212,12 @@ int get_merge_info(CONFIG* config, PATHS* paths, int *offset, int *nelem, int **
     }
     for(int i = 0; i < (*config).nproc; i++) { // RANK OF THE PROCESS
         if(i == ROOT) {
-            recvcounts[i] = (rowsperblk + remainder) * (*paths).nodes;
-            displ[i] = (rowsperblk * (*paths).nodes) * ((*config).nproc - 1);
+            (*recvcounts)[i] = (rowsperblk + remainder) * (*paths).nodes;
+            (*displ)[i] = (rowsperblk * (*paths).nodes) * ((*config).nproc - 1);
             continue;
         }
-        recvcounts[i] = rowsperblk * (*paths).nodes;
-        displ[i] = (rowsperblk * (*paths).nodes) * (i - 1);
+        (*recvcounts)[i] = rowsperblk * (*paths).nodes;
+        (*displ)[i] = (rowsperblk * (*paths).nodes) * (i - 1);
     }
     return 0;
 }
@@ -241,29 +252,31 @@ int min_weight(int original, int new) {
  */
 int collect_final_sp(SP_CONFIG *config, PATHS *paths) {
 
-    int remainder = (*paths).nodes % (*config).nproc; // remainder of even block distribution
-    int rowsperblk = ((*paths).nodes - remainder) / (*config).nproc; // number of rows handled by each node
+    //int remainder = (*paths).nodes % (*config).nproc; // remainder of even block distribution
+    //int rowsperblk = ((*paths).nodes - remainder) / (*config).nproc; // number of rows handled by each node
 
     if((*config).rank == ROOT) {
-        (*paths).sp = malloc((*paths).nodes * sizeof(int *));
+        (*paths).sp = malloc((*paths).nodes * (*paths).nodes * sizeof(int));
         if((*paths).sp == NULL) {
-            perror(NULL);
-            return -1;
-        }
-        if(create_matrix((*config).sp, &(paths).nodes)) {
             perror(NULL);
             return -1;
         }
     }
 
-    int offset, nelements, recvcounts[(*config).nproc], displs[(*config).nproc];
+    int offset, nelements;
+    int *recvcounts = malloc((*config).nproc * sizeof(int *));
+    int *displs = malloc((*config).nproc * sizeof(int *));
+    if(recvcounts == NULL || displs == NULL) {
+        perror(NULL);
+        return -1;
+    }
     if(get_merge_info(config, paths, &offset, &nelements, &recvcounts, &displs)) {
         fprintf(stderr, "Error merging distributed data\n");
         return -1;
     }
 
     // GATHER ALL DATA
-    MPI_Gatherv(&(*config).mtx[offset], nelements, MPI_INT, &(*paths).sp[0][0], recvcounts, displs, MPI_INT, ROOT, MPI_COMM_WORLD);
+    MPI_Gatherv(&(*paths).weight[offset], nelements, MPI_INT, &(*paths).sp[0], recvcounts, displs, MPI_INT, ROOT, MPI_COMM_WORLD);
 
     // ROOT  SHOULD CONTAIN ALL SHORTEST PATHS AT THIS STAGE.
 

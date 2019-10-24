@@ -26,26 +26,36 @@ int read_file_mpi(SP_CONFIG *config, PATHS *paths) {
     (*paths).nodes = nnodes;
 
     // -- GET THE ADJCENCY MATRIX --
-    MPI_Datatype mpi_vectors; // ~ array of path weights for a particular node
-    MPI_Datatype mpi_row;
-    int nrows = nnodes/(*config).nproc; // number of rows handled by the system
-    int stride = (*config).nproc;
-    int nints = nnodes*nnodes/(*config).nproc; //number of integers per node
+    //MPI_Datatype mpi_vectors; // ~ array of path weights for a particular node
+    MPI_Datatype mpi_block;
+    int offset, nelem;
+    int remainder = nnodes % (*config).nproc; // remainder of even block distribution
+    int rowsperblk = (nnodes - remainder) / (*config).nproc; // number of rows handled by each node
+    //int stride = (*config).nproc;
+    if((*config).rank == ROOT) {
+        offset = (rowsperblk * (*paths).nodes) * ((*config).nproc - 1);
+        nelem = (rowsperblk + remainder) * (*paths).nodes;
+    }
+    else {
+        offset = (rowsperblk * (*paths).nodes) * ((*config).rank - 1);
+        nelem = rowsperblk * (*paths).nodes;
+    }
+    //int nints = nnodes*nnodes/(*config).nproc; //number of integers per node
 
-    MPI_Type_contiguous(nnodes, MPI_INT, &mpi_row);
-    MPI_Type_commit(&mpi_row);
-    MPI_Type_vector(nrows, 1, stride, mpi_row, &mpi_vectors);
-    MPI_Type_commit(&mpi_vectors);
+    MPI_Type_contiguous(nelem, MPI_INT, &mpi_block);
+    MPI_Type_commit(&mpi_block);
+    //MPI_Type_vector(nrows, 1, stride, mpi_row, &mpi_vectors);
+    //MPI_Type_commit(&mpi_vectors);
 
-    int *weights = calloc(nints, sizeof(int));
+    int *weights = calloc(nelem, sizeof(int));
     if(weights == NULL) return -1;
 
-    MPI_File_set_view((*config).file_in, 4 + nnodes*sizeof(int)*(*config).rank, mpi_row, mpi_vectors, "native", MPI_INFO_NULL);
-    MPI_File_read_all((*config).file_in, weights, nints, MPI_INT, &status);
+    MPI_File_set_view((*config).file_in, 4 + (offset * sizeof(int)), MPI_INT, mpi_block, "native", MPI_INFO_NULL);
+    MPI_File_read_all((*config).file_in, weights, nelem, MPI_INT, &status);
 
     /*if((*config).rank == 0) {
         int j = 0;
-        for(int i = 0; i < nints; i++) {
+        for(int i = 0; i < nelem; i++) {
             j = i % nnodes;
             printf("%i ", weights[i]);
             if(j == (nnodes -1)) printf("\t|\t%i\n", i/nnodes);
@@ -60,12 +70,28 @@ int read_file_mpi(SP_CONFIG *config, PATHS *paths) {
        - Can then start computation.
      */
 
-    MPI_Datatype mpi_int_array; // contiguous MPI_INT
-    MPI_Type_contiguous(nints, MPI_INT, &mpi_int_array);
-    MPI_Type_commit(&mpi_int_array);
+    /*MPI_Datatype mpi_int_array; // contiguous MPI_INT
+    MPI_Type_contiguous(nelem, MPI_INT, &mpi_int_array);
+    MPI_Type_commit(&mpi_int_array);*/
 
-    int *recvbuf = malloc(nnodes * nnodes * sizeof(int));
-    err = MPI_Allgather(&weights[0], 1, mpi_int_array, &recvbuf[0], 1, mpi_int_array, MPI_COMM_WORLD);
+    (*paths).weight = malloc(nnodes * nnodes * sizeof(int));
+    if((*paths).weight == NULL) {
+        perror(NULL);
+        return -1;
+    }
+
+    int *recvcounts = malloc((*config).nproc * sizeof(int *));
+    int *displs = malloc((*config).nproc * sizeof(int *));
+    if(recvcounts == NULL || displs == NULL) {
+        perror(NULL);
+        return -1;
+    }
+    if(get_merge_info(config, paths, &offset, &nelem, &recvcounts, &displs)) {
+        fprintf(stderr, "Error merging distributed data\n");
+        return -1;
+    }
+
+    err = MPI_Allgatherv(&weights[0], nelem, MPI_INT, &(*paths).weight[0], recvcounts, displs, MPI_INT, MPI_COMM_WORLD);
     if(err != MPI_SUCCESS) {
         error_handler(&err);
         return -1;
@@ -73,9 +99,24 @@ int read_file_mpi(SP_CONFIG *config, PATHS *paths) {
 
     MPI_Barrier(MPI_COMM_WORLD); // wait for all communication
 
-    if(process_matrix_array(&config[0], &paths[0], &recvbuf[0])) {
+
+    // -- SAVE INFORMATION NEEDED --
+    /*(*paths).weight = malloc(size * sizeof(int *));
+    if((*paths).weight == NULL) {
+        perror(NULL);
+        return -1;
+    }*/
+
+
+    /*if(process_matrix_array(&config[0], &paths[0], &recvbuf[0])) {
         fprintf(stderr, "Error sharing file data with communication group.\n");
         return -1;
+    }*/
+    if((*config).rank == ROOT){
+        for(int i = 0; i < (nnodes *nnodes); i++) {
+            if((i % nnodes) == 0) printf("\n");
+            printf("%i ", (*paths).weight[i]);
+        }
     }
 
     // -- debugging --
@@ -84,18 +125,20 @@ int read_file_mpi(SP_CONFIG *config, PATHS *paths) {
         print_matrix((*paths).weight, &nnodes);
     }*/
 
-    MPI_Type_free(&mpi_row);
-    MPI_Type_free(&mpi_vectors);
-    MPI_Type_free(&mpi_int_array);
+    MPI_Type_free(&mpi_block);
+    //MPI_Type_free(&mpi_vectors);
+    //MPI_Type_free(&mpi_int_array);
     free(weights);
-    free(recvbuf);
+    //free(recvbuf);
+    free(recvcounts);
+    free(displs);
 
     if((*config).rank == ROOT) printf("Processing input file.\n");
     return 0;
 }
 
 
-int process_matrix_array(SP_CONFIG *config, PATHS *paths, int *buf) {
+/*int process_matrix_array(SP_CONFIG *config, PATHS *paths, int *buf) {
     int size = (*paths).nodes;
     int work = size/(*config).nproc; // number of rows collected by each node
     (*paths).weight = malloc(size * sizeof(int *));
@@ -109,15 +152,15 @@ int process_matrix_array(SP_CONFIG *config, PATHS *paths, int *buf) {
         node = i/work; // the node that read the file
         element = i%work*(*config).nproc; // the order of row read by file.
         j = node + element;
-        (*paths).weight[j] = calloc(size, sizeof(int));
-        if((*paths).weight[j] == NULL) {
+        (*paths).weight = calloc(size, sizeof(int));
+        if((*paths).weight == NULL) {
             perror(NULL);
             return -1;
         }
         memcpy(&(*paths).weight[j][0], &buf[i * size], size * sizeof(int));
     }
     return 0;
-}
+}*/
 
 
 /**

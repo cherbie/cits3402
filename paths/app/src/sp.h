@@ -28,8 +28,8 @@ typedef struct {
 // -- FOR REFERENCE --
 typedef struct {
     int nodes;
-    int **weight; // weight of path.
-    int **sp;
+    int *weight; // weight of path.
+    int *sp;
 } PATHS;
 
 
@@ -43,9 +43,9 @@ extern int parse_args(SP_CONFIG*, int*, char***);
 
 
 // -- HELPER FUNCTIONS --
-extern void print_matrix(int **, int *);
+extern void print_matrix(int*, int *);
 extern int create_matrix(int **, int *);
-extern int prep_weights(int **, int *);
+extern int prep_weights(int*, int *);
 extern int dup_matrix(int **, int **, int *);
 extern int cpy_matrix(int **, int **, int *);
 extern void print_array(int **, int *);
