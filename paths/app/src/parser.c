@@ -55,11 +55,14 @@ int set_logger(SP_CONFIG *config) {
     sprintf(date, "%02.0f%02.0f%i", (float) exec_time->tm_mday, (float) exec_time->tm_mon + 1.0, exec_time->tm_year + 1900);
     sprintf(time, "%02.0f%02.0f", (float) exec_time->tm_hour, (float) exec_time->tm_min);
     sprintf(buffer, "./results/%d_%s_%s.out", STUDENT_NUMBER, date, time);
-    (*config).filename_out = strdup(buffer);
+
+    (*config).filename_out = calloc(30, sizeof(char));
     if((*config).filename_out == NULL) {
-        perror("location: /parser.c\n");
+        perror(NULL);
         return -1;
     }
+    (*config).filename_out = memcpy(&(*config).filename_out[0], &buffer[0], sizeof(char) * (strlen(buffer) + 1));
+    
     (*config).fp_out = fopen((*config).filename_out, "wb"); //writing in binary mode
     if((*config).fp_out == NULL) {
         perror("location: /parser.c/set_logger()\n");
@@ -94,11 +97,14 @@ int set_time_logger(SP_CONFIG *config, PATHS *paths) {
     sprintf(date, "%02.0f%02.0f%i", (float) exec_time->tm_mday, (float) exec_time->tm_mon + 1.0, exec_time->tm_year + 1900);
     sprintf(info, "%d_%d", (*config).nproc, (*paths).nodes);
     sprintf(buffer, "./time/%s_%s_%s.out", "time", date, info);
-    (*config).time_out = strdup(buffer);
+
+    (*config).time_out = calloc(30, sizeof(char));
     if((*config).time_out == NULL) {
-        perror("location: /parser.c\n");
+        perror(NULL);
         return -1;
     }
+    (*config).time_out = memcpy(&(*config).time_out[0], &buffer[0], sizeof(char) * (strlen(buffer) + 1));
+
     (*config).fp_time_out = fopen((*config).time_out, "w"); //writing in binary mode
     if((*config).fp_time_out == NULL) {
         perror("location: /parser.c/set_logger()\n");
