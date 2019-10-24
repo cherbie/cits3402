@@ -8,9 +8,15 @@ int parse_args(SP_CONFIG *config, int *argc, char ***argv)  {
         switch (c) {
             case 'f': { // file specified
                 if(optind > *argc) return -1;
-                (*config).filename_in = strdup(optarg);
+                int len = strlen(optarg);
+                (*config).filename_in = malloc((len+1) * sizeof(char));
+                if((*config).filename_in == NULL) {
+                    perror(NULL);
+                    return -1;
+                }
+                (*config).filename_in = memcpy(&(*config).filename_in[0], optarg, sizeof(char) * (len+1));
                 if((*config).filename_in == NULL) return -1;
-                printf("%s | %i\n", (*config).filename_in, optind);
+                printf("%s | %i | %i\n", (*config).filename_in, optind, len);
                 return 0;
             }
             case ':': {
