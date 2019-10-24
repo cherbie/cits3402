@@ -81,6 +81,14 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
     }
 
     free((*paths).weight); // EXPIRED
+
+    // -- LOG RESULT TO FILE --
+    if((*config).rank == ROOT)
+        if(log_result(config, paths)) {
+            fprintf(stderr, "An error has occured logging the all pairs shortest paths.\n");
+            return -1;
+        }
+
     return 0;
 }
 

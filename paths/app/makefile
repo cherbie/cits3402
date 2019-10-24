@@ -29,4 +29,4 @@ shortestpath.o: ./src/shortestpath.c $(HEADERS)
 	$(CC) $(WARNINGS) -c ./src/shortestpath.c
 
 clean:
-	rm -f *.o
+	rm -f *.o *.out

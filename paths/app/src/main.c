@@ -28,7 +28,10 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Unable to calculate the all pairs shortest paths\n");
         return EXIT_FAILURE;
     }
-    if((*config).rank == ROOT) print_matrix((*paths).sp, &(*paths).nodes);
+    if((*config).rank == ROOT) {
+        print_matrix((*paths).sp, &(*paths).nodes);
+    }
+
 
     printf(" -- Completed calculation. -- \n");
 
@@ -43,15 +46,4 @@ int main(int argc, char *argv[]) {
     // -- FINALIZE DISTRIBUTED NODES --
     MPI_Finalize();
     return EXIT_SUCCESS;
-}
-
-/**
- * Set config struct for distributed nodes.
- */
-int initialise(SP_CONFIG *config, PATHS *paths) {
-    MPI_Comm_size(MPI_COMM_WORLD, &(*config).nproc);
-    MPI_Comm_rank(MPI_COMM_WORLD, &(*config).rank);
-    printf("Information:\nSize = %i\nRank = %i\n", (*config).nproc, (*config).rank);
-
-    return 0;
 }
