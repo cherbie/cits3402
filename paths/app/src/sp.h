@@ -6,6 +6,9 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <time.h>
+#include <getopt.h>
+
+#define _POSIX_C_SOURCE 2
 
 #define ROOT 0
 #define STUCT_PATH_NUM_ELEM 3

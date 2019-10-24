@@ -1,5 +1,5 @@
 # clang wrapper
-CC=mpicc
+CC=mpicc -std=c99
 WARNINGS=-Wall -Werror -pedantic
 OBJECT=main.o filereading.o parser.o dealloc.o errors.o helpers.o shortestpath.o
 HEADERS=./src/sp.h
