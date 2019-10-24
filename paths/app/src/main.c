@@ -1,7 +1,8 @@
 #include "sp.h"
 
 int main(int argc, char *argv[]) {
-    MPI_Init(&argc, &argv); // critical
+    MPI_Init(&argc, &argv); // CRITICAL
+
     SP_CONFIG *config = malloc(1 * sizeof(SP_CONFIG));
     PATHS *paths = malloc(1 * sizeof(PATHS));
     if(paths == NULL || config == NULL) {
@@ -9,23 +10,20 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     if(initialise(config, paths)) return EXIT_FAILURE;
+
     // -- PARSE COMMAND LINE ARGUMENTS --
     if(parse_args(&(config[0]), &argc, &argv)) {
         fprintf(stderr, "Unable to parse command line arguments.\n");
         return EXIT_FAILURE;
     }
+
     // -- READ INPUT FILE --
     if(read_file_mpi(&(config[0]), &(paths[0]))) {
         fprintf(stderr, "Unable to read input file.\n");
         return EXIT_FAILURE;
     }
+
     // -- ALGORITHM --
-    /*
-    if(block_apsp(&config[0], &paths[0])) {
-        fprintf(stderr, "Unable to calculate the all pairs shortest paths\n");
-        return -1;
-    }*/
-    printf("reached\n");
     if(compute_shortest_paths(&config[0], &paths[0])) {
         fprintf(stderr, "Unable to calculate the all pairs shortest paths\n");
         return EXIT_FAILURE;
@@ -35,10 +33,14 @@ int main(int argc, char *argv[]) {
     printf(" -- Completed calculation. -- \n");
 
     // -- DEALLOCATE MEMORY --
-    //if((*config).rank == ROOT) free_mtx((void **)(*paths).sp, &(*paths).nodes);
+    if((*config).rank == ROOT) {
+        free((*paths).sp);
+    }
     dealloc_config(config);
-    dealloc_paths(paths);
+    free(paths);
+    free(config);
 
+    // -- FINALIZE DISTRIBUTED NODES --
     MPI_Finalize();
     return EXIT_SUCCESS;
 }

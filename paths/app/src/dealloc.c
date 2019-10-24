@@ -6,13 +6,6 @@
 void dealloc_config(SP_CONFIG *config) {
     MPI_File_close(&(*config).file_in);
     free((*config).filename_in);
-    free(config);
-}
-
-void dealloc_paths(PATHS *paths) {
-    free((*paths).weight);
-    //free((*paths).sp);
-    free(paths);
 }
 
 void free_mtx(void **mtx, int *size) {
