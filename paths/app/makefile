@@ -30,3 +30,6 @@ shortestpath.o: ./src/shortestpath.c $(HEADERS)
 
 clean:
 	rm -f *.o *.out
+
+clean-all:
+	rm -f *.o *.out ./results/* ./time/*

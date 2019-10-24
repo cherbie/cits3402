@@ -32,7 +32,8 @@ int main(int argc, char *argv[]) {
         print_matrix((*paths).sp, &(*paths).nodes);
     }
 
-
+    MPI_Barrier(MPI_COMM_WORLD);
+    
     printf(" -- Completed calculation. -- \n");
 
     // -- DEALLOCATE MEMORY --

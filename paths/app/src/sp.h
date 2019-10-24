@@ -24,6 +24,10 @@ typedef struct {
     //FILE *fp_in;
     char *filename_out;
     FILE *fp_out;
+    char *time_out; // time execution analysis
+    FILE *fp_time_out; // time execution analysis.
+    double starttime;
+    double endtime;
 } SP_CONFIG;
 
 // -- FOR REFERENCE --
@@ -42,7 +46,9 @@ extern int initialise(SP_CONFIG*, PATHS*);
 // -- PARSING FUNCTIONS --
 extern int parse_args(SP_CONFIG*, int*, char***);
 extern int set_logger(SP_CONFIG*);
+extern int set_time_logger(SP_CONFIG*, PATHS*);
 extern int log_result(SP_CONFIG*, PATHS*);
+extern int log_time_analysis(SP_CONFIG*, PATHS*);
 
 
 // -- HELPER FUNCTIONS --
