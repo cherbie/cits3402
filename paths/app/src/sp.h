@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <limits.h>
+#include <time.h>
 
 #define ROOT 0
 #define STUCT_PATH_NUM_ELEM 3
@@ -21,8 +22,11 @@ typedef struct {
     MPI_File file_in;
     FILE *fp_in;
     char *filename_out;
-    MPI_File file_out;
     FILE *fp_out;
+    char *time_out;
+    FILE *fp_time_out;
+    double starttime;
+    double endtime;
 } SP_CONFIG;
 
 // -- FOR REFERENCE --
@@ -40,6 +44,7 @@ extern int initialise(SP_CONFIG*, PATHS*);
 
 // -- PARSING FUNCTIONS --
 extern int parse_args(SP_CONFIG*, int*, char***);
+extern int log_time(SP_CONFIG*, PATHS*);
 
 
 // -- HELPER FUNCTIONS --

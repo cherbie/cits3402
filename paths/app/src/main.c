@@ -25,9 +25,8 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "Unable to calculate the all pairs shortest paths\n");
             return -1;
         }
-        printf("------\n");
-        print_matrix((*paths).sp, &(*paths).nodes);
-        printf("Completed calculation.\n");
+        //print_matrix((*paths).sp, &(*paths).nodes);
+        log_time(&config[0], &paths[0]);
     }
     // -- DEALLOCATE MEMORY --
     if((*config).rank == ROOT) free_mtx((void **)(*paths).sp, &(*paths).nodes);
@@ -44,7 +43,7 @@ int main(int argc, char *argv[]) {
 int initialise(SP_CONFIG *config, PATHS *paths) {
     MPI_Comm_size(MPI_COMM_WORLD, &(*config).nproc);
     MPI_Comm_rank(MPI_COMM_WORLD, &(*config).rank);
-    printf("Information:\nSize = %i\nRank = %i\n", (*config).nproc, (*config).rank);
+    //printf("Information:\nSize = %i\nRank = %i\n", (*config).nproc, (*config).rank);
 
     return 0;
 }

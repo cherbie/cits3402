@@ -12,10 +12,8 @@ void dealloc_config(SP_CONFIG *config) {
 void dealloc_paths(PATHS *paths) {
     for(int i = 0; i < (*paths).nodes; i++) {
         free((*paths).weight[i]);
-        //free((*paths).sp[i]);
     }
     free((*paths).weight);
-    //free((*paths).sp);
     free(paths);
 }
 

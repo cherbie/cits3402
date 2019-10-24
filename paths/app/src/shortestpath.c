@@ -13,8 +13,12 @@ int find_apsp(SP_CONFIG *config, PATHS *paths) {
     if(prep_weights(&prev[0], &rows)) return -1;
     next  = create_matrix(&rows);
     if(next == NULL) return -1; // error allocating memory
+
+    (*config).starttime = MPI_Wtime();
+
+    // -- ALGORITHM --
     for(int k = 0; k < rows; k++) {
-        printf("new k value: %i\n", k);
+        //printf("new k value: %i\n", k);
         for(int i = 0; i < rows; i++) {
             for(int j = 0; j < rows; j++) {
                 if(i == j) {
@@ -28,13 +32,16 @@ int find_apsp(SP_CONFIG *config, PATHS *paths) {
             }
         }
         if(k == (rows-1)) break;
-        print_matrix(prev, &rows);
+        //print_matrix(prev, &rows);
         if(cpy_matrix(prev, next, &rows)) {
             fprintf(stderr, "Problem determining shortest path.\n");
             return -1;
         }
     }
-    free_mtx((void **)prev, &rows);
     (*paths).sp = next; // shortest path
+    (*config).endtime = MPI_Wtime();
+
+    // -- DEALLOCATE --
+    free_mtx((void **)prev, &rows);
     return 0;
 }

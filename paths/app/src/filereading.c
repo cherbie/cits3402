@@ -22,7 +22,7 @@ int read_file_mpi(SP_CONFIG *config, PATHS *paths) {
         error_handler(&err);
         return -1;
     }
-    printf(" number of nodes: %i\n", nnodes);
+    //printf(" number of nodes: %i\n", nnodes);
     (*paths).nodes = nnodes;
 
     // -- GET THE ADJCENCY MATRIX --
@@ -43,23 +43,6 @@ int read_file_mpi(SP_CONFIG *config, PATHS *paths) {
     MPI_File_set_view((*config).file_in, 4 + nnodes*sizeof(int)*(*config).rank, mpi_row, mpi_vectors, "native", MPI_INFO_NULL);
     MPI_File_read_all((*config).file_in, weights, nints, MPI_INT, &status);
 
-    /*if((*config).rank == 0) {
-        int j = 0;
-        for(int i = 0; i < nints; i++) {
-            j = i % nnodes;
-            printf("%i ", weights[i]);
-            if(j == (nnodes -1)) printf("\t|\t%i\n", i/nnodes);
-        }
-        printf("-------\n");
-    }*/
-
-    // -- GATHER DATA --
-    /* Need master slave relationship to gather all data in the master matrix
-       - Blocking function may be required.
-       - after that broadcast the data to all nodes in MPI_COMM_WORLD.
-       - Can then start computation.
-     */
-
     MPI_Datatype mpi_int_array; // contiguous MPI_INT
     MPI_Type_contiguous(nints, MPI_INT, &mpi_int_array);
     MPI_Type_commit(&mpi_int_array);
@@ -78,19 +61,12 @@ int read_file_mpi(SP_CONFIG *config, PATHS *paths) {
         return -1;
     }
 
-    // -- debugging --
-    /*if((*config).rank == 2) {
-        printf("---------- process 2 reached this\n");
-        print_matrix((*paths).weight, &nnodes);
-    }*/
-
     MPI_Type_free(&mpi_row);
     MPI_Type_free(&mpi_vectors);
     MPI_Type_free(&mpi_int_array);
     free(weights);
     free(recvbuf);
 
-    if((*config).rank == ROOT) printf("Processing input file.\n");
     return 0;
 }
 
@@ -104,7 +80,7 @@ int process_matrix_array(SP_CONFIG *config, PATHS *paths, int *buf) {
     	return -1;
     }
     int j = 0, node = 0, element = 0;
-    printf("num processes = %i | size = %i\n", (*config).nproc, size);
+    //printf("num processes = %i | size = %i\n", (*config).nproc, size);
     for(int i = 0; i < size; i++) {
         node = i/work; // the node that read the file
         element = i%work*(*config).nproc; // the order of row read by file.
@@ -116,25 +92,5 @@ int process_matrix_array(SP_CONFIG *config, PATHS *paths, int *buf) {
         }
         memcpy(&(*paths).weight[j][0], &buf[i * size], size * sizeof(int));
     }
-    return 0;
-}
-
-
-/**
- * Create the output filename.
- * @return 0 to indicate success and -1 to indicate failure.
- */
-int create_output(SP_CONFIG *config, char *name) {
-    /*(*config).filename_out = strdup(name);
-    if((*config).filename_out == NULL) {
-        perror(NULL);
-        return -1;
-    }
-    (*config).fd_out = fopen((*config).filename_out, "wb");
-    if((*config).fd_out == NULL) {
-        perror(NULL);
-        return -1;
-    }
-    printf("Creating output file.\n");*/
     return 0;
 }
