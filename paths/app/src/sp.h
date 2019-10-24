@@ -64,6 +64,7 @@ extern int get_block_owner(int, int, int);
 extern int get_worker(int, int, int);
 extern int min_weight(int, int);
 extern int collect_final_sp(SP_CONFIG*, PATHS*);
+extern int get_merge_info(SP_CONFIG*, PATHS*, int*, int*, int**, int**);
 
 // -- ERRORS --
 extern void error_handler(int*);

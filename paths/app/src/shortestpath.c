@@ -105,6 +105,7 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
     int worker; // focus the work performed by nodes
     int *tmp;
     int **next;
+    int rowoffset; // ROW STARTING INDEX
 
     printf("10\n");
 
@@ -145,6 +146,7 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
             worker = get_worker(i, (*config).nproc, (*paths).nodes); // workers metadata
             printf("row: %i vs worker: %i\n", i, worker);
             if((*config).rank != worker) continue;
+            rowoffset = i * (*paths).nodes;
             for (j = 0; j < (*paths).nodes; j++) {
                 if(i == j) next[i][j] = 0;
                 else next[i][j] = min_weight((*paths).weight[i][j], (*paths).weight[i][k] + tmp[j]); // primitive distributed task
@@ -181,6 +183,34 @@ int get_block_owner(int k, int p, int n) {
     else return owner;
 }
 
+/**
+ * @return the starting index of block owners units / weights.
+ */
+int get_merge_info(CONFIG* config, PATHS* paths, int *offset, int *nelem, int **recvcounts, int **displ) {
+    int remainder = (*paths).nodes % (*config).nproc; // remainder of even block distribution
+    int rowsperblk = ((*paths).nodes - remainder) / (*config).nproc; // number of rows handled by each node
+    //int unitsperblk = rowsperblk * (*paths).nodes;
+
+    if((*config).rank == ROOT) {
+        *offset = (rowsperblk * (*paths).nodes) * ((*config).nproc - 1);
+        *nelem = (rowsperblk + remainder) * (*paths).nodes;
+    }
+    else {
+        *offset = (rowsperblk * (*paths).nodes) * ((*config).rank - 1);
+        *nelem = rowsperblk * (*paths).nodes;
+    }
+    for(int i = 0; i < (*config).nproc; i++) { // RANK OF THE PROCESS
+        if(i == ROOT) {
+            recvcounts[i] = (rowsperblk + remainder) * (*paths).nodes;
+            displ[i] = (rowsperblk * (*paths).nodes) * ((*config).nproc - 1);
+            continue;
+        }
+        recvcounts[i] = rowsperblk * (*paths).nodes;
+        displ[i] = (rowsperblk * (*paths).nodes) * (i - 1);
+    }
+    return 0;
+}
+
 /*
  * @return the rank of the block / row owner
  */
@@ -210,13 +240,30 @@ int min_weight(int original, int new) {
  * Send an array of integers.
  */
 int collect_final_sp(SP_CONFIG *config, PATHS *paths) {
-    int offset = 0;
-    int nelememts = 10;
-    int recvcounts[(*config).nproc] = {23, 123}; // integer array containing number of elements to be received.
-    int displs[(*config).nproc] = {123, 0, 0};
+
+    int remainder = (*paths).nodes % (*config).nproc; // remainder of even block distribution
+    int rowsperblk = ((*paths).nodes - remainder) / (*config).nproc; // number of rows handled by each node
+
+    if((*config).rank == ROOT) {
+        (*paths).sp = malloc((*paths).nodes * sizeof(int *));
+        if((*paths).sp == NULL) {
+            perror(NULL);
+            return -1;
+        }
+        if(create_matrix((*config).sp, &(paths).nodes)) {
+            perror(NULL);
+            return -1;
+        }
+    }
+
+    int offset, nelements, recvcounts[(*config).nproc], displs[(*config).nproc];
+    if(get_merge_info(config, paths, &offset, &nelements, &recvcounts, &displs)) {
+        fprintf(stderr, "Error merging distributed data\n");
+        return -1;
+    }
 
     // GATHER ALL DATA
-    MPI_Gatherv(&(*config).mtx[offset][0], nelements, MPI_INT, &(*paths).sp[0][0], recvcounts, displs, MPI_INT, ROOT, MPI_COMM_WORLD);
+    MPI_Gatherv(&(*config).mtx[offset], nelements, MPI_INT, &(*paths).sp[0][0], recvcounts, displs, MPI_INT, ROOT, MPI_COMM_WORLD);
 
     // ROOT  SHOULD CONTAIN ALL SHORTEST PATHS AT THIS STAGE.
 
