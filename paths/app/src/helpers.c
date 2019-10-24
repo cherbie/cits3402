@@ -7,7 +7,7 @@
 int initialise(SP_CONFIG *config, PATHS *paths) {
     MPI_Comm_size(MPI_COMM_WORLD, &(*config).nproc);
     MPI_Comm_rank(MPI_COMM_WORLD, &(*config).rank);
-    printf("Information:\nSize = %i\nRank = %i\n", (*config).nproc, (*config).rank);
+    //printf("Information:\nSize = %i\nRank = %i\n", (*config).nproc, (*config).rank);
     if((*config).rank == ROOT) {
         if(set_logger(config)) return -1; // OPEN OUTPUT FILE
     }

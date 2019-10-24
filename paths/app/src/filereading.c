@@ -21,7 +21,7 @@ int read_file_mpi(SP_CONFIG *config, PATHS *paths) {
         error_handler(&err);
         return -1;
     }
-    printf(" number of nodes: %i\n", (*paths).nodes);
+    //printf(" number of nodes: %i\n", (*paths).nodes);
 
     // -- GET THE ADJCENCY MATRIX --
     MPI_Datatype mpi_block;

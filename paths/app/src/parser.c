@@ -16,7 +16,7 @@ int parse_args(SP_CONFIG *config, int *argc, char ***argv)  {
                 }
                 (*config).filename_in = memcpy(&(*config).filename_in[0], optarg, sizeof(char) * (len+1));
                 if((*config).filename_in == NULL) return -1;
-                printf("%s | %i | %i\n", (*config).filename_in, optind, len);
+                //printf("%s | %i | %i\n", (*config).filename_in, optind, len);
                 return 0;
             }
             case ':': {
@@ -66,7 +66,6 @@ int set_logger(SP_CONFIG *config) {
     (*config).fp_out = fopen((*config).filename_out, "wb"); //writing in binary mode
     if((*config).fp_out == NULL) {
         perror("location: /parser.c/set_logger()\n");
-	fprintf(stderr, "%s\n", buffer);
         return -1;
     }
     free(buffer);
