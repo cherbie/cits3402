@@ -32,15 +32,10 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
         return -1;
     }
 
-    /*if((*config).rank == ROOT) {
-        printf("starting ...\n");
-        print_matrix((*paths).weight, &(*paths).nodes);
-    }*/
-
     // -- INITIALISE EXECUTION TIME LOGGING --
     if((*config).rank == ROOT)
         if(set_time_logger(config, paths)) return -1;
-    
+
     // -- START TIMER --
     (*config).starttime = MPI_Wtime();
 
@@ -48,21 +43,17 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
     for (k = 0; k < (*paths).nodes; k++) {
         owner = get_block_owner(k,(*config).nproc, (*paths).nodes); // receiving things? ROW-WISE DISTRIBUTION
 
-        if (owner == (*config).rank) { // if the current process is the owner.
+        if (owner == (*config).rank) { // if the current process is the owner of the row
             offset = k * (*paths).nodes; // start index of row
             for (j = 0; j < (*paths).nodes; j++)
-                tmp[j] = (*paths).weight[offset + j]; // contains a column
+                tmp[j] = (*paths).weight[offset + j];
         }
 
-        MPI_Bcast(tmp, (*paths).nodes, MPI_INT, owner, MPI_COMM_WORLD); // broadcast to all worker nodes what owner contains
+        MPI_Bcast(tmp, (*paths).nodes, MPI_INT, owner, MPI_COMM_WORLD); // broadcast to all worker nodes what the "owner" contains
 
-        //printf("k value = %i ... ", k);
         for (i = 0; i < (*paths).nodes; i++) {
-            worker = get_worker(i, (*config).nproc, (*paths).nodes); // workers metadata
-            //printf("row: %i vs worker: %i\n", i, worker);
-
+            worker = get_worker(i, (*config).nproc, (*paths).nodes); // retrieve the owner / worker of the row
             if((*config).rank != worker) continue; // NOT YOUR WORK TO BE DONE !
-
             offset = i * (*paths).nodes; // start index of row
 
             for (j = 0; j < (*paths).nodes; j++) {
@@ -71,11 +62,8 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
             }
         }
         memcpy((void *) (*paths).weight, (void *) next, ((*paths).nodes * (*paths).nodes) * sizeof(int));
-        /*if((*config).rank == ROOT) {
-            printf(" -- matrix at k = %i -- \n", k);
-            print_matrix((*paths).weight, &(*paths).nodes);
-        }*/
-        /* ALL WORKERS BLOCKS OF RESPONSIBILITY ARE UPDATED AT THIS POINT */
+
+        /* ALL WORKERS "BLOCKS OF RESPONSIBILITY" ARE UPDATED AT THIS POINT */
     }
 
     // -- COLLECT DATA FROM DISTRIBUTED NODES --
@@ -109,9 +97,9 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
 /**
  * Calculates the owner of a row.
  * The owner is considered to be the node contain the most up-to-date shortest path of that row.
+ * @return the communicator rank of the row owner.
  */
 int get_block_owner(int k, int p, int n) {
-    //printf(" ... calculate block owner\n");
     if(n <= p) return ROOT;
     int remainder = n % p; // remainder of even block distribution
     int rowsperblk = (n - remainder) / p; // number of rows handled by each node
@@ -123,10 +111,10 @@ int get_block_owner(int k, int p, int n) {
 }
 
 /**
- * @return the starting index of block owners units / weights.
+ * Critical "SET VIEW" like function to be executed before gathering distributed node data.
+ * @return the starting index of block owners units / edge weights
  */
 int get_merge_info(SP_CONFIG* config, PATHS* paths, int *offset, int *nelem, int **recvcounts, int **displ) {
-    //printf("... merge info\n");
     int remainder = (*paths).nodes % (*config).nproc; // remainder of even block distribution
     int rowsperblk = ((*paths).nodes - remainder) / (*config).nproc; // number of rows handled by each node
 
@@ -152,7 +140,6 @@ int get_merge_info(SP_CONFIG* config, PATHS* paths, int *offset, int *nelem, int
 
 /*
  * @return the rank of the block / row owner
- * IMPROVEMENT USE VALUES IN CONFIG AND PATHS.
  */
 int get_worker(int i, int p, int n) {
     //printf("calculate block owner\n");
@@ -187,7 +174,6 @@ int collect_final_sp(SP_CONFIG *config, PATHS *paths) {
             return -1;
         }
     }
-
     int offset, nelements;
     int *recvcounts = malloc((*config).nproc * sizeof(int *));
     int *displs = malloc((*config).nproc * sizeof(int *));
@@ -204,7 +190,6 @@ int collect_final_sp(SP_CONFIG *config, PATHS *paths) {
     MPI_Gatherv(&(*paths).weight[offset], nelements, MPI_INT, &(*paths).sp[0], recvcounts, displs, MPI_INT, ROOT, MPI_COMM_WORLD);
 
     // ROOT SHOULD CONTAIN ALL SHORTEST PATHS AT THIS STAGE.
-
-    //printf("... COMPLETED MERGE\n");
+    
     return 0;
 }

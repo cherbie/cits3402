@@ -16,7 +16,6 @@ int parse_args(SP_CONFIG *config, int *argc, char ***argv)  {
                 }
                 (*config).filename_in = memcpy(&(*config).filename_in[0], optarg, sizeof(char) * (len+1));
                 if((*config).filename_in == NULL) return -1;
-                //printf("%s | %i | %i\n", (*config).filename_in, optind, len);
                 return 0;
             }
             case ':': {
@@ -43,8 +42,10 @@ int parse_args(SP_CONFIG *config, int *argc, char ***argv)  {
 int set_logger(SP_CONFIG *config) {
     time_t rawtime;
     struct tm *exec_time;
+
     time(&rawtime);
     exec_time = localtime(&rawtime);
+
     char *buffer = calloc(100, sizeof(char));
     char *date = malloc(20 * sizeof(char));
     char *time = malloc(20 * sizeof(char));
@@ -52,9 +53,10 @@ int set_logger(SP_CONFIG *config) {
         perror(NULL);
         return -1;
     }
+
     sprintf(date, "%02.0f%02.0f%i", (float) exec_time->tm_mday, (float) exec_time->tm_mon + 1.0, exec_time->tm_year + 1900);
     sprintf(time, "%02.0f%02.0f", (float) exec_time->tm_hour, (float) exec_time->tm_min);
-    sprintf(buffer, "./results/%d_%s_%s.out", STUDENT_NUMBER, date, time);
+    sprintf(buffer, "%d_%s_%s.out", STUDENT_NUMBER, date, time);
 
     (*config).filename_out = calloc(100, sizeof(char));
     if((*config).filename_out == NULL) {
@@ -68,9 +70,12 @@ int set_logger(SP_CONFIG *config) {
         perror("location: /parser.c/set_logger()\n");
         return -1;
     }
+
+    //-- DEALLOCATE TEMPORARY VARIABLES --
     free(buffer);
     free(date);
     free(time);
+
     return 0;
 }
 
@@ -96,7 +101,7 @@ int set_time_logger(SP_CONFIG *config, PATHS *paths) {
 
     sprintf(date, "%02.0f%02.0f%i", (float) exec_time->tm_mday, (float) exec_time->tm_mon + 1.0, exec_time->tm_year + 1900);
     sprintf(info, "%d_%d", (*config).nproc, (*paths).nodes);
-    sprintf(buffer, "./time/%s_%s_%s.out", "time", date, info);
+    sprintf(buffer, "%s_%s_%s.out", "time", date, info);
 
     (*config).time_out = calloc(50, sizeof(char));
     if((*config).time_out == NULL) {
@@ -110,19 +115,22 @@ int set_time_logger(SP_CONFIG *config, PATHS *paths) {
         perror("location: /parser.c/set_logger()\n");
         return -1;
     }
+
+    // -- DEALLOCATE TEMPORARY VARIABLES --
     free(buffer);
     free(date);
     free(info);
+
     return 0;
 }
 
 /**
- * Log the final all pairs
+ * Log the final all-pairs shortest path matrix to file.
  * @return 0 to indicate success and -1 to indicate failure.
  */
 int log_result(SP_CONFIG *config, PATHS *paths) {
     int nmemb, rout;
-    // -- WRITE SIZE OF ROW --
+    // -- WRITE SIZE OF ROW TO OUTPUT FILE --
     nmemb = 1;
     rout = fwrite(&(*paths).nodes, sizeof(int), nmemb, (*config).fp_out);
     if(rout != nmemb) {
@@ -130,7 +138,7 @@ int log_result(SP_CONFIG *config, PATHS *paths) {
         return -1;
     }
 
-    // -- WRITE APSP --
+    // -- WRITE APSP TO OUTPUT FILE --
     nmemb = (*paths).nodes * (*paths).nodes;
     rout = fwrite(&(*paths).sp[0], sizeof(int), nmemb, (*config).fp_out);
     if(rout != nmemb) {
@@ -141,6 +149,9 @@ int log_result(SP_CONFIG *config, PATHS *paths) {
     return 0;
 }
 
+/**
+ * Log the execution time of the distributed algorithm.
+ */
 int log_time_analysis(SP_CONFIG *config, PATHS *paths) {
     double delta = (*config).endtime - (*config).starttime; //seconds elapsed
     fprintf((*config).fp_time_out, "Processes:\t%i\n", (*config).nproc);

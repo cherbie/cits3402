@@ -28,17 +28,13 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Unable to calculate the all pairs shortest paths\n");
         return EXIT_FAILURE;
     }
-    /*if((*config).rank == ROOT) {
-        print_matrix((*paths).sp, &(*paths).nodes);
-    }*/
 
     MPI_Barrier(MPI_COMM_WORLD);
-
-    //printf(" -- Completed calculation. -- \n");
 
     // -- DEALLOCATE MEMORY --
     if((*config).rank == ROOT) {
         free((*paths).sp);
+        fprintf(stdout, "... completed execution. \n");
     }
     dealloc_config(config);
     free(paths);

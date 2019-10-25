@@ -65,8 +65,6 @@ extern void print_array(int **, int *);
 
 // -- FILE READING --
 extern int read_file_mpi(SP_CONFIG*, PATHS*);
-extern int process_matrix_array(SP_CONFIG*, PATHS*, int*);
-extern int create_output(SP_CONFIG*, char*);
 
 // -- CALCULATIONS --
 extern int find_apsp(SP_CONFIG *, PATHS *);
