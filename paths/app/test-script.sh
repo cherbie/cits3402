@@ -1,5 +1,7 @@
 #!/bin/bash
 clear
+mpirun --hostfile hostfile -np 1 ./sp -f ./examples/2048.in
+echo "... completed p = 1"
 mpirun --hostfile hostfile -np 2 ./sp -f ./examples/2048.in
 echo "... completed p = 2"
 mpirun --hostfile hostfile -np 4 ./sp -f ./examples/2048.in
@@ -14,4 +16,6 @@ mpirun --hostfile hostfile -np 12 ./sp -f ./examples/2048.in
 echo "... completed p = 12"
 mpirun --hostfile hostfile -np 14 ./sp -f ./examples/2048.in
 echo "... completed p = 14"
+mpirun --hostfile hostfile -np 16 ./sp -f ./examples/2048.in
+echo "... completed p = 16"
 echo "... script complete"
