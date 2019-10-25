@@ -11,5 +11,7 @@ void dealloc_config(SP_CONFIG *config) {
     if((*config).rank == ROOT) {
         fclose((*config).fp_out);
         free((*config).filename_out);
+        fclose((*config).fp_time_out);
+        free((*config).time_out);
     }
 }

@@ -37,6 +37,13 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
         print_matrix((*paths).weight, &(*paths).nodes);
     }*/
 
+    // -- INITIALISE EXECUTION TIME LOGGING --
+    if((*config).rank == ROOT)
+        if(set_time_logger(config, paths)) return -1;
+    
+    // -- START TIMER --
+    (*config).starttime = MPI_Wtime();
+
     // -- DISTRIBUTED ALGORITHM --
     for (k = 0; k < (*paths).nodes; k++) {
         owner = get_block_owner(k,(*config).nproc, (*paths).nodes); // receiving things? ROW-WISE DISTRIBUTION
@@ -70,9 +77,6 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
         }*/
         /* ALL WORKERS BLOCKS OF RESPONSIBILITY ARE UPDATED AT THIS POINT */
     }
-    // -- DEALLOCATE TEMPORARY VARIABLES --
-    free(tmp);
-    free(next);
 
     // -- COLLECT DATA FROM DISTRIBUTED NODES --
     if(collect_final_sp(config, paths)) {
@@ -80,14 +84,24 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
         return -1;
     }
 
-    free((*paths).weight); // EXPIRED
+    // -- END TIMER --
+    (*config).endtime = MPI_Wtime();
+
+    // -- DEALLOCATE MEMORY --
+    free(tmp);
+    free(next);
+    free((*paths).weight);
 
     // -- LOG RESULT TO FILE --
-    if((*config).rank == ROOT)
+    if((*config).rank == ROOT) {
         if(log_result(config, paths)) {
             fprintf(stderr, "An error has occured logging the all pairs shortest paths.\n");
             return -1;
         }
+        if(log_time_analysis(config, paths)) {
+            fprintf(stderr, "Error logging execution time analysis to file.\n");
+        }
+    }
 
     return 0;
 }
@@ -98,7 +112,7 @@ int compute_shortest_paths(SP_CONFIG *config, PATHS *paths) {
  */
 int get_block_owner(int k, int p, int n) {
     //printf(" ... calculate block owner\n");
-    //if(n == p) return ROOT;
+    if(n <= p) return ROOT;
     int remainder = n % p; // remainder of even block distribution
     int rowsperblk = (n - remainder) / p; // number of rows handled by each node
     int owner = k/rowsperblk;
@@ -142,6 +156,7 @@ int get_merge_info(SP_CONFIG* config, PATHS* paths, int *offset, int *nelem, int
  */
 int get_worker(int i, int p, int n) {
     //printf("calculate block owner\n");
+    if(n <= p) return ROOT;
     int remainder = n % p; // remainder of even block distribution
     int rowsperblk = (n - remainder) / p; // number of rows handled by each node
     int worker = (i/rowsperblk);
