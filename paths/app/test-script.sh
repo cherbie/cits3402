@@ -1,7 +1,5 @@
 #!/bin/bash
 clear
-mpirun --hostfile hostfile -np 4 ./sp -f ./examples/4.in
-echo "... completed 4"
 mpirun --hostfile hostfile -np 4 ./sp -f ./examples/16.in
 echo "... completed 16"
 mpirun --hostfile hostfile -np 4 ./sp -f ./examples/32.in
