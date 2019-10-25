@@ -21,7 +21,7 @@ int read_file_mpi(SP_CONFIG *config, PATHS *paths) {
         error_handler(&err);
         return -1;
     }
-    printf(" number of nodes: %i\n", (*paths).nodes);
+    //printf(" number of nodes: %i\n", (*paths).nodes);
 
     // -- GET THE ADJCENCY MATRIX --
     MPI_Datatype mpi_block;
@@ -88,50 +88,5 @@ int read_file_mpi(SP_CONFIG *config, PATHS *paths) {
     free(displs);
 
     //if((*config).rank == ROOT) printf("Processing input file.\n");
-    return 0;
-}
-
-
-/*int process_matrix_array(SP_CONFIG *config, PATHS *paths, int *buf) {
-    int size = (*paths).nodes;
-    int work = size/(*config).nproc; // number of rows collected by each node
-    (*paths).weight = malloc(size * sizeof(int *));
-    if((*paths).weight == NULL) {
-    	perror(NULL);
-    	return -1;
-    }
-    int j = 0, node = 0, element = 0;
-    printf("num processes = %i | size = %i\n", (*config).nproc, size);
-    for(int i = 0; i < size; i++) {
-        node = i/work; // the node that read the file
-        element = i%work*(*config).nproc; // the order of row read by file.
-        j = node + element;
-        (*paths).weight = calloc(size, sizeof(int));
-        if((*paths).weight == NULL) {
-            perror(NULL);
-            return -1;
-        }
-        memcpy(&(*paths).weight[j][0], &buf[i * size], size * sizeof(int));
-    }
-    return 0;
-}*/
-
-
-/**
- * Create the output filename.
- * @return 0 to indicate success and -1 to indicate failure.
- */
-int create_output(SP_CONFIG *config, char *name) {
-    /*(*config).filename_out = strdup(name);
-    if((*config).filename_out == NULL) {
-        perror(NULL);
-        return -1;
-    }
-    (*config).fd_out = fopen((*config).filename_out, "wb");
-    if((*config).fd_out == NULL) {
-        perror(NULL);
-        return -1;
-    }
-    printf("Creating output file.\n");*/
     return 0;
 }

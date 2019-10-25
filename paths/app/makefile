@@ -1,5 +1,5 @@
 # clang wrapper
-CC=mpicc
+CC=mpicc -std=c99
 WARNINGS=-Wall -Werror -pedantic
 OBJECT=main.o filereading.o parser.o dealloc.o errors.o helpers.o shortestpath.o
 HEADERS=./src/sp.h
@@ -30,3 +30,6 @@ shortestpath.o: ./src/shortestpath.c $(HEADERS)
 
 clean:
 	rm -f *.o *.out
+
+clean-all:
+	rm -f *.o *.out ./results/*.out ./time/*.out
